@@ -1,0 +1,68 @@
+# Ignore heavy dependency folders
+node_modules/
+venv/
+.venv/
+env/
+.env/
+__pycache__/
+*.pyc
+
+# Ignore compiled/build outputs
+build/
+dist/
+out/
+target/
+*.node
+*.dylib
+*.so
+*.dll
+
+# Ignore caches and temporary data
+.gemini/
+.remember/
+.playwright-mcp/
+.serena/
+.worktrees/
+.vscode/
+.antigravity/
+.antigravity-ide/
+logs/
+*.log
+*.db
+*.db-shm
+*.db-wal
+
+# Ignore system diagnostics and massive files
+sysdiagnose*
+*.ips
+*.panic
+*.spin
+*.archive
+
+# Tier1 symlink target — node_modules and .git inside ~/AIClient2API are heavy
+Tier1-AIClient2API/node_modules/
+Tier1-AIClient2API/.git/
+Tier1-AIClient2API/build/
+Tier1-AIClient2API/.venv/
+
+# LiteLLM upstream source tree — 3700+ files, not edited directly
+Tier2-LiteLLM/tests/
+Tier2-LiteLLM/litellm/
+Tier2-LiteLLM/ui/
+Tier2-LiteLLM/cookbook/
+Tier2-LiteLLM/docs/
+Tier2-LiteLLM/enterprise/
+Tier2-LiteLLM/.venv/
+Tier2-LiteLLM/venv/
+Tier2-LiteLLM/uv.lock
+Tier2-LiteLLM/.git/
+Tier2-LiteLLM/model_prices_and_context_window.json
+
+# Lockfiles
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Git
+.git/
+
