@@ -1,17 +1,25 @@
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Credentials and Secrets
+# Credentials and secrets — never commit
 Credentials/
 .env
 *.pem
 *.key
 
-# Local IDE and Config
+# Claude Code and MCP configs (contain sensitive endpoints/keys)
 .mcp.json
+.claude/
+
+# OS noise
+.DS_Store
+.metadata_never_index
+
+# Tier1 symlink internals — git stores symlink only; these are inside ~/AIClient2API
+Tier1-AIClient2API/node_modules/
+Tier1-AIClient2API/.git/
+Tier1-AIClient2API/build/
+
+# Tier2 LiteLLM — only track litellm_config.yaml; everything else is upstream source
+Tier2-LiteLLM/*
+!Tier2-LiteLLM/litellm_config.yaml
+
+# Lock files (not committed for this config-only repo)
+package-lock.json
