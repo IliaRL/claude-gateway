@@ -84,6 +84,9 @@ export function createTrace(requestId) {
         errorMessage: null,
         inputTokens: null,         // actual input tokens consumed (from upstream usage field)
         outputTokens: null,        // actual output tokens generated (from upstream usage field)
+        sessionId: null,           // X-Claude-Code-Session-Id
+        agentId: null,             // X-Claude-Code-Agent-Id
+        parentAgentId: null,       // X-Claude-Code-Parent-Agent-Id — for nested agent cost attribution
     };
 }
 

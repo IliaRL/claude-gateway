@@ -9,6 +9,18 @@ import { MODEL_PROTOCOL_PREFIX } from './constants.js';
 import { ensureValidStatusCode } from './network-utils.js';
 import { getProtocolPrefix } from './model-utils.js';
 
+/**
+ * Returns Retry-After value in seconds as a string, or null if status is not 429.
+ * Prefers upstream header → retryAfterMs → conservative 30s default.
+ */
+function _getRetryAfterSeconds(statusCode, error) {
+    if (statusCode !== 429) return null;
+    const raw = error?.response?.headers?.['retry-after'];
+    if (raw) return String(raw);
+    if (error?.retryAfterMs) return String(Math.ceil(error.retryAfterMs / 1000));
+    return '30';
+}
+
 export function handleError(res, error, provider = null, fromProvider = null, req = null) {
     const rawStatusCode = error.response?.status || error.statusCode || error.status || error.code || 500;
     const statusCode = ensureValidStatusCode(rawStatusCode);
@@ -24,7 +36,10 @@ export function handleError(res, error, provider = null, fromProvider = null, re
     if (fromProvider) {
         const errorResponse = createErrorResponse(error, fromProvider);
         if (!res.headersSent) {
-            res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+            const respHeaders = { 'Content-Type': 'application/json' };
+            const retryAfter = _getRetryAfterSeconds(statusCode, error);
+            if (retryAfter) respHeaders['Retry-After'] = retryAfter;
+            res.writeHead(statusCode, respHeaders);
         }
         res.end(JSON.stringify(errorResponse));
         return;
@@ -85,7 +100,10 @@ export function handleError(res, error, provider = null, fromProvider = null, re
     }
 
     if (!res.headersSent) {
-        res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+        const respHeaders = { 'Content-Type': 'application/json' };
+        const retryAfter = _getRetryAfterSeconds(statusCode, error);
+        if (retryAfter) respHeaders['Retry-After'] = retryAfter;
+        res.writeHead(statusCode, respHeaders);
     }
 
     const errorPayload = {

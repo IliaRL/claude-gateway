@@ -78,7 +78,7 @@ _claude_mode_write_settings() {
     # Only ANTHROPIC_API_KEY is set — ANTHROPIC_AUTH_TOKEN is for Anthropic OAuth/native auth
     # and must never be present alongside ANTHROPIC_API_KEY (causes Claude Code conflict + silent drops).
     jq --arg base "$base" --arg token "$token" --arg model "$PROXY_CLI_MODEL" \
-      '.env = (.env // {}) | .env.ANTHROPIC_BASE_URL = $base | .env.ANTHROPIC_API_KEY = $token | .env.CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY = "1" | del(.env.ANTHROPIC_AUTH_TOKEN) | .model = $model' \
+      '.env = (.env // {}) | .env.ANTHROPIC_BASE_URL = $base | .env.ANTHROPIC_API_KEY = $token | .env.CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY = "1" | .env.CLAUDE_CODE_ATTRIBUTION_HEADER = "0" | .env.ENABLE_TOOL_SEARCH = "true" | del(.env.ANTHROPIC_AUTH_TOKEN) | .model = $model' \
       "$CLAUDE_SETTINGS_FILE" >"$tmp" && mv "$tmp" "$CLAUDE_SETTINGS_FILE"
     # Clear the claude.ai OAuth token from config.json so ANTHROPIC_API_KEY is the
     # sole auth method and Claude Code doesn't show the "both a token and an API key
@@ -97,7 +97,9 @@ _claude_mode_write_settings() {
          | .["terminal.integrated.env.osx"] = (
              (.["terminal.integrated.env.osx"] // {})
              + {ANTHROPIC_BASE_URL: $base, ANTHROPIC_API_KEY: $token,
-                AICLIENT_BASE: $base, AICLIENT_TOKEN: $token}
+                AICLIENT_BASE: $base, AICLIENT_TOKEN: $token,
+                CLAUDE_CODE_ATTRIBUTION_HEADER: "0",
+                ENABLE_TOOL_SEARCH: "true"}
              | del(.ANTHROPIC_AUTH_TOKEN)
            )' \
         "$ANTIGRAVITY_SETTINGS_FILE" >"$ag_tmp" && mv "$ag_tmp" "$ANTIGRAVITY_SETTINGS_FILE"
@@ -108,7 +110,7 @@ _claude_mode_write_settings() {
     native_model="$(jq -r '.native_model // empty' "$CLAUDE_PROXY_BACKUP_FILE" 2>/dev/null)"
     [ -z "$native_model" ] && native_model="$NATIVE_CLI_MODEL"
     jq --arg m "$native_model" \
-      'if has("env") then .env |= (del(.ANTHROPIC_BASE_URL, .ANTHROPIC_AUTH_TOKEN, .ANTHROPIC_API_KEY, .CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY)) else . end | .model = $m' \
+      'if has("env") then .env |= (del(.ANTHROPIC_BASE_URL, .ANTHROPIC_AUTH_TOKEN, .ANTHROPIC_API_KEY, .CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY, .CLAUDE_CODE_ATTRIBUTION_HEADER, .ENABLE_TOOL_SEARCH)) else . end | .model = $m' \
       "$CLAUDE_SETTINGS_FILE" >"$tmp" && mv "$tmp" "$CLAUDE_SETTINGS_FILE"
     # Also sync Antigravity IDE settings: restore native model, strip proxy env vars
     if [ -f "$ANTIGRAVITY_SETTINGS_FILE" ]; then
@@ -117,7 +119,7 @@ _claude_mode_write_settings() {
         '.["claude.model"] = $model
          | .["terminal.integrated.env.osx"] = (
              (.["terminal.integrated.env.osx"] // {})
-             | del(.ANTHROPIC_BASE_URL, .ANTHROPIC_AUTH_TOKEN, .ANTHROPIC_API_KEY, .AICLIENT_BASE, .AICLIENT_TOKEN)
+             | del(.ANTHROPIC_BASE_URL, .ANTHROPIC_AUTH_TOKEN, .ANTHROPIC_API_KEY, .AICLIENT_BASE, .AICLIENT_TOKEN, .CLAUDE_CODE_ATTRIBUTION_HEADER, .ENABLE_TOOL_SEARCH)
            )' \
         "$ANTIGRAVITY_SETTINGS_FILE" >"$ag_tmp" && mv "$ag_tmp" "$ANTIGRAVITY_SETTINGS_FILE"
     fi
@@ -138,6 +140,8 @@ claude-proxy() {
   export ANTHROPIC_BASE_URL="$base"
   export ANTHROPIC_API_KEY="$token"
   unset ANTHROPIC_AUTH_TOKEN
+  export CLAUDE_CODE_ATTRIBUTION_HEADER=0
+  export ENABLE_TOOL_SEARCH=true
 
   if ! _claude_mode_proxy_alive; then
     echo "WARN: LiteLLM at $base did not respond. Run 'start-proxies' first." >&2
@@ -187,6 +191,8 @@ claude-native() {
   unset ANTHROPIC_BASE_URL
   unset ANTHROPIC_API_KEY
   unset ANTHROPIC_AUTH_TOKEN
+  unset CLAUDE_CODE_ATTRIBUTION_HEADER
+  unset ENABLE_TOOL_SEARCH
   rm -f /tmp/aiclient_last_model
   echo "native" > /tmp/aiclient_mode
 
