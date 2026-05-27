@@ -63,6 +63,9 @@ export function createRequestHandler(config, providerPoolManager) {
                 // ---- Diagnostic trace (lives for the entire request lifecycle) ----
                 const trace = createTrace(requestId);
                 trace.debugRequested = req.headers['x-debug-trace'] === '1' || req.headers['x-debug-trace'] === 'true';
+                // Capture Claude Code session headers for attribution (not forwarded upstream — used for logging only)
+                trace.sessionId = req.headers['x-claude-code-session-id'] ?? null;
+                trace.agentId   = req.headers['x-claude-code-agent-id']   ?? null;
                 currentConfig._trace = trace;
                 // Inject X-Proxy-Trace header just before response headers flush.
                 // For both unary (writeHead) and stream (writeHead happens early via

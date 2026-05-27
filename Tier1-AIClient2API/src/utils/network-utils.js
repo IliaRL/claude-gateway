@@ -278,6 +278,9 @@ export async function handleUnifiedResponse(res, responsePayload, isStream, stat
     if (metadata.uuid) {
         headers["X-Proxy-Credential-Uuid"] = metadata.uuid;
     }
+    if (metadata.cacheHit) {
+        headers["X-Cache"] = "HIT";
+    }
 
     if (!res.headersSent) {
         res.writeHead(isStream ? 200 : validatedStatusCode, headers);

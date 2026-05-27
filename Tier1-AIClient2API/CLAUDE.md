@@ -138,6 +138,26 @@ Always check `logs/prompt_log_*.log` (enable with `PROMPT_LOG_MODE: "file"` in `
 
 **First request is no longer slow.** OAuth adapters (gemini-antigravity, gemini-cli-oauth, claude-kiro-oauth) are pre-warmed at startup via `setImmediate` in `src/services/api-server.js`. If a first request is still slow (>5s), check the `[Warmup]` log line in `/tmp/aiclient.log` — `failed=N` means one or more adapters didn't initialize.
 
+**Status line fields (`/tmp/aiclient_last_model` JSON):**
+
+| Field | Type | Description |
+|---|---|---|
+| `model` | string | Actual model ID used (post-fallback) |
+| `maxOutput` | number | Max output tokens for this model |
+| `contextWindow` | number | Context window size |
+| `provider` | string | Provider that served the request |
+| `customName` | string\|null | Custom model alias if used |
+| `requestedModel` | string\|null | Original requested model (differs on fallback) |
+| `latencyMs` | number\|null | Total upstream latency in ms |
+| `ttftMs` | number\|null | Time-to-first-token in ms |
+| `fallbackCount` | number | Number of fallback hops taken (0 = direct) |
+| `isDowngrade` | boolean | True when a cross-family model downgrade occurred |
+| `finalProvider` | string\|null | Provider that actually served (matches `provider`) |
+| `inputTokens` | number\|null | Actual input tokens consumed |
+| `outputTokens` | number\|null | Actual output tokens generated |
+
+**Response caching (`src/utils/response-cache.js`):** Non-streaming, deterministic (`temperature=0`) requests are cached in-process for 30s (max 200 entries). Identical repeated requests return `X-Cache: HIT` without burning upstream quota. Never caches streaming requests, non-zero temperature, or turns containing `tool_result` blocks.
+
 For full triage procedure and error lookup tables, see `docs/DEBUGGING.md`.
 
 ---

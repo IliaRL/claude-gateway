@@ -44,6 +44,21 @@ function getCustomModelIdsForProvider(config, providerType) {
 }
 
 /**
+ * Detect whether a model fallback crosses a model family boundary (e.g. Claude → Gemini).
+ * Used to emit a prominent warning when modelFallbackMapping downgrades across families.
+ * @param {string} fromModel
+ * @param {string} toModel
+ * @returns {boolean}
+ */
+function _isCrossFamilyDowngrade(fromModel, toModel) {
+    if (!fromModel || !toModel) return false;
+    const isClaude = (m) => m.toLowerCase().includes('claude');
+    const isGemini = (m) => m.toLowerCase().includes('gemini');
+    // Cross-family if one is Claude and the other is not, or one is Gemini and the other is not
+    return isClaude(fromModel) !== isClaude(toModel) || isGemini(fromModel) !== isGemini(toModel);
+}
+
+/**
  * Manages a pool of API service providers, handling their health and selection.
  */
 export class ProviderPoolManager {
@@ -1460,13 +1475,19 @@ export class ProviderPoolManager {
                 if (triedModels.has(requestedModel)) {
                     this._log('warn', `Model Fallback cycle detected for ${requestedModel} — skipping`);
                 } else {
-                    this._log('info', `Trying Model Fallback Mapping for ${requestedModel}: -> ${targetProviderType} (${targetModel})`);
+                    // Detect cross-family downgrades: warn loudly when Claude ↔ non-Claude boundary is crossed.
+                    const isModelDowngrade = _isCrossFamilyDowngrade(requestedModel, targetModel);
+                    if (isModelDowngrade) {
+                        this._log('warn', `[Fallback] ⚠️  Model family downgrade: "${requestedModel}" → "${targetModel}" (${targetProviderType}). All ${requestedModel} providers exhausted.`);
+                    } else {
+                        this._log('info', `Trying Model Fallback Mapping for ${requestedModel}: -> ${targetProviderType} (${targetModel})`);
+                    }
                     triedModels.add(requestedModel);
                     // Recurse fully — lets the target model follow its own chain and modelFallbackMapping entries
                     const result = await this.selectProviderWithFallback(targetProviderType, targetModel, { ...options, _triedModels: triedModels });
                     if (result) {
                         this._log('info', `Fallback activated (Model Mapping): ${providerType} (${requestedModel}) -> ${result.actualProviderType} (${result.actualModel})`);
-                        return { ...result, isFallback: true };
+                        return { ...result, isFallback: true, isModelDowngrade };
                     }
                 }
             }

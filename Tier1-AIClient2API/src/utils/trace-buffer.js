@@ -76,12 +76,14 @@ export function createTrace(requestId) {
         totalUpstreamMs: null,
         fallbackCount: 0,
         fallbackReasons: [],
-        fallbackSteps: [],         // {step, fromProvider, toProvider, reason, errorCode, penaltyMs}
+        fallbackSteps: [],         // {step, fromProvider, toProvider, reason, errorCode, penaltyMs, isModelDowngrade}
         ttftWarning: null,
         ttftAborted: false,
         totalRTTMs: null,
         status: 'pending',         // pending | ok | error | timeout | aborted
         errorMessage: null,
+        inputTokens: null,         // actual input tokens consumed (from upstream usage field)
+        outputTokens: null,        // actual output tokens generated (from upstream usage field)
     };
 }
 
@@ -119,7 +121,7 @@ export function getTrace(requestId) {
 /**
  * Record one fallback step on a trace.
  * @param {object} trace
- * @param {object} step  {fromProvider, toProvider, reason, errorCode, penaltyMs}
+ * @param {object} step  {fromProvider, toProvider, reason, errorCode, penaltyMs, isModelDowngrade}
  */
 export function recordFallbackStep(trace, step) {
     if (!trace || !step) return;
@@ -132,6 +134,7 @@ export function recordFallbackStep(trace, step) {
         reason: step.reason ?? null,
         errorCode: step.errorCode ?? null,
         penaltyMs: step.penaltyMs ?? null,
+        isModelDowngrade: step.isModelDowngrade === true,
         at: Date.now() - trace.startedAt,
     };
     trace.fallbackSteps.push(entry);
