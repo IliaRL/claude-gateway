@@ -1293,6 +1293,14 @@ export class AntigravityApiService {
                     }
                 }
 
+                // For staging-API-missing (known Google false-positive on verified-active accounts):
+                // try the next base URL before switching accounts — the non-sandbox URL
+                // (daily-cloudcode-pa.googleapis.com) does not require the staging API.
+                if (isStagingApiMissing && !isBootstrapMethod && baseURLIndex + 1 < this.baseURLs.length) {
+                    logger.info(`[Antigravity API] Staging endpoint ${baseURL} returned known false-positive — retrying on next base URL...`);
+                    return this.callApi(method, body, isRetry, retryCount, baseURLIndex + 1);
+                }
+
                 // Mark error for credential switch without recording error count
                 error.shouldSwitchCredential = true;
                 error.skipErrorCount = true;
@@ -1458,6 +1466,15 @@ export class AntigravityApiService {
                         });
                         error.credentialMarkedUnhealthy = true;
                     }
+                }
+
+                // For staging-API-missing (known Google false-positive on verified-active accounts):
+                // try the next base URL before switching accounts — the non-sandbox URL
+                // (daily-cloudcode-pa.googleapis.com) does not require the staging API.
+                if (isStagingApiMissing && !isBootstrapMethod && baseURLIndex + 1 < this.baseURLs.length) {
+                    logger.info(`[Antigravity API] Staging endpoint ${baseURL} returned known false-positive during stream — retrying on next base URL...`);
+                    yield* this.streamApi(method, body, isRetry, retryCount, baseURLIndex + 1);
+                    return;
                 }
 
                 // Mark error for credential switch without recording error count
