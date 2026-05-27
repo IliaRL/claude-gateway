@@ -1,0 +1,37 @@
+# Node/Yarn/PNPM Dependencies
+node_modules
+
+# Duplicate Project Reference (Major Crash Cause)
+TEST_REF
+
+# Compiled Binary & Build Outputs
+build
+dist
+out
+target
+
+# AI Agent Caches & Internal State
+.claude
+.gemini
+.remember
+.playwright-mcp
+.serena
+.worktrees
+.vscode
+
+# Databases, Caches & Temporary Files
+*.db
+*.db-shm
+*.db-wal
+*.log
+logs
+.DS_Store
+
+# Lockfiles (High-density, low-semantic value)
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Version Control
+.git
+.github

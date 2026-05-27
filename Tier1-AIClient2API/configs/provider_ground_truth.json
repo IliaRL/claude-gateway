@@ -1,0 +1,25 @@
+{
+  "github-models": {
+    "available_models": [
+      "gpt-5-mini",
+      "claude-haiku-4-5",
+      "gpt-4.1",
+      "gpt-4o"
+    ],
+    "capabilities": {
+      "streaming": true,
+      "tools": true,
+      "prompt_caching": false
+    }
+  },
+  "gemini-antigravity": {
+    "warmup_required": true,
+    "warmup_delay_ms": 40000,
+    "retry_on_first_timeout": true
+  },
+  "nvidia-nim": {
+    "available_models": [
+      "nvidia/llama-3.1-nemotron-ultra-253b"
+    ]
+  }
+}

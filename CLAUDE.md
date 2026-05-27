@@ -95,7 +95,7 @@ If unsure: stop and ask before scanning
 
 ### Active Config
 
-`Tier2-LiteLLM/litellm_config.yaml` — 29 named model entries across 6 providers, all routing via `openai/*` prefix to `http://127.0.0.1:3000/v1`. See file directly.
+`Tier2-LiteLLM/litellm_config.yaml` — 85 named entries across 7 providers (including short-name aliases), all routing via `openai/*` prefix to `http://127.0.0.1:3000/v1`. See file directly.
 
 ### Install Method
 
@@ -117,6 +117,8 @@ cd ~/AIClient2API && npm start
 # Or start both with the shell alias
 start-proxies
 ```
+
+**Current operational mode:** `claude-proxy` sets `ANTHROPIC_BASE_URL=http://127.0.0.1:3000`, routing Claude Code directly to Tier 1. LiteLLM (`:4000`) still runs and is healthy, but is not in the active Claude Code request path — it was bypassed to eliminate SSE stream corruption caused by LiteLLM re-wrapping streaming chunks. Both tiers run; only the active path changed.
 
 For health diagnostics after startup, use the `proxy-repair` skill (`~/.claude/skills/proxy-repair`).
 
@@ -163,6 +165,8 @@ Polls `http://127.0.0.1:18081/report?token=C-Code-CLI-Model-API` on a sub-10-min
 
 Use **`pnpm`** for all Node.js dependency installation and builds. Never use `npm install` in this project.
 
+---
+
 ## Model ID Reference
 
 Exact model strings per provider are in `Model-Guide.md` Part 3. The `model:` value in `litellm_config.yaml` must exactly match the provider adapter's internal model map in `src/providers/provider-models.js` — mismatches are the #1 source of silent 404s.
@@ -194,6 +198,26 @@ Key skills: `proxy-repair` and `config` at `~/.claude/skills/`; `verify` from `a
 |---|---|
 | `proxy-debugger` | Any 429/502/auth error or model ID mismatch across Tier 1 or Tier 2 |
 | `tier-config-auditor` | Before merging provider config changes; verify Credentials ↔ provider map ↔ LiteLLM consistency |
+| `security-reviewer` | Pre-commit security audit of credential handling, env var injection patterns, and file access |
+
+### Tier 1 Project Skills (`Tier1-AIClient2API/.claude/skills/`)
+
+Full `aiclient-*` skill suite covering every operational concern:
+
+| Skill | Use when |
+|---|---|
+| `aiclient-master` | Any task touching AIClient2API — read first as a safeguard |
+| `aiclient-preflight` | Before editing any core file (adapter.js, provider-models.js, utils.js, etc.) |
+| `aiclient-models` | Adding/removing models, fixing context window values, updating model catalog |
+| `aiclient-routing` | Editing fallback chains, debugging unexpected model routing |
+| `aiclient-health` | Pool health, 429s, cooldowns, quota exhaustion, account recovery |
+| `aiclient-debug` | Request tracing, PROMPT_LOG_MODE, latency, ECONNREFUSED |
+| `aiclient-statusline` | Status line display, mode toggle, context window accuracy |
+| `aiclient-credentials` | OAuth refresh, API key updates, needsRefresh/needsReauth flags |
+| `aiclient-providers` | Adding new provider adapters, converter strategy, protocol prefix |
+| `aiclient-tooluse` | Tool-use failures, schema normalization, converter selection |
+| `aiclient-sync` | After any modification — syncs agents and updates skill inventory |
+| `aiclient-cleanup` | Removing dead weight, clearing stale files, freeing disk space |
 
 ---
 
@@ -206,3 +230,70 @@ Key skills: `proxy-repair` and `config` at `~/.claude/skills/`; `verify` from `a
 - **LiteLLM install method:** Use `uv sync` inside `Tier2-LiteLLM/` — NOT `pip install litellm[proxy]` or `make install-*`. The `.venv/` directory (Python 3.12.11) is the correct environment. Never recreate it.
 - **`anthropic-skills:aiclient2api` does not exist** — the correct operational skill is `proxy-repair` at `~/.claude/skills/proxy-repair`.
 - **Kiro identity override:** Kiro occasionally responds as "Kiro" or "Amazon Q" on the first request in a session. The identity override prompt in `configs/input_system_prompt.txt` appends correctly but Kiro's internal system prompt can win on the first call. Pre-existing Kiro behavior, not a config bug. Subsequent calls in the same session return correct identity.
+
+# CLAUDE.md
+
+Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
+
+**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
+
+## 1. Think Before Coding
+
+**Don't assume. Don't hide confusion. Surface tradeoffs.**
+
+Before implementing:
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them - don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
+
+## 2. Simplicity First
+
+**Minimum code that solves the problem. Nothing speculative.**
+
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
+
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+
+## 3. Surgical Changes
+
+**Touch only what you must. Clean up only your own mess.**
+
+When editing existing code:
+- Don't "improve" adjacent code, comments, or formatting.
+- Don't refactor things that aren't broken.
+- Match existing style, even if you'd do it differently.
+- If you notice unrelated dead code, mention it - don't delete it.
+
+When your changes create orphans:
+- Remove imports/variables/functions that YOUR changes made unused.
+- Don't remove pre-existing dead code unless asked.
+
+The test: Every changed line should trace directly to the user's request.
+
+## 4. Goal-Driven Execution
+
+**Define success criteria. Loop until verified.**
+
+Transform tasks into verifiable goals:
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
+
+For multi-step tasks, state a brief plan:
+```
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
+```
+
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+---
+
+**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+

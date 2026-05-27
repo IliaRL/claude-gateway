@@ -133,8 +133,10 @@ Each provider entry shows:
 | Model ID | Notes |
 |---|---|
 | `gemini-3-flash` | |
-| `gemini-3.5-flash-low` | |
-| `gemini-3.5-flash-high` | |
+| `gemini-3.5-flash-high` | Alias → `gemini-3-flash-agent` (Antigravity "High" tier) |
+| `gemini-3.5-flash-medium` | Alias → `gemini-3.5-flash-low` (Antigravity "Medium" tier) |
+| `gemini-3.5-flash-low` | Antigravity "Medium" tier API ID |
+| `gemini-3.5-flash-extra-low` | Antigravity "Low" tier API ID |
 | `gemini-3.1-pro-low` | |
 | `gemini-3.1-pro-high` | |
 | `gemini-3.1-flash-image` | Image-capable |
@@ -198,7 +200,7 @@ Each provider entry shows:
 
 ### Grok / xAI
 **AIClient2API provider type:** `grok-web`
-**Credential folder:** `/Users/ilialiston/MASTER-C/Credentials/` (check for grok or xai subfolder)
+**Credential folder:** `/Users/ilialiston/MASTER-C/Credentials/` — ⚠️ not yet provisioned (no grok/xai subfolder exists)
 
 | Model ID | Notes |
 |---|---|
@@ -224,7 +226,7 @@ Each provider entry shows:
 
 ### iFlow
 **AIClient2API provider type:** `openai-iflow`
-**Credential folder:** `/Users/ilialiston/MASTER-C/Credentials/` (check for iflow subfolder)
+**Credential folder:** `/Users/ilialiston/MASTER-C/Credentials/` — ⚠️ not provisioned (no iflow subfolder exists)
 
 > ⚠️ **Migration notice:** The iFlow CLI was shut down on April 17, 2026. Check whether
 > `openai-iflow` credentials are still active before configuring. If the credential is
@@ -264,7 +266,7 @@ Each provider entry shows:
 
 ### Qwen OAuth
 **AIClient2API provider type:** `openai-qwen-oauth`
-**Credential folder:** `/Users/ilialiston/MASTER-C/Credentials/` (check for qwen subfolder)
+**Credential folder:** `/Users/ilialiston/MASTER-C/Credentials/` — ⚠️ not yet provisioned (no qwen subfolder exists)
 
 > ⚠️ **Verify model IDs before configuring.** The current confirmed working strings are
 > listed below. `coder-model` and `vision-model` are internal aliases — use the explicit
