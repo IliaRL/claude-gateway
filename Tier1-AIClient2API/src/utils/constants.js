@@ -91,5 +91,5 @@ export const UI_PATHS = {
     // API 路径前缀
     API_PREFIX: '/api/',
     // API 白名单（即使在禁用 UI 时也允许访问）
-    API_WHITELIST: ['/api/health', '/api/grok/assets', '/api/login', '/api/help', '/api/example']
+    API_WHITELIST: ['/api/health', '/api/grok/assets', '/api/login', '/api/help', '/api/example', '/api/quota']
 };

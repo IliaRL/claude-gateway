@@ -49,8 +49,8 @@ check "models" "updateLastModelFile in request-handlers.js (not common.js)" \
 # ── aiclient-routing ─────────────────────────────────────────────────────────
 echo ""
 echo "[ aiclient-routing ]"
-check "routing" "_resolveEffectiveRouting in service-manager.js:376" \
-  "grep -n '_resolveEffectiveRouting' '$SRC/services/service-manager.js' | head -1 | grep -q '376:'"
+check "routing" "_resolveEffectiveRouting in service-manager.js:377" \
+  "grep -n '_resolveEffectiveRouting' '$SRC/services/service-manager.js' | head -1 | grep -q '377:'"
 check "routing" "getApiServiceWithFallback in service-manager.js" \
   "grep -q 'getApiServiceWithFallback' '$SRC/services/service-manager.js'"
 check "routing" "selectProvider in provider-pool-manager.js" \
@@ -59,20 +59,20 @@ check "routing" "normalizeConfiguredProviders in config-manager.js:12" \
   "grep -n 'normalizeConfiguredProviders' '$SRC/core/config-manager.js' | head -1 | grep -q '12:'"
 check "routing" "handleAPIRequests in api-manager.js:32" \
   "grep -n 'handleAPIRequests' '$SRC/services/api-manager.js' | head -1 | grep -q '32:'"
-check "routing" "fallback tracking: updateLastModelFile in request-handlers.js:552" \
-  "grep -n 'updateLastModelFile' '$SRC/utils/request-handlers.js' | sed -n '2p' | grep -q '552:'"
+check "routing" "fallback tracking: updateLastModelFile in request-handlers.js:602" \
+  "grep -n 'updateLastModelFile' '$SRC/utils/request-handlers.js' | sed -n '2p' | grep -q '602:'"
 check "routing" "handleModelListRequest in request-handlers.js (model aggregation)" \
   "grep -q 'handleModelListRequest' '$SRC/utils/request-handlers.js'"
 
 # ── aiclient-statusline ───────────────────────────────────────────────────────
 echo ""
 echo "[ aiclient-statusline ]"
-check "statusline" "updateLastModelFile renames to /tmp/aiclient_last_model at request-handlers.js:308" \
-  "grep -n \"fs.rename.*aiclient_last_model'\" '$SRC/utils/request-handlers.js' | head -1 | grep -q '308:'"
-check "statusline" "updateLastModelFile call in stream handler at request-handlers.js:552" \
-  "grep -n 'updateLastModelFile' '$SRC/utils/request-handlers.js' | sed -n '2p' | grep -q '552:'"
-check "statusline" "updateLastModelFile call in unary handler at request-handlers.js:861" \
-  "grep -n 'updateLastModelFile' '$SRC/utils/request-handlers.js' | sed -n '3p' | grep -q '861:'"
+check "statusline" "updateLastModelFile renames to /tmp/aiclient_last_model at request-handlers.js:345" \
+  "grep -n \"fs.rename.*aiclient_last_model'\" '$SRC/utils/request-handlers.js' | head -1 | grep -q '345:'"
+check "statusline" "updateLastModelFile call in stream handler at request-handlers.js:602" \
+  "grep -n 'updateLastModelFile' '$SRC/utils/request-handlers.js' | sed -n '2p' | grep -q '602:'"
+check "statusline" "updateLastModelFile call in unary handler at request-handlers.js:951" \
+  "grep -n 'updateLastModelFile' '$SRC/utils/request-handlers.js' | sed -n '3p' | grep -q '951:'"
 
 # ── aiclient-debug ────────────────────────────────────────────────────────────
 echo ""
@@ -121,10 +121,10 @@ echo ""
 echo "[ aiclient-providers ]"
 check "providers" "registerAdapter calls in adapter.js:704+" \
   "grep -n 'registerAdapter' '$SRC/providers/adapter.js' | sed -n '2p' | grep -q '704:'"
-check "providers" "refreshToken check in provider-pool-manager.js:491" \
-  "grep -n 'refreshToken' '$SRC/providers/provider-pool-manager.js' | awk -F: '{if(\$1>=480 && \$1<=505) found=1} END{exit !found}'"
-check "providers" "DEFAULT_HEALTH_CHECK_MODELS in provider-pool-manager.js:51" \
-  "grep -n 'DEFAULT_HEALTH_CHECK_MODELS' '$SRC/providers/provider-pool-manager.js' | head -1 | grep -q '51:'"
+check "providers" "refreshToken check in provider-pool-manager.js:516+" \
+  "grep -n 'refreshToken' '$SRC/providers/provider-pool-manager.js' | awk -F: '{if(\$1>=505 && \$1<=545) found=1} END{exit !found}'"
+check "providers" "DEFAULT_HEALTH_CHECK_MODELS in provider-pool-manager.js:67" \
+  "grep -n 'DEFAULT_HEALTH_CHECK_MODELS' '$SRC/providers/provider-pool-manager.js' | head -1 | grep -q '67:'"
 check "providers" "PROVIDER_MAPPINGS in provider-utils.js:14" \
   "grep -n 'PROVIDER_MAPPINGS' '$SRC/utils/provider-utils.js' | head -1 | grep -q '14:'"
 check "providers" "normalizeConfiguredProviders in config-manager.js:12" \
@@ -137,8 +137,8 @@ check "providers" "ClaudeConverter.js exists" \
 # ── aiclient-credentials ──────────────────────────────────────────────────────
 echo ""
 echo "[ aiclient-credentials ]"
-check "credentials" "refreshToken check in provider-pool-manager.js:491" \
-  "grep -n 'refreshToken' '$SRC/providers/provider-pool-manager.js' | awk -F: '{if(\$1>=480 && \$1<=505) found=1} END{exit !found}'"
+check "credentials" "refreshToken check in provider-pool-manager.js:516+" \
+  "grep -n 'refreshToken' '$SRC/providers/provider-pool-manager.js' | awk -F: '{if(\$1>=505 && \$1<=545) found=1} END{exit !found}'"
 check "credentials" "codex-oauth.js exists (OAuth-but-no-needsReauth)" \
   "test -f '$SRC/auth/codex-oauth.js'"
 

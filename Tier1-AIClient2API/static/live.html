@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Gateway Monitor</title>
+  <link rel="stylesheet" href="app/base.css">
+  <link rel="stylesheet" href="app/mobile.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* ── Layout ──────────────────────────────────────────── */
+    body { background: var(--bg-secondary); min-height: 100vh; }
+
+    .navbar {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--bg-primary);
+      border-bottom: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+    .navbar-inner {
+      max-width: 1400px; margin: 0 auto; padding: 0 24px;
+      height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+    .brand-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      display: flex; align-items: center; justify-content: center; color: white; font-size: 16px;
+    }
+    .brand-title { font-weight: 700; font-size: 17px; color: var(--text-primary); }
+    .brand-sub { font-size: 12px; color: var(--text-tertiary); margin-top: 1px; }
+
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+
+    /* Live indicator */
+    .live-dot {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 600; color: var(--text-secondary);
+    }
+    .live-dot .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--text-tertiary); transition: background 0.3s;
+    }
+    .live-dot.connected .dot {
+      background: var(--success-color);
+      animation: pulse-dot 2s infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
+      50% { box-shadow: 0 0 0 4px rgba(16,185,129,0); }
+    }
+
+    .refresh-select {
+      font-size: 12px; padding: 4px 8px; border-radius: var(--radius-md);
+      border: 1px solid var(--border-color); background: var(--bg-secondary);
+      color: var(--text-secondary); cursor: pointer;
+    }
+
+    .theme-btn {
+      background: none; border: 1px solid var(--border-color); border-radius: var(--radius-md);
+      padding: 6px 10px; cursor: pointer; color: var(--text-secondary); font-size: 14px;
+    }
+    .theme-btn:hover { background: var(--bg-secondary); }
+
+    .main { max-width: 1400px; margin: 0 auto; padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+
+    /* ── Auth gate ───────────────────────────────────────── */
+    #auth-gate {
+      display: flex; justify-content: center; align-items: center; min-height: 60vh;
+    }
+    .auth-card {
+      background: var(--bg-primary); border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl); padding: 40px; width: 100%; max-width: 420px;
+      box-shadow: var(--shadow-lg);
+    }
+    .auth-card h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; color: var(--text-primary); }
+    .auth-card p { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; }
+    .auth-card input {
+      width: 100%; padding: 10px 14px; border: 1px solid var(--border-color);
+      border-radius: var(--radius-md); font-size: 14px; background: var(--bg-secondary);
+      color: var(--text-primary); box-sizing: border-box; margin-bottom: 12px;
+    }
+    .auth-card input:focus { outline: none; border-color: var(--primary-color); }
+    .btn-primary {
+      width: 100%; padding: 10px; border-radius: var(--radius-md); border: none;
+      background: var(--primary-color); color: white; font-weight: 600; font-size: 14px;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .btn-primary:hover { background: var(--primary-hover); }
+    #auth-error { font-size: 12px; color: var(--danger-color); margin-top: 8px; display: none; }
+
+    /* ── Dashboard grid ──────────────────────────────────── */
+    #dashboard { display: none; flex-direction: column; gap: 20px; }
+    .row { display: grid; gap: 20px; }
+    .row-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .row-2 { grid-template-columns: 1.4fr 1fr; }
+
+    /* ── Card base ───────────────────────────────────────── */
+    .panel {
+      background: var(--bg-primary); border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl); padding: 20px; box-shadow: var(--shadow-sm);
+    }
+    .panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .panel-title {
+      font-size: 13px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.05em; color: var(--text-tertiary);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .panel-title i { font-size: 11px; }
+
+    /* ── Empty state ─────────────────────────────────────── */
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 32px 16px; color: var(--text-tertiary); text-align: center; gap: 8px;
+    }
+    .empty-state i { font-size: 28px; opacity: 0.4; }
+    .empty-state p { font-size: 13px; }
+
+    /* ── Panel 1: Active Model ───────────────────────────── */
+    .model-hero {
+      display: flex; align-items: flex-start; gap: 16px;
+    }
+    .model-icon {
+      width: 48px; height: 48px; border-radius: 14px; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--primary-color), var(--indigo-500));
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 20px;
+    }
+    .model-info { flex: 1; min-width: 0; }
+    .model-name { font-size: 18px; font-weight: 700; color: var(--text-primary); word-break: break-all; }
+    .model-provider {
+      font-size: 13px; color: var(--text-secondary); margin-top: 4px;
+      display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    }
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: var(--radius-full);
+      font-size: 11px; font-weight: 600;
+    }
+    .badge-green { background: var(--success-10); color: var(--success-color); }
+    .badge-red { background: rgba(239,68,68,0.1); color: var(--danger-color); }
+    .badge-yellow { background: var(--warning-15); color: var(--warning-color); }
+    .badge-blue { background: rgba(59,130,246,0.1); color: var(--info-color); }
+    .badge-gray { background: var(--bg-tertiary); color: var(--text-tertiary); }
+
+    .model-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+    .meta-item { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 10px 12px; }
+    .meta-label { font-size: 11px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.04em; }
+    .meta-value { font-size: 15px; font-weight: 600; color: var(--text-primary); margin-top: 2px; font-variant-numeric: tabular-nums; }
+
+    .downgrade-banner {
+      display: none; margin-top: 12px;
+      background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);
+      border-radius: var(--radius-md); padding: 10px 14px;
+      font-size: 13px; color: var(--danger-color);
+    }
+    .downgrade-banner i { margin-right: 6px; }
+
+    /* ── Panel 2: Token Usage ────────────────────────────── */
+    .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .stat-box { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 12px 14px; }
+    .stat-label { font-size: 11px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.04em; }
+    .stat-value { font-size: 22px; font-weight: 700; color: var(--text-primary); margin-top: 4px; font-variant-numeric: tabular-nums; }
+    .stat-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+
+    /* ── Panel 3: Fallback Chain ─────────────────────────── */
+    .chain-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .chain-node {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg-secondary); border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg); padding: 8px 12px;
+      font-size: 13px; transition: var(--transition);
+    }
+    .chain-node.active {
+      background: var(--primary-10); border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px var(--primary-20);
+    }
+    .chain-node.unhealthy { opacity: 0.5; }
+    .chain-node.downgrade-node {
+      background: rgba(239,68,68,0.06); border-color: rgba(239,68,68,0.3);
+      border-style: dashed;
+    }
+    .chain-node .node-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+      background: var(--success-color);
+    }
+    .chain-node.unhealthy .node-dot { background: var(--danger-color); }
+    .chain-node .node-label { font-weight: 500; color: var(--text-primary); }
+    .chain-node .node-sub { font-size: 11px; color: var(--text-tertiary); }
+    .chain-arrow { color: var(--text-tertiary); font-size: 12px; flex-shrink: 0; }
+    .chain-arrow.downgrade-arrow { color: var(--danger-color); }
+
+    /* Fallback steps log */
+    .fallback-steps { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; }
+    .fallback-step {
+      background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.15);
+      border-radius: var(--radius-md); padding: 8px 12px;
+      font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px;
+    }
+    .fallback-step i { color: var(--danger-color); flex-shrink: 0; }
+
+    /* ── Panel 4: Provider Health ────────────────────────── */
+    .health-summary {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px;
+    }
+    .health-num { text-align: center; }
+    .health-num .num { font-size: 28px; font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+    .health-num .lbl { font-size: 11px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.04em; }
+    .health-num.danger .num { color: var(--danger-color); }
+
+    .provider-list { display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow-y: auto; }
+    .provider-row {
+      display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+      border-radius: var(--radius-md); font-size: 12px; transition: background 0.15s;
+    }
+    .provider-row:hover { background: var(--bg-secondary); }
+    .provider-row.active-provider { background: var(--primary-10); }
+    .provider-row .prov-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .prov-dot.healthy { background: var(--success-color); }
+    .prov-dot.unhealthy { background: var(--danger-color); }
+    .provider-row .prov-name { flex: 1; font-weight: 500; color: var(--text-primary); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .provider-row .prov-meta { color: var(--text-tertiary); white-space: nowrap; flex-shrink: 0; }
+
+    /* ── Panel 5: Quota ──────────────────────────────────── */
+    .quota-list { display: flex; flex-direction: column; gap: 12px; max-height: 300px; overflow-y: auto; }
+    .quota-account { }
+    .quota-account-name { font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .quota-model-row { margin-bottom: 6px; }
+    .quota-model-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-secondary); margin-bottom: 3px; }
+    .quota-bar-track { height: 6px; background: var(--bg-tertiary); border-radius: 99px; overflow: hidden; }
+    .quota-bar-fill { height: 100%; border-radius: 99px; transition: width 0.4s ease; }
+    .quota-bar-fill.high { background: var(--success-color); }
+    .quota-bar-fill.mid { background: var(--warning-color); }
+    .quota-bar-fill.low { background: var(--danger-color); }
+
+    .quota-refresh { font-size: 11px; color: var(--text-tertiary); margin-top: 8px; }
+
+    /* ── Panel 6: Request History ────────────────────────── */
+    .history-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .history-table th {
+      text-align: left; padding: 6px 10px; font-weight: 600; font-size: 11px;
+      text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-tertiary);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .history-table td {
+      padding: 8px 10px; border-bottom: 1px solid var(--border-color);
+      color: var(--text-primary); vertical-align: middle;
+    }
+    .history-table tr:last-child td { border-bottom: none; }
+    .history-table tr:hover td { background: var(--bg-secondary); }
+    .history-table tr.expandable { cursor: pointer; }
+    .status-pill {
+      display: inline-block; padding: 2px 7px; border-radius: var(--radius-full);
+      font-size: 10px; font-weight: 600; text-transform: uppercase;
+    }
+    .status-ok { background: var(--success-10); color: var(--success-color); }
+    .status-error { background: rgba(239,68,68,0.1); color: var(--danger-color); }
+    .status-timeout { background: var(--warning-15); color: var(--warning-color); }
+    .status-pending { background: rgba(59,130,246,0.1); color: var(--info-color); }
+    .history-detail {
+      display: none; background: var(--bg-tertiary); font-size: 11px;
+      color: var(--text-secondary);
+    }
+    .history-detail td { padding: 10px 14px; }
+
+    /* ── Panel 7: System ─────────────────────────────────── */
+    .sys-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .sys-item { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 10px 12px; }
+    .sys-label { font-size: 11px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.04em; }
+    .sys-value { font-size: 15px; font-weight: 600; color: var(--text-primary); margin-top: 2px; }
+
+    /* ── Responsive ──────────────────────────────────────── */
+    @media (max-width: 1100px) {
+      .row-3 { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      .main { padding: 16px; }
+      .row-3, .row-2 { grid-template-columns: 1fr; }
+      .model-meta { grid-template-columns: 1fr 1fr; }
+      .health-summary { grid-template-columns: 1fr 1fr 1fr; }
+      .navbar-inner { padding: 0 16px; }
+      .brand-sub { display: none; }
+    }
+    @media (max-width: 480px) {
+      .model-meta { grid-template-columns: 1fr 1fr; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a class="brand" href="/">
+      <div class="brand-icon"><i class="fas fa-chart-line"></i></div>
+      <div>
+        <div class="brand-title">Live Monitor</div>
+        <div class="brand-sub">AIClient2API Gateway</div>
+      </div>
+    </a>
+    <div class="nav-right">
+      <div class="live-dot" id="live-indicator">
+        <span class="dot"></span>
+        <span id="live-label">Disconnected</span>
+      </div>
+      <select class="refresh-select" id="refresh-select" title="Health poll interval">
+        <option value="5000">5s poll</option>
+        <option value="10000" selected>10s poll</option>
+        <option value="30000">30s poll</option>
+      </select>
+      <button class="theme-btn" id="theme-btn" title="Toggle theme"><i class="fas fa-circle-half-stroke"></i></button>
+    </div>
+  </div>
+</nav>
+
+<!-- Auth gate -->
+<div id="auth-gate">
+  <div class="auth-card">
+    <h2><i class="fas fa-key" style="color:var(--primary-color);margin-right:8px"></i>Connect</h2>
+    <p>Enter your proxy Bearer token to connect the live dashboard.</p>
+    <input type="password" id="token-input" placeholder="sk-..." autocomplete="current-password">
+    <button class="btn-primary" id="connect-btn">Connect</button>
+    <div id="auth-error"><i class="fas fa-circle-exclamation"></i> Could not authenticate. Check your token.</div>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div class="main" id="dashboard">
+
+  <!-- Row 1: Active Model + Token Stats + System -->
+  <div class="row row-3">
+
+    <!-- Panel 1: Active Model -->
+    <div class="panel" id="panel-model">
+      <div class="panel-header">
+        <span class="panel-title"><i class="fas fa-robot"></i> Active Model</span>
+        <span id="model-updated" style="font-size:11px;color:var(--text-tertiary)"></span>
+      </div>
+      <div id="model-empty" class="empty-state">
+        <i class="fas fa-circle-notch fa-spin"></i>
+        <p>Waiting for first request…</p>
+      </div>
+      <div id="model-content" style="display:none">
+        <div class="model-hero">
+          <div class="model-icon"><i class="fas fa-microchip"></i></div>
+          <div class="model-info">
+            <div class="model-name" id="m-name">—</div>
+            <div class="model-provider">
+              <span id="m-provider">—</span>
+              <span id="m-cache-badge"></span>
+            </div>
+          </div>
+        </div>
+        <div class="model-meta">
+          <div class="meta-item">
+            <div class="meta-label">Context Window</div>
+            <div class="meta-value" id="m-ctx">—</div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-label">Max Output</div>
+            <div class="meta-value" id="m-max">—</div>
+          </div>
+        </div>
+        <div class="downgrade-banner" id="m-downgrade">
+          <i class="fas fa-triangle-exclamation"></i>
+          Model downgraded from <strong id="m-requested"></strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 2: Token Usage -->
+    <div class="panel" id="panel-tokens">
+      <div class="panel-header">
+        <span class="panel-title"><i class="fas fa-coins"></i> Last Request</span>
+      </div>
+      <div id="tokens-empty" class="empty-state">
+        <i class="fas fa-clock"></i>
+        <p>No requests yet</p>
+      </div>
+      <div id="tokens-content" style="display:none">
+        <div class="stats-row">
+          <div class="stat-box">
+            <div class="stat-label">Tokens In</div>
+            <div class="stat-value" id="t-input">—</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Tokens Out</div>
+            <div class="stat-value" id="t-output">—</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Response Time</div>
+            <div class="stat-value" id="t-latency">—</div>
+            <div class="stat-sub">end-to-end</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Time to First Token</div>
+            <div class="stat-value" id="t-ttft">—</div>
+          </div>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap" id="t-badges"></div>
+      </div>
+    </div>
+
+    <!-- Panel 7: System -->
+    <div class="panel" id="panel-system">
+      <div class="panel-header">
+        <span class="panel-title"><i class="fas fa-server"></i> System</span>
+      </div>
+      <div class="sys-grid">
+        <div class="sys-item">
+          <div class="sys-label">Uptime</div>
+          <div class="sys-value" id="sys-uptime">—</div>
+        </div>
+        <div class="sys-item">
+          <div class="sys-label">Memory Used</div>
+          <div class="sys-value" id="sys-mem">—</div>
+        </div>
+        <div class="sys-item">
+          <div class="sys-label">Node Version</div>
+          <div class="sys-value" id="sys-node">—</div>
+        </div>
+        <div class="sys-item">
+          <div class="sys-label">Requests Today</div>
+          <div class="sys-value" id="sys-reqs">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 2: Fallback Chain (wide) + Provider Health -->
+  <div class="row row-2">
+
+    <!-- Panel 3: Fallback Chain -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title"><i class="fas fa-diagram-project"></i> Fallback Chain</span>
+        <span id="chain-updated" style="font-size:11px;color:var(--text-tertiary)"></span>
+      </div>
+      <div id="chain-empty" class="empty-state">
+        <i class="fas fa-link-slash"></i>
+        <p>Waiting for first request to show chain</p>
+      </div>
+      <div id="chain-content" style="display:none">
+        <div class="chain-wrap" id="chain-nodes"></div>
+        <div class="fallback-steps" id="chain-steps" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- Panel 4: Provider Health -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title"><i class="fas fa-heart-pulse"></i> Provider Pool</span>
+        <span id="health-updated" style="font-size:11px;color:var(--text-tertiary)"></span>
+      </div>
+      <div class="health-summary">
+        <div class="health-num">
+          <div class="num" id="ph-total">—</div>
+          <div class="lbl">Total</div>
+        </div>
+        <div class="health-num">
+          <div class="num" id="ph-healthy" style="color:var(--success-color)">—</div>
+          <div class="lbl">Healthy</div>
+        </div>
+        <div class="health-num danger">
+          <div class="num" id="ph-unhealthy">—</div>
+          <div class="lbl">Unhealthy</div>
+        </div>
+      </div>
+      <div class="provider-list" id="provider-list"></div>
+    </div>
+  </div>
+
+  <!-- Row 3: Quota + History -->
+  <div class="row row-2">
+
+    <!-- Panel 5: Quota -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title"><i class="fas fa-gauge-high"></i> Quota Remaining</span>
+        <button onclick="window._dash.refreshQuota()" style="background:none;border:none;cursor:pointer;color:var(--text-tertiary);font-size:13px" title="Refresh quota"><i class="fas fa-rotate-right"></i></button>
+      </div>
+      <div id="quota-empty" class="empty-state">
+        <i class="fas fa-chart-pie"></i>
+        <p>No quota data available</p>
+      </div>
+      <div id="quota-content" style="display:none">
+        <div class="quota-list" id="quota-list"></div>
+        <div class="quota-refresh" id="quota-refresh-time"></div>
+      </div>
+    </div>
+
+    <!-- Panel 6: Request History -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title"><i class="fas fa-clock-rotate-left"></i> Request History</span>
+        <span style="font-size:11px;color:var(--text-tertiary)">Last 10 requests</span>
+      </div>
+      <div id="history-empty" class="empty-state">
+        <i class="fas fa-inbox"></i>
+        <p>No requests recorded yet</p>
+      </div>
+      <div id="history-content" style="display:none;overflow-x:auto">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Model</th>
+              <th>Provider</th>
+              <th>In</th>
+              <th>Out</th>
+              <th>ms</th>
+              <th>FB</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="history-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /dashboard -->
+
+<script>
+(function() {
+  // ── State ────────────────────────────────────────────────
+  let TOKEN = localStorage.getItem('live_token') || localStorage.getItem('authToken') || '';
+  let healthPollTimer = null;
+  let quotaData = null;
+  let healthData = null;
+  let configData = null;
+  let lastModel = null;
+  let sseSource = null;
+  let traceHistory = [];
+  let pollInterval = 10000;
+
+  // ── Theme ────────────────────────────────────────────────
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    localStorage.setItem('theme', t);
+  }
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  applyTheme(savedTheme);
+  document.getElementById('theme-btn').addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme') || 'light';
+    applyTheme(cur === 'light' ? 'dark' : 'light');
+  });
+
+  // ── Auth ─────────────────────────────────────────────────
+  document.getElementById('connect-btn').addEventListener('click', tryConnect);
+  document.getElementById('token-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryConnect(); });
+  if (TOKEN) tryConnect();
+
+  async function tryConnect() {
+    const input = document.getElementById('token-input').value.trim();
+    if (input) TOKEN = input;
+    if (!TOKEN) { showAuthError(); return; }
+
+    try {
+      const r = await fetch('/api/health', { headers: { Authorization: `Bearer ${TOKEN}` } });
+      if (!r.ok) throw new Error('auth failed');
+      localStorage.setItem('live_token', TOKEN);
+      document.getElementById('auth-gate').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'flex';
+      initDashboard();
+    } catch {
+      showAuthError();
+    }
+  }
+
+  function showAuthError() {
+    const el = document.getElementById('auth-error');
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 4000);
+  }
+
+  // ── Init ─────────────────────────────────────────────────
+  function initDashboard() {
+    connectSSE();
+    fetchHealth();
+    fetchQuota();
+    fetchConfig();
+    fetchSystem();
+    fetchTraces();
+
+    document.getElementById('refresh-select').addEventListener('change', e => {
+      pollInterval = +e.target.value;
+      clearInterval(healthPollTimer);
+      healthPollTimer = setInterval(fetchHealth, pollInterval);
+    });
+
+    healthPollTimer = setInterval(fetchHealth, pollInterval);
+    setInterval(fetchSystem, 30000);
+    setInterval(fetchQuota, 60000);
+    setInterval(fetchTraces, 5000);
+  }
+
+  // ── SSE ──────────────────────────────────────────────────
+  function connectSSE() {
+    if (sseSource) sseSource.close();
+    // Inject token via URL since EventSource doesn't support custom headers
+    sseSource = new EventSource(`/api/events?token=${encodeURIComponent(TOKEN)}`);
+    sseSource.onopen = () => setLive(true);
+    sseSource.onerror = () => { setLive(false); setTimeout(connectSSE, 5000); };
+
+    sseSource.addEventListener('request_complete', e => {
+      try {
+        const data = JSON.parse(e.data);
+        lastModel = data;
+        renderActiveModel(data);
+        renderTokenStats(data);
+        fetchTraces(); // refresh history + chain
+      } catch {}
+    });
+
+    sseSource.addEventListener('provider_update', () => fetchHealth());
+    sseSource.addEventListener('config_update', () => fetchConfig());
+  }
+
+  function setLive(on) {
+    const el = document.getElementById('live-indicator');
+    el.classList.toggle('connected', on);
+    document.getElementById('live-label').textContent = on ? 'Live' : 'Reconnecting…';
+  }
+
+  // ── Fetch helpers ─────────────────────────────────────────
+  async function api(path) {
+    const r = await fetch(path, { headers: { Authorization: `Bearer ${TOKEN}` } });
+    if (!r.ok) throw new Error(`${r.status}`);
+    return r.json();
+  }
+
+  async function fetchHealth() {
+    try {
+      const data = await api('/provider_health');
+      healthData = data;
+      renderHealth(data);
+      document.getElementById('health-updated').textContent = fmtRelTime(new Date());
+      if (lastModel) renderChain(configData, healthData, lastModel, traceHistory);
+    } catch {}
+  }
+
+  async function fetchQuota() {
+    try {
+      const data = await api('/api/quota');
+      quotaData = data;
+      renderQuota(data);
+    } catch {}
+  }
+
+  async function fetchConfig() {
+    try {
+      const data = await api('/api/config');
+      configData = data;
+      if (lastModel && healthData) renderChain(data, healthData, lastModel, traceHistory);
+    } catch {}
+  }
+
+  async function fetchSystem() {
+    try {
+      const data = await api('/api/system');
+      renderSystem(data);
+    } catch {}
+  }
+
+  async function fetchTraces() {
+    try {
+      const traces = await api('/v1/trace');
+      if (!Array.isArray(traces) || traces.length === 0) return;
+      traceHistory = traces;
+      renderHistory(traces);
+      // Also seed active model from last trace if we don't have SSE data yet
+      if (!lastModel) {
+        const last = traces[traces.length - 1];
+        if (last && last.status !== 'pending') {
+          // Build a synthetic last-model-like object from trace
+          lastModel = {
+            model: last.model,
+            provider: last.provider,
+            latencyMs: last.totalUpstreamMs,
+            ttftMs: last.upstreamTTFTMs,
+            fallbackCount: last.fallbackCount,
+            isDowngrade: Array.isArray(last.fallbackSteps) && last.fallbackSteps.some(s => s.isModelDowngrade),
+            inputTokens: last.inputTokens,
+            outputTokens: last.outputTokens,
+          };
+          renderActiveModel(lastModel);
+          renderTokenStats(lastModel);
+        }
+      }
+      if (configData && healthData) renderChain(configData, healthData, lastModel, traces);
+    } catch {}
+  }
+
+  // ── Render: Active Model ──────────────────────────────────
+  function renderActiveModel(d) {
+    show('model-empty', false); show('model-content', true);
+    document.getElementById('m-name').textContent = d.model || '—';
+    document.getElementById('m-provider').textContent = d.provider || '—';
+    document.getElementById('m-ctx').textContent = d.contextWindow ? fmtNum(d.contextWindow) : '—';
+    document.getElementById('m-max').textContent = d.maxOutput ? fmtNum(d.maxOutput) : '—';
+    document.getElementById('model-updated').textContent = fmtRelTime(new Date());
+
+    const cacheBadge = document.getElementById('m-cache-badge');
+    cacheBadge.innerHTML = '';
+
+    const downBanner = document.getElementById('m-downgrade');
+    if (d.isDowngrade && d.requestedModel && d.requestedModel !== d.model) {
+      downBanner.style.display = 'block';
+      document.getElementById('m-requested').textContent = d.requestedModel;
+    } else {
+      downBanner.style.display = 'none';
+    }
+  }
+
+  // ── Render: Token Stats ───────────────────────────────────
+  function renderTokenStats(d) {
+    show('tokens-empty', false); show('tokens-content', true);
+    document.getElementById('t-input').textContent  = d.inputTokens  != null ? fmtNum(d.inputTokens)  : '—';
+    document.getElementById('t-output').textContent = d.outputTokens != null ? fmtNum(d.outputTokens) : '—';
+    document.getElementById('t-latency').textContent = d.latencyMs != null ? `${fmtNum(d.latencyMs)}ms` : '—';
+    document.getElementById('t-ttft').textContent    = d.ttftMs    != null ? `${fmtNum(d.ttftMs)}ms`    : '—';
+
+    const badges = document.getElementById('t-badges');
+    badges.innerHTML = '';
+    if (d.fallbackCount > 0) badges.innerHTML += `<span class="badge badge-yellow"><i class="fas fa-arrows-rotate"></i> ${d.fallbackCount} fallback${d.fallbackCount>1?'s':''}</span>`;
+    if (d.isDowngrade) badges.innerHTML += `<span class="badge badge-red"><i class="fas fa-arrow-down"></i> Downgraded</span>`;
+    if (!d.isDowngrade && (!d.fallbackCount || d.fallbackCount === 0)) badges.innerHTML += `<span class="badge badge-green"><i class="fas fa-check"></i> Direct</span>`;
+  }
+
+  // ── Render: Fallback Chain ────────────────────────────────
+  function renderChain(cfg, health, model, traces) {
+    if (!model) return;
+    show('chain-empty', false); show('chain-content', true);
+
+    const items = health?.items || [];
+    const healthMap = {};
+    items.forEach(p => {
+      const key = (p.provider || p.identify || '').split('::').pop();
+      if (!healthMap[key]) healthMap[key] = [];
+      healthMap[key].push(p);
+    });
+
+    const isHealthy = provName => {
+      const arr = healthMap[provName] || [];
+      if (arr.length === 0) return null; // unknown
+      return arr.some(a => a.isHealthy);
+    };
+
+    // Build chain: primary provider → horizontal fallbacks → model downgrade chain
+    const provChain = [];
+    const currentProvider = model.provider || '';
+
+    // Start with current provider
+    provChain.push({ label: currentProvider, type: 'provider', active: true });
+
+    // Horizontal fallbacks from config
+    const fallbackChain = cfg?.providerFallbackChain?.[currentProvider] || [];
+    fallbackChain.forEach(p => provChain.push({ label: p, type: 'provider', active: false }));
+
+    // Model downgrade from modelFallbackMapping
+    const modelChain = [];
+    let cur = model.model;
+    const mapping = cfg?.modelFallbackMapping || {};
+    const seen = new Set([cur]);
+    while (mapping[cur]) {
+      const next = mapping[cur];
+      const target = next.targetModel || next;
+      if (seen.has(target)) break;
+      seen.add(target);
+      modelChain.push({ label: target, provider: next.targetProviderType, type: 'model-downgrade' });
+      cur = target;
+    }
+
+    // Render
+    const wrap = document.getElementById('chain-nodes');
+    wrap.innerHTML = '';
+
+    provChain.forEach((n, i) => {
+      if (i > 0) {
+        const arr = document.createElement('span');
+        arr.className = 'chain-arrow'; arr.textContent = '→';
+        wrap.appendChild(arr);
+      }
+      const healthy = isHealthy(n.label);
+      const node = document.createElement('div');
+      node.className = 'chain-node' + (n.active ? ' active' : '') + (healthy === false ? ' unhealthy' : '');
+      node.innerHTML = `
+        <span class="node-dot ${healthy === false ? 'unhealthy' : 'healthy'}"></span>
+        <div>
+          <div class="node-label">${esc(n.label)}</div>
+          ${n.active ? '<div class="node-sub">active</div>' : ''}
+        </div>`;
+      wrap.appendChild(node);
+    });
+
+    // Model downgrade chain (dashed)
+    if (modelChain.length > 0) {
+      const arr = document.createElement('span');
+      arr.className = 'chain-arrow downgrade-arrow'; arr.innerHTML = '↓<br><span style="font-size:10px">downgrade</span>';
+      arr.style.textAlign = 'center';
+      wrap.appendChild(arr);
+
+      modelChain.forEach((n, i) => {
+        if (i > 0) {
+          const arr2 = document.createElement('span');
+          arr2.className = 'chain-arrow downgrade-arrow'; arr2.textContent = '→';
+          wrap.appendChild(arr2);
+        }
+        const healthy = n.provider ? isHealthy(n.provider) : null;
+        const node = document.createElement('div');
+        node.className = 'chain-node downgrade-node' + (healthy === false ? ' unhealthy' : '');
+        node.innerHTML = `
+          <span class="node-dot ${healthy === false ? 'unhealthy' : 'healthy'}"></span>
+          <div>
+            <div class="node-label">${esc(n.label)}</div>
+            <div class="node-sub">${esc(n.provider || '')}</div>
+          </div>`;
+        wrap.appendChild(node);
+      });
+    }
+
+    document.getElementById('chain-updated').textContent = fmtRelTime(new Date());
+
+    // Fallback steps from last trace
+    const stepsWrap = document.getElementById('chain-steps');
+    stepsWrap.innerHTML = '';
+    const lastTrace = traces && traces.length > 0 ? traces[traces.length - 1] : null;
+    const steps = lastTrace?.fallbackSteps || [];
+    if (steps.length > 0) {
+      stepsWrap.style.display = 'flex';
+      steps.forEach(s => {
+        const row = document.createElement('div');
+        row.className = 'fallback-step';
+        const icon = s.isModelDowngrade ? 'fa-arrow-down-long' : 'fa-arrows-rotate';
+        row.innerHTML = `<i class="fas ${icon}"></i> Step ${s.step}: <b>${esc(s.fromProvider||'')}</b> → <b>${esc(s.toProvider||'')}</b> — ${esc(s.reason||'')} ${s.errorCode?`<span class="badge badge-red">${esc(s.errorCode)}</span>`:''}`;
+        stepsWrap.appendChild(row);
+      });
+    } else {
+      stepsWrap.style.display = 'none';
+    }
+  }
+
+  // ── Render: Provider Health ───────────────────────────────
+  function renderHealth(data) {
+    const items = data.items || [];
+    const healthyCount = items.filter(p => p.isHealthy).length;
+    document.getElementById('ph-total').textContent   = items.length;
+    document.getElementById('ph-healthy').textContent = healthyCount;
+    document.getElementById('ph-unhealthy').textContent = items.length - healthyCount;
+
+    const list = document.getElementById('provider-list');
+    list.innerHTML = '';
+    const currentProvider = lastModel?.provider || '';
+
+    const sorted = [...items].sort((a, b) => {
+      if (a.isHealthy && !b.isHealthy) return -1;
+      if (!a.isHealthy && b.isHealthy) return 1;
+      return 0;
+    });
+
+    sorted.forEach(p => {
+      const name = p.customName || (p.identify ? p.identify.split('::').pop() : 'unknown');
+      const isActive = p.provider === currentProvider;
+      const row = document.createElement('div');
+      row.className = 'provider-row' + (isActive ? ' active-provider' : '');
+      const lastErr = p.lastErrorMessage ? `<span class="prov-meta" title="${esc(p.lastErrorMessage)}" style="color:var(--danger-color);max-width:140px;overflow:hidden;text-overflow:ellipsis">${esc(p.lastErrorMessage.slice(0,40))}…</span>` : '';
+      row.innerHTML = `
+        <span class="prov-dot ${p.isHealthy ? 'healthy' : 'unhealthy'}"></span>
+        <span class="prov-name">${esc(name)} <span style="color:var(--text-tertiary);font-weight:400">(${esc(p.provider||'')})</span></span>
+        ${lastErr || `<span class="prov-meta">${p.activeRequests ? `${p.activeRequests} active` : ''}</span>`}
+      `;
+      list.appendChild(row);
+    });
+  }
+
+  // ── Render: Quota ─────────────────────────────────────────
+  function renderQuota(data) {
+    const snapshot = data.snapshot || {};
+    const accounts = Object.keys(snapshot);
+    if (accounts.length === 0) { show('quota-empty', true); show('quota-content', false); return; }
+    show('quota-empty', false); show('quota-content', true);
+
+    const list = document.getElementById('quota-list');
+    list.innerHTML = '';
+
+    accounts.forEach(email => {
+      const models = snapshot[email];
+      const modelKeys = Object.keys(models);
+      if (modelKeys.length === 0) return;
+
+      const section = document.createElement('div');
+      section.className = 'quota-account';
+
+      const shortEmail = email.length > 32 ? email.slice(0, 28) + '…' : email;
+      section.innerHTML = `<div class="quota-account-name" title="${esc(email)}">${esc(shortEmail)}</div>`;
+
+      modelKeys.slice(0, 6).forEach(m => {
+        const pct = typeof models[m] === 'number' ? models[m] : 0;
+        const cls = pct > 50 ? 'high' : pct > 20 ? 'mid' : 'low';
+        const row = document.createElement('div');
+        row.className = 'quota-model-row';
+        row.innerHTML = `
+          <div class="quota-model-label">
+            <span>${esc(m)}</span>
+            <span>${pct.toFixed(0)}%</span>
+          </div>
+          <div class="quota-bar-track">
+            <div class="quota-bar-fill ${cls}" style="width:${Math.min(100,Math.max(0,pct))}%"></div>
+          </div>`;
+        section.appendChild(row);
+      });
+
+      list.appendChild(section);
+    });
+
+    document.getElementById('quota-refresh-time').textContent = `Last updated: ${fmtRelTime(new Date(data.timestamp || Date.now()))}`;
+  }
+
+  // ── Render: Request History ───────────────────────────────
+  function renderHistory(traces) {
+    if (!traces || traces.length === 0) { show('history-empty', true); show('history-content', false); return; }
+    show('history-empty', false); show('history-content', true);
+
+    const tbody = document.getElementById('history-body');
+    tbody.innerHTML = '';
+
+    const recent = [...traces].reverse().slice(0, 10);
+    recent.forEach((t, i) => {
+      const statusCls = t.status === 'ok' ? 'status-ok' : t.status === 'error' ? 'status-error' : t.status === 'timeout' ? 'status-timeout' : 'status-pending';
+      const tr = document.createElement('tr');
+      tr.className = 'expandable';
+      tr.dataset.idx = i;
+      tr.innerHTML = `
+        <td>${fmtTime(t.startedAtIso)}</td>
+        <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(t.model||'')}">${esc((t.model||'—').replace('gemini-claude-','g-c-'))}</td>
+        <td style="color:var(--text-tertiary)">${esc((t.provider||'—').replace('claude-kiro-oauth','kiro').replace('gemini-antigravity','antigravity').replace('openai-custom','openai'))}</td>
+        <td>${t.inputTokens  != null ? fmtNum(t.inputTokens)  : '—'}</td>
+        <td>${t.outputTokens != null ? fmtNum(t.outputTokens) : '—'}</td>
+        <td>${t.totalUpstreamMs != null ? fmtNum(t.totalUpstreamMs) : '—'}</td>
+        <td>${t.fallbackCount > 0 ? `<span class="badge badge-yellow">${t.fallbackCount}</span>` : '—'}</td>
+        <td><span class="status-pill ${statusCls}">${esc(t.status||'?')}</span></td>`;
+
+      // Detail row
+      const det = document.createElement('tr');
+      det.className = 'history-detail';
+      const steps = t.fallbackSteps || [];
+      const stepStr = steps.length > 0
+        ? steps.map(s => `${s.fromProvider}→${s.toProvider} (${s.reason||s.errorCode||'?'})`).join(' · ')
+        : 'No fallbacks';
+      det.innerHTML = `<td colspan="8">Fallbacks: ${esc(stepStr)} · TTFT: ${t.upstreamTTFTMs!=null?t.upstreamTTFTMs+'ms':'—'} · Session: ${esc(t.sessionId||'—')}</td>`;
+
+      tr.addEventListener('click', () => {
+        const vis = det.style.display === 'table-row';
+        det.style.display = vis ? 'none' : 'table-row';
+      });
+
+      tbody.appendChild(tr);
+      tbody.appendChild(det);
+    });
+  }
+
+  // ── Render: System ────────────────────────────────────────
+  function renderSystem(data) {
+    const info = data?.systemInfo || data || {};
+    document.getElementById('sys-uptime').textContent = info.uptime ? fmtUptime(info.uptime) : '—';
+    document.getElementById('sys-node').textContent   = info.nodeVersion || '—';
+    document.getElementById('sys-mem').textContent    = info.memoryUsage?.heapUsed
+      ? `${Math.round(info.memoryUsage.heapUsed / 1024 / 1024)}MB`
+      : (info.usedMemoryMB ? `${info.usedMemoryMB}MB` : '—');
+    document.getElementById('sys-reqs').textContent   = fmtNum(traceHistory.length);
+  }
+
+  // ── Expose for manual refresh ─────────────────────────────
+  window._dash = { refreshQuota: fetchQuota };
+
+  // ── Helpers ───────────────────────────────────────────────
+  function show(id, visible) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = visible ? (el.tagName === 'TR' ? 'table-row' : 'block') : 'none';
+  }
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function fmtNum(n) {
+    return Number(n).toLocaleString();
+  }
+  function fmtTime(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+  function fmtRelTime(d) {
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+  function fmtUptime(secs) {
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    const s = secs % 60;
+    if (h > 0) return `${h}h ${m}m`;
+    if (m > 0) return `${m}m ${s}s`;
+    return `${s}s`;
+  }
+
+})();
+</script>
+</body>
+</html>

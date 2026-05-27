@@ -10,6 +10,7 @@ import { ProviderStrategyFactory } from './provider-strategies.js';
 import { getPluginManager } from '../core/plugin-manager.js';
 import { MODEL_MAX_OUTPUT_TOKENS, MODEL_CONTEXT_WINDOWS, GEMINI_DEFAULT_MAX_TOKENS } from '../converters/utils.js';
 import { MODEL_PROTOCOL_PREFIX, MODEL_PROVIDER } from './constants.js';
+import { broadcastEvent } from '../ui-modules/event-broadcast.js';
 import {
     handleUnifiedResponse,
     getClientIp,
@@ -342,6 +343,7 @@ export async function updateLastModelFile(model, provider = null, customName = n
         const tmpPath = '/tmp/aiclient_last_model.tmp';
         await fs.writeFile(tmpPath, payload);
         await fs.rename(tmpPath, '/tmp/aiclient_last_model');
+        broadcastEvent('request_complete', JSON.parse(payload));
     } catch (err) {
         // Silently ignore errors
     }

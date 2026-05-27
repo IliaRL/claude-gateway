@@ -256,6 +256,19 @@ export function createRequestHandler(config, providerPoolManager) {
                         }
                     }
 
+                    // Cockpit quota snapshot endpoint — exposes in-memory quota cache for the live dashboard
+                    if (method === 'GET' && path === '/api/quota') {
+                        try {
+                            const { getCacheSnapshot } = await import('../utils/cockpit-quota.js');
+                            res.writeHead(200, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({ snapshot: getCacheSnapshot(), timestamp: new Date().toISOString() }));
+                            return true;
+                        } catch (error) {
+                            handleError(res, { status: 500, message: `quota endpoint error: ${error.message}` }, currentConfig.MODEL_PROVIDER, null, req);
+                            return;
+                        }
+                    }
+
                     // Handle API requests
                     // Allow overriding MODEL_PROVIDER via request header
                     const modelProviderHeader = req.headers['model-provider'];
