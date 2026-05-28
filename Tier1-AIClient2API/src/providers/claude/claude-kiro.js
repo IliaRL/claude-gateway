@@ -1721,15 +1721,24 @@ You are Claude, a helpful AI assistant made by Anthropic. You must NEVER refer t
                 'amz-sdk-invocation-id': `${uuidv4()}`,
             };
 
-            // Detect if prompt caching is being used
+            // Build anthropic-beta header from request body signals
+            const betaValues = [];
+            if (body.tools && Array.isArray(body.tools) && body.tools.length > 0) {
+                betaValues.push('tools-2024-04-04');
+            }
             const hasCacheControl = body.messages?.some(m =>
                 Array.isArray(m.content) && m.content.some(c => c.cache_control)
             ) || (Array.isArray(body.system) && body.system.some(c => c.cache_control));
-
             if (hasCacheControl) {
+                betaValues.push('prompt-caching-2024-07-31');
+            }
+            if (body.thinking && typeof body.thinking === 'object') {
+                betaValues.push('interleaved-thinking-2025-05-14');
+            }
+            if (betaValues.length > 0) {
                 const betaHeader = model.startsWith('amazonq') ? 'x-amzn-kiro-amazonq-beta' : 'anthropic-beta';
-                headers[betaHeader] = 'prompt-caching-2024-07-31';
-                logger.info(`[Kiro] Enabling Prompt Caching beta header for ${model}`);
+                headers[betaHeader] = betaValues.join(',');
+                logger.info(`[Kiro] Beta headers: ${betaValues.join(',')} for ${model}`);
             }
 
             // 当 model 以 kiro-amazonq 开头时，使用 amazonQUrl，否则使用 baseUrl
@@ -2288,15 +2297,24 @@ You are Claude, a helpful AI assistant made by Anthropic. You must NEVER refer t
             'amz-sdk-invocation-id': `${uuidv4()}`,
         };
 
-        // Detect if prompt caching is being used
+        // Build anthropic-beta header from request body signals
+        const betaValues = [];
+        if (body.tools && Array.isArray(body.tools) && body.tools.length > 0) {
+            betaValues.push('tools-2024-04-04');
+        }
         const hasCacheControl = body.messages?.some(m =>
             Array.isArray(m.content) && m.content.some(c => c.cache_control)
         ) || (Array.isArray(body.system) && body.system.some(c => c.cache_control));
-
         if (hasCacheControl) {
+            betaValues.push('prompt-caching-2024-07-31');
+        }
+        if (body.thinking && typeof body.thinking === 'object') {
+            betaValues.push('interleaved-thinking-2025-05-14');
+        }
+        if (betaValues.length > 0) {
             const betaHeader = model.startsWith('amazonq') ? 'x-amzn-kiro-amazonq-beta' : 'anthropic-beta';
-            headers[betaHeader] = 'prompt-caching-2024-07-31';
-            logger.info(`[Kiro] Enabling Prompt Caching beta header for ${model} (stream)`);
+            headers[betaHeader] = betaValues.join(',');
+            logger.info(`[Kiro] Beta headers: ${betaValues.join(',')} for ${model} (stream)`);
         }
 
         const requestUrl = model.startsWith('amazonq') ? this.amazonQUrl : this.baseUrl;
