@@ -24,7 +24,7 @@ These variables are injected by the shell layer (`~/dotfiles/zsh/zshrc`) before 
 
 ### Testing Environment Variables
 
-Integration tests (`tests/api-integration.test.js`) require an auth token to be present in the environment. There is no hardcoded fallback — if neither variable is set, authenticated test requests will fail.
+Integration tests (`tests/api-integration.test.js`) require an auth token to be present in the environment. There is no hardcoded fallback — if neither variable is set, the test suite fails with an error.
 
 | Variable | Description |
 |---|---|
@@ -161,7 +161,7 @@ The config file is loaded at startup. CLI flags override values from the file; t
 
 ### Model List Cache
 
-The `/v1/models` endpoint response is cached in memory by `provider-pool-manager.js` for up to 30 seconds. The cache is auto-invalidated on any pool health change (account added, removed, or flagged as unhealthy). There is no configuration knob for this TTL — it is hardcoded in the pool manager source.
+The `/v1/models` endpoint response is cached in memory by `provider-pool-manager.js` for up to 30 seconds. The cache is auto-invalidated on any pool health change (account added, removed, or flagged as unhealthy) and also when `initializeProviderStatus()` runs (provider config reload). There is no configuration knob for this TTL — it is hardcoded in the pool manager source.
 
 ### Minimal Working Config
 

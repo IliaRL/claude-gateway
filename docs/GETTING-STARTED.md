@@ -179,7 +179,7 @@ Tests run against the live Tier 1 source in `~/AIClient2API`:
 ```bash
 cd ~/AIClient2API
 
-pnpm test              # full suite (73 tests)
+pnpm test              # full suite (80 tests)
 pnpm run test:unit     # unit tests only
 pnpm run test:integration  # integration tests only
 pnpm run test:coverage # with coverage report

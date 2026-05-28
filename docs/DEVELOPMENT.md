@@ -226,6 +226,9 @@ Coverage is collected from `src/**/*.js`, excluding test files and `node_modules
 
 Test files follow the `*.test.js` naming convention and live under `tests/`. Unit tests go in `tests/unit/`; integration tests go in `tests/api-integration.test.js` or alongside it. The project uses ESM imports throughout — use `import` not `require`.
 
+Notable unit test files:
+- `tests/unit/request-handlers-display-name.test.js` — verifies the `display_name` naming convention; exercises `buildFriendlyDisplayName`, which is exported from `src/utils/request-handlers.js` for testability.
+
 ### Debugging test failures
 
 Enable request/response logging before reproducing:

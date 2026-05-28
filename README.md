@@ -9,7 +9,7 @@ Master configuration and source tree for a 3-tier AI gateway that routes Claude 
 
 MASTER-C is a personal infrastructure repository. It contains the configuration, source code, and credentials for a layered proxy stack that intercepts Claude Code CLI traffic and routes it to whichever AI backend is selected at runtime.
 
-**112 models across 8+ providers. 73 tests passing.**
+**112 models across 8+ providers. 80 tests passing.**
 
 **Request flow:**
 
@@ -56,7 +56,7 @@ Provider-facing proxy. Handles account pool load balancing, OAuth credential lif
 cd Tier1-AIClient2API && pnpm install   # first-time setup
 pnpm start                              # production
 pnpm run start:dev                      # dev mode
-pnpm test                               # full test suite (73 tests)
+pnpm test                               # full test suite (80 tests)
 ```
 
 ### Tier 2 — LiteLLM Gateway (Python, port 4000)

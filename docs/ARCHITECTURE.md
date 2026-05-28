@@ -84,7 +84,7 @@ External Provider
 │  │  converters/ & convert/   (format translation)       │   │
 │  │  auth/                    (key injection/validation) │   │
 │  │  handlers/request-handler.js                         │   │
-│  │  utils/request-handlers.js (Gemini format detection) │   │
+│  │  utils/request-handlers.js (display name + format)  │   │
 │  │  services/response-cache.js (provider-prefixed keys) │   │
 │  └──────────────────────────────────────────────────────┘   │
 └──────────────────────┬──────────────────────────────────────┘
@@ -200,7 +200,7 @@ Key responsibilities:
 | `auth/` | API key injection and validation |
 | `services/api-server.js` | Standalone API server entrypoint |
 | `services/response-cache.js` | Response cache with provider-protocol-prefixed keys |
-| `utils/request-handlers.js` | Gemini-protocol format detection and OpenAI → Gemini response conversion |
+| `utils/request-handlers.js` | Display name helper (`buildFriendlyDisplayName()`), Gemini-protocol format detection, and OpenAI → Gemini response conversion |
 | `utils/` | Error formatters and logging |
 
 ### Tier 1 — `Tier1-AIClient2API/configs/`
@@ -255,10 +255,11 @@ Tier 2 — Level 3: Tiered Downgrade
 | Abstraction | Location | Description |
 |---|---|---|
 | Model ID map | `src/providers/provider-models.js` | Canonical source of truth for all valid model strings per provider. LiteLLM model strings must exactly match entries here. |
-| Provider pool manager | `src/providers/provider-pool-manager.js` | Manages multi-account credential pools, cooldown state, penalty scoring, and a 30s TTL cache for available model lists (`getCachedAvailableModels()`). Cache is invalidated on provider health changes. |
+| Provider pool manager | `src/providers/provider-pool-manager.js` | Manages multi-account credential pools, cooldown state, penalty scoring, and a 30s TTL cache for available model lists (`getCachedAvailableModels()`). Cache is invalidated on provider health changes and on `initializeProviderStatus()` (config reload). |
 | Request handler | `src/handlers/request-handler.js` | Exposes the OpenAI-compatible `/v1/chat/completions` endpoint that LiteLLM targets. |
 | Format converters | `src/converters/` and `src/convert/` | Translate between OpenAI spec and native provider wire formats. Most format errors originate here. |
-| Response cache | `src/services/response-cache.js` | Caches responses with cache keys prefixed by provider protocol (e.g., `gemini:sha256hash`). Prefix isolation prevents OpenAI-format cached responses from being served to Gemini-protocol callers for the same model and content. |
+| Response cache | `src/services/response-cache.js` | Caches responses with cache keys prefixed by provider protocol (e.g., `gemini:sha256hash`). Prefix isolation prevents OpenAI-format cached responses from being served to Gemini-protocol callers for the same model and content. Only caches requests with `temperature` explicitly set to `0`; requests with undefined temperature are not cached. |
+| Display name helper | `src/utils/request-handlers.js` | `buildFriendlyDisplayName()` — exported helper used by all `/v1/models` response paths to produce `"Claude [Name] ([Provider])"` display names. |
 | Gemini format detection | `src/utils/request-handlers.js` | Detects when a Gemini-protocol caller would receive an OpenAI-format response due to protocol prefix collision (`gemini` and `gemini-cli-oauth` both resolve to `gemini`). Explicitly converts via `OpenAIConverter.toGeminiResponse()` before responding. |
 | LiteLLM router | `litellm/router.py` (Tier 2 source) | Multi-model routing, load balancing, and Level 3 downgrade fallback logic. |
 | LiteLLM config | `Tier2-LiteLLM/litellm_config.yaml` | Declares all 85 model entries, their `openai/` prefixed routing strings, and the fallback chain. |
@@ -293,10 +294,10 @@ Additional tolerance setting: `CLAUDE_CODE_STREAM_DELAY=50` can be exported to a
 
 ## Test Suite
 
-Tier 1 ships 73 tests across 8 suites, covering unit and integration scenarios for provider adapters, format converters, pool management, and request handling.
+Tier 1 ships 80 tests across 8 suites, covering unit and integration scenarios for provider adapters, format converters, pool management, request handling, and display name generation.
 
 ```bash
-pnpm test             # all 73 tests
+pnpm test             # all 80 tests
 pnpm run test:unit
 pnpm run test:integration
 pnpm run test:coverage

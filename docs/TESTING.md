@@ -53,6 +53,7 @@ Runs all `tests/unit/*.test.js` files:
 | `openai-converter-gemini-response-json-guard.test.js` | F-03: `toGeminiResponse` with malformed JSON arguments — no `SyntaxError` thrown, valid `candidates` structure returned, tool name preserved |
 | `openai-converter-tool-call-integrity.test.js` | OpenAI tool-call ID and name buffering |
 | `openai-converter-tool-use.test.js` | OpenAI tool-use round-trip fidelity |
+| `request-handlers-display-name.test.js` | buildFriendlyDisplayName: Claude prefix naming convention for /v1/models display_name (7 cases) |
 
 ### Watch Mode
 
@@ -105,6 +106,8 @@ TEST_SERVER_BASE_URL=http://127.0.0.1:3000 TEST_API_KEY=$AICLIENT_TOKEN pnpm tes
 
 `TEST_SERVER_BASE_URL` defaults to `http://127.0.0.1:3000` if unset. `TEST_API_KEY` defaults to `process.env.AICLIENT_TOKEN` (set by `~/dotfiles/zsh/zshrc`) if not passed explicitly. Any CI environment running integration tests must export `AICLIENT_TOKEN`.
 
+The `/v1/models` (OpenAI-format) and `/v1beta/models` (Gemini-format) integration tests assert that every entry in the model list has a `display_name` field starting with `"Claude "`.
+
 ---
 
 ## Smoke Tests (Live Provider Verification)
@@ -144,7 +147,7 @@ cd Tier1-AIClient2API
 bash scripts/validate-skills.sh
 ```
 
-Asserts that all 73 skill reference points in `Tier1-AIClient2API/.claude/skills/` still point to valid files and line numbers. Run after any refactor that moves or renames source files.
+Asserts that all 62 assertion points in `Tier1-AIClient2API/.claude/skills/` still point to valid files and line numbers. Run after any refactor that moves or renames source files.
 
 ---
 
@@ -230,7 +233,7 @@ No CI/CD pipeline is configured for this repository. All test execution is manua
 For the canonical test sequence after any non-trivial change:
 
 ```
-1. pnpm test                        → unit tests pass
+1. pnpm test                        → unit tests pass (80 tests across 8 files)
 2. node scripts/master-smoke-test.cjs   → live provider smoke passes
 3. /provider_health shows ≥ 25 healthy accounts
 4. cat /tmp/aiclient_last_model shows correct provider + fallbackCount=0
