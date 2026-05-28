@@ -116,13 +116,13 @@ type start-proxies
 start-proxies
 ```
 
-This starts Tier 1 (`~/AIClient2API && npm start`) and then Tier 2 (LiteLLM on port 4000) in the correct order via the `_ensure_gateways` function.
+This starts Tier 1 (`~/AIClient2API`) and then Tier 2 (LiteLLM on port 4000) in the correct order via the `_ensure_gateways` function.
 
 ### Option B — Manual sequential startup
 
 ```bash
 # Terminal 1 — Start Tier 1 first
-cd ~/AIClient2API && npm start
+cd ~/AIClient2API && pnpm start
 
 # Wait until you see the "Server listening on port 3000" log line, then:
 
@@ -145,14 +145,46 @@ curl -sf -H "Authorization: Bearer $AICLIENT_TOKEN" http://127.0.0.1:4000/v1/mod
 ### Route Claude Code to the gateway
 
 ```bash
-# Switch Claude Code CLI to proxy mode (writes ANTHROPIC_BASE_URL to ~/.claude/settings.json)
+# Switch Claude Code CLI to proxy mode (writes ANTHROPIC_BASE_URL=http://127.0.0.1:4000 to ~/.claude/settings.json)
 claude-proxy
 
 # Or launch Claude Code with model selection:
 claude-pick
 ```
 
-**Current operational mode:** `claude-proxy` sets `ANTHROPIC_BASE_URL=http://127.0.0.1:3000`, routing Claude Code directly to Tier 1. LiteLLM (port 4000) runs and is healthy but is not in the active Claude Code request path — it was bypassed to eliminate SSE stream corruption from LiteLLM re-wrapping streaming chunks.
+**Active request path:** Claude Code CLI → Tier 3 (ZSH env injection) → Tier 2 LiteLLM (`:4000`) → Tier 1 AIClient2API (`:3000`) → External provider.
+
+`claude-proxy` sets `ANTHROPIC_BASE_URL=http://127.0.0.1:4000`, routing Claude Code through Tier 2 LiteLLM. SSE stream buffering is handled via `X-Accel-Buffering: no` and `stream_timeout` in `litellm_config.yaml`.
+
+---
+
+## Switching Models
+
+```bash
+# Interactive model menu — starts both tiers if offline, then opens Claude Code
+claude-pick
+
+# Same menu mid-session (both tiers must already be running)
+claude-swap
+```
+
+Both commands call `_ensure_gateways` to verify Tier 1 and Tier 2 are healthy before launching Claude Code. The selected model is passed as `CLAUDE_MODEL` and `--model` to the Claude Code CLI.
+
+---
+
+## Running Tests
+
+Tests run against the live Tier 1 source in `~/AIClient2API`:
+
+```bash
+cd ~/AIClient2API
+
+pnpm test              # full suite (73 tests)
+pnpm run test:unit     # unit tests only
+pnpm run test:integration  # integration tests only
+pnpm run test:coverage # with coverage report
+pnpm run test:verbose  # verbose output
+```
 
 ---
 
@@ -169,6 +201,10 @@ You started Tier 2 before Tier 1 was ready. Stop both processes, start Tier 1 fi
 ### `claude-pick` / `start-proxies` not found
 
 The shell functions are defined in `~/dotfiles/zsh/zshrc`. Run `source ~/dotfiles/zsh/zshrc` or open a new terminal session.
+
+### `AICLIENT_TOKEN` not set
+
+`claude-proxy` will error with `AICLIENT_TOKEN is empty`. Ensure `AICLIENT_TOKEN` is exported in `~/dotfiles/zsh/zshrc` and that the file is sourced in your current shell session.
 
 ### Model returns 404 silently
 

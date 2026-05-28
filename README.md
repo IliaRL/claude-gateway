@@ -1,13 +1,15 @@
 <!-- generated-by: gsd-doc-writer -->
 # MASTER-C
 
-Master configuration and source tree for a 3-tier AI gateway that routes Claude Code CLI through any external AI provider — enabling seamless model switching across Kiro, Antigravity, Gemini, OpenAI Codex, GitHub Models, NVIDIA NIM, and Grok with zero downtime.
+Master configuration and source tree for a 3-tier AI gateway that routes Claude Code CLI through any external AI provider — enabling seamless model switching across Kiro, Antigravity, Gemini, OpenAI Codex, GitHub Models, NVIDIA NIM, Grok, and OpenRouter with zero downtime.
 
 ---
 
 ## What this is
 
 MASTER-C is a personal infrastructure repository. It contains the configuration, source code, and credentials for a layered proxy stack that intercepts Claude Code CLI traffic and routes it to whichever AI backend is selected at runtime.
+
+**112 models across 8+ providers. 73 tests passing.**
 
 **Request flow:**
 
@@ -54,14 +56,14 @@ Provider-facing proxy. Handles account pool load balancing, OAuth credential lif
 cd Tier1-AIClient2API && pnpm install   # first-time setup
 pnpm start                              # production
 pnpm run start:dev                      # dev mode
-pnpm test                               # full test suite
+pnpm test                               # full test suite (73 tests)
 ```
 
 ### Tier 2 — LiteLLM Gateway (Python, port 4000)
 
 Middle layer between Claude Code and Tier 1. Accepts Anthropic-format requests from the CLI, normalizes payloads, retries on 429s/500s/502s, and owns fallback level 3 (tiered model downgrade).
 
-**Config:** `Tier2-LiteLLM/litellm_config.yaml` — 85 model entries across 7 providers  
+**Config:** `Tier2-LiteLLM/litellm_config.yaml` — 112 model entries across 8+ providers  
 **Runtime:** `Tier2-LiteLLM/.venv/` (Python 3.12.11, litellm 1.87.0) — do not recreate
 
 ```bash
@@ -78,6 +80,8 @@ Shell layer — not in this repo. Provides `claude-pick` (model menu + fresh ses
 
 ## Starting the Stack
 
+See `docs/GETTING-STARTED.md` for full prerequisites and first-run instructions.
+
 ```bash
 # Start both tiers with the shell alias (preferred)
 start-proxies
@@ -91,8 +95,6 @@ cd ~/AIClient2API && npm start
 ```
 
 **Startup order is mandatory.** If LiteLLM starts while Tier 1 is still initializing, it fires ~80 concurrent health-check requests at `:3000` — instant CPU spike on Apple Silicon. Use `start-proxies` or `safereset` to enforce correct order.
-
-**Current active path:** `claude-proxy` sets `ANTHROPIC_BASE_URL=http://127.0.0.1:3000`, routing Claude Code directly to Tier 1. LiteLLM runs and is healthy but is not in the active request path — bypassed to eliminate SSE stream corruption from LiteLLM re-wrapping streaming chunks.
 
 ---
 
@@ -121,7 +123,7 @@ cd ~/AIClient2API && npm start
 ## Critical Rules
 
 - **`Tier1-AIClient2API/`** is a real directory. Never glob or scan inside it — `node_modules` (187 MB) and `.git` (11 MB) live there.
-- **Never glob inside** `Tier2-LiteLLM/litellm/`, `.venv/`, `tests/`, `ui/`, `enterprise/`, `docs/`, or `cookbook/`.
+- **Never glob `tests/`, `ui/`, `enterprise/`, `docs/`, or `cookbook/`.
 - **Never recreate** `Tier2-LiteLLM/.venv/` or run `uv sync`, `pip install`, or `make install-*`.
 - **Model strings** in `litellm_config.yaml` must exactly match `src/providers/provider-models.js` — mismatches are the #1 source of silent 404s.
 - **Credentials** must be sourced from `Credentials/` — never hardcoded elsewhere.
@@ -133,6 +135,11 @@ cd ~/AIClient2API && npm start
 
 | Document | Purpose |
 |---|---|
+| `docs/GETTING-STARTED.md` | Prerequisites, first-run instructions, common setup issues |
+| `docs/ARCHITECTURE.md` | System architecture, component diagram, data flow |
+| `docs/DEVELOPMENT.md` | Local dev setup, build commands, code style, PR process |
+| `docs/TESTING.md` | Test framework, running tests, coverage requirements |
+| `docs/CONFIGURATION.md` | Environment variables, config file format, per-environment overrides |
 | `docs/ULTIMATE-GOAL.md` | Full architecture spec and success criteria |
 | `docs/Model-Guide.md` | Canonical model IDs, provider strings, context windows |
 | `docs/AIClient-BP.md` | AIClient2API best practices and validated patterns |

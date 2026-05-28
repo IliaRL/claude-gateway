@@ -16,7 +16,7 @@ Developer guide for working on the 3-Tier AI Gateway. Covers local setup, build 
 
 ### Cloning and installing
 
-Tier 1 source lives at `~/AIClient2API/` on disk. `Tier1-AIClient2API/` is a symlink to that directory. Do not glob or scan inside it — `node_modules` (187 MB) and `.git` (11 MB) live there.
+Tier 1 source lives at `~/AIClient2API/` on disk. `Tier1-AIClient2API/` is a directory copy of that source — changes to one do not automatically propagate to the other. Do not glob or scan inside it — `node_modules` (187 MB) and `.git` (11 MB) live there.
 
 ```bash
 # Install Tier 1 dependencies (pnpm only — never npm install)
@@ -93,7 +93,7 @@ node scripts/unified-test-suite.cjs  # all 39 models — runs several minutes
 start-proxies
 
 # Manual Tier 1 start
-cd ~/AIClient2API && npm start
+cd ~/AIClient2API && pnpm start
 
 # Manual Tier 2 start — only after Tier 1 passes health check
 /Users/ilialiston/MASTER-C/Tier2-LiteLLM/.venv/bin/litellm \
@@ -187,11 +187,27 @@ The model string in `litellm_config.yaml` (after the `openai/` prefix) must exac
 
 ## Testing
 
-Tests live in `Tier1-AIClient2API/tests/` and use Jest with Babel for ESM support. The test timeout is 30 seconds per test.
+Tests live in `Tier1-AIClient2API/tests/` and use Jest with Babel for ESM support (`"type": "module"` in `package.json`). The test timeout is 30 seconds per test.
+
+### Auth token requirement
+
+Tests require the `AICLIENT_TOKEN` environment variable (or `TEST_API_KEY`) to be set. There is no hardcoded fallback — tests will fail with an auth error if neither variable is present.
 
 ```bash
-# All tests
+export AICLIENT_TOKEN=your-token-here
+```
+
+### Running tests
+
+```bash
+# All tests (run from ~/AIClient2API)
 cd ~/AIClient2API && pnpm test
+
+# Unit tests only
+pnpm run test:unit
+
+# Integration tests only (requires Tier 1 running on :3000)
+pnpm run test:integration
 
 # Single file
 pnpm test tests/path/to/file.test.js
@@ -200,9 +216,15 @@ pnpm test tests/path/to/file.test.js
 pnpm run test:coverage
 ```
 
+Integration tests require Tier 1 to be running on port 3000 before they are invoked.
+
+### Coverage
+
 Coverage is collected from `src/**/*.js`, excluding test files and `node_modules`. Reports are written to `coverage/` in text, lcov, and HTML formats. No minimum coverage threshold is configured — coverage reports are informational.
 
-Integration tests require Tier 1 to be running on port 3000.
+### Writing new tests
+
+Test files follow the `*.test.js` naming convention and live under `tests/`. Unit tests go in `tests/unit/`; integration tests go in `tests/api-integration.test.js` or alongside it. The project uses ESM imports throughout — use `import` not `require`.
 
 ### Debugging test failures
 
@@ -214,6 +236,22 @@ Enable request/response logging before reproducing:
 # Then restart Tier 1 and reproduce the failure
 # Logs appear in logs/prompt_log_*.log
 ```
+
+---
+
+## Debugging
+
+### PROMPT_LOG_MODE
+
+Set `"PROMPT_LOG_MODE": "file"` in `configs/config.json` to capture full request/response payloads to `logs/prompt_log_*.log`. Useful for diagnosing converter failures, malformed tool-use payloads, and SSE stream corruption.
+
+### proxy-debugger agent
+
+Invoke the `proxy-debugger` custom agent for any 429, 502, auth error, or model ID mismatch across Tier 1 or Tier 2. It runs structured diagnostics across both tiers.
+
+### aiclient-debug skill
+
+Read the `aiclient-debug` skill (`Tier1-AIClient2API/.claude/skills/`) for request tracing, latency analysis, and `ECONNREFUSED` diagnosis patterns.
 
 ---
 
