@@ -1,0 +1,591 @@
+model_list:
+  # ── claude-kiro-oauth ─────────────────────────────────────────────────────
+  # All Kiro models use openai/* prefix to AIClient2API's OpenAI endpoint.
+  # Using anthropic/ prefix would cause LiteLLM to append /v1/messages —
+  # a path that does not exist in AIClient2API. openai/* avoids this entirely.
+  - model_name: "claude-kiro-oauth:claude-opus-4-7"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:claude-opus-4-7"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "claude-kiro-oauth:claude-opus-4-6"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:claude-opus-4-6"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "claude-kiro-oauth:claude-opus-4-5"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:claude-opus-4-5"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "claude-kiro-oauth:claude-sonnet-4-6"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:claude-sonnet-4-6"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "claude-kiro-oauth:claude-sonnet-4-6-thinking"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:claude-sonnet-4-6-thinking"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "claude-kiro-oauth:claude-sonnet-4-5"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:claude-sonnet-4-5"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "claude-kiro-oauth:claude-sonnet-4-5-20250929"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:claude-sonnet-4-5-20250929"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "claude-kiro-oauth:claude-haiku-4-5"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:claude-haiku-4-5"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "claude-kiro-oauth:claude-haiku-4-5-20251001"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:claude-haiku-4-5-20251001"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  # Bare alias — Claude Code sends this versioned ID for subagents/compact/background tasks
+  - model_name: "claude-haiku-4-5-20251001"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:claude-haiku-4-5-20251001"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "claude-kiro-oauth:claude-sonnet-4-0"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:claude-sonnet-4-0"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  # Bare alias — Claude Code may send this versioned ID
+  - model_name: "claude-sonnet-4-0"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:claude-sonnet-4-0"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "claude-kiro-oauth:claude-opus-4-5-20251101"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:claude-opus-4-5-20251101"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  # Bare alias — Claude Code may send this versioned ID
+  - model_name: "claude-opus-4-5-20251101"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:claude-opus-4-5-20251101"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "claude-kiro-oauth:deepseek-3.2"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:deepseek-3.2"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "claude-kiro-oauth:deepseek-3-2"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:deepseek-3-2"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "claude-kiro-oauth:minimax-m2.5"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:minimax-m2.5"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "claude-kiro-oauth:minimax-m2-5"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:minimax-m2-5"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "claude-kiro-oauth:glm-5"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:glm-5"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "claude-kiro-oauth:minimax-m2.1"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:minimax-m2.1"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "claude-kiro-oauth:minimax-m2-1"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:minimax-m2-1"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "claude-kiro-oauth:qwen3-coder-next"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:qwen3-coder-next"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  # ── gemini-antigravity ────────────────────────────────────────────────────
+  - model_name: "gemini-antigravity:gemini-3.1-pro-high"
+    litellm_params:
+      model: "openai/gemini-antigravity:gemini-3.1-pro-high"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "gemini-antigravity:gemini-3.1-pro-low"
+    litellm_params:
+      model: "openai/gemini-antigravity:gemini-3.1-pro-low"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "gemini-antigravity:gemini-3-flash"
+    litellm_params:
+      model: "openai/gemini-antigravity:gemini-3-flash"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "gemini-antigravity:gemini-3-flash-agent"
+    litellm_params:
+      model: "openai/gemini-antigravity:gemini-3-flash-agent"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "gemini-antigravity:gemini-3.1-flash-image"
+    litellm_params:
+      model: "openai/gemini-antigravity:gemini-3.1-flash-image"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "gemini-antigravity:gemini-2.5-flash"
+    litellm_params:
+      model: "openai/gemini-antigravity:gemini-2.5-flash"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "gemini-antigravity:gemini-2.5-flash-lite"
+    litellm_params:
+      model: "openai/gemini-antigravity:gemini-2.5-flash-lite"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "gemini-antigravity:gemini-2.5-flash-thinking"
+    litellm_params:
+      model: "openai/gemini-antigravity:gemini-2.5-flash-thinking"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "gemini-antigravity:gemini-3.5-flash-low"
+    litellm_params:
+      model: "openai/gemini-antigravity:gemini-3.5-flash-low"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "gemini-antigravity:gemini-3.5-flash-high"
+    litellm_params:
+      model: "openai/gemini-antigravity:gemini-3.5-flash-high"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "gemini-antigravity:gemini-claude-sonnet-4-6"
+    litellm_params:
+      model: "openai/gemini-antigravity:gemini-claude-sonnet-4-6"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  # Short alias — lets /model gemini-claude-sonnet-4-6 work without the provider prefix
+  - model_name: "gemini-claude-sonnet-4-6"
+    litellm_params:
+      model: "openai/gemini-antigravity:gemini-claude-sonnet-4-6"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "gemini-antigravity:gemini-claude-opus-4-6-thinking"
+    litellm_params:
+      model: "openai/gemini-antigravity:gemini-claude-opus-4-6-thinking"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  # Short alias — lets /model gemini-claude-opus-4-6-thinking work without the provider prefix
+  - model_name: "gemini-claude-opus-4-6-thinking"
+    litellm_params:
+      model: "openai/gemini-antigravity:gemini-claude-opus-4-6-thinking"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  # ── gemini-cli-oauth ──────────────────────────────────────────────────────
+  - model_name: "gemini-cli-oauth:gemini-3.1-pro-preview"
+    litellm_params:
+      model: "openai/gemini-cli-oauth:gemini-3.1-pro-preview"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "gemini-cli-oauth:gemini-2.5-pro"
+    litellm_params:
+      model: "openai/gemini-cli-oauth:gemini-2.5-pro"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "gemini-cli-oauth:gemini-2.5-flash"
+    litellm_params:
+      model: "openai/gemini-cli-oauth:gemini-2.5-flash"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "gemini-cli-oauth:gemini-2.5-flash-lite"
+    litellm_params:
+      model: "openai/gemini-cli-oauth:gemini-2.5-flash-lite"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "gemini-cli-oauth:gemini-3-flash-preview"
+    litellm_params:
+      model: "openai/gemini-cli-oauth:gemini-3-flash-preview"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "gemini-cli-oauth:gemini-3.1-flash-lite-preview"
+    litellm_params:
+      model: "openai/gemini-cli-oauth:gemini-3.1-flash-lite-preview"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "gemini-cli-oauth:gemini-3.5-flash"
+    litellm_params:
+      model: "openai/gemini-cli-oauth:gemini-3.5-flash"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  # ── openai-codex-oauth ────────────────────────────────────────────────────
+  - model_name: "openai-codex-oauth:gpt-5.5"
+    litellm_params:
+      model: "openai/openai-codex-oauth:gpt-5.5"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "openai-codex-oauth:gpt-5.4"
+    litellm_params:
+      model: "openai/openai-codex-oauth:gpt-5.4"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "openai-codex-oauth:gpt-5.4-mini"
+    litellm_params:
+      model: "openai/openai-codex-oauth:gpt-5.4-mini"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "openai-codex-oauth:gpt-5.3-codex"
+    litellm_params:
+      model: "openai/openai-codex-oauth:gpt-5.3-codex"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "openai-codex-oauth:gpt-5.2"
+    litellm_params:
+      model: "openai/openai-codex-oauth:gpt-5.2"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  # ── nvidia-nim ───────────────────────────────────────────────────────────
+  - model_name: "nvidia-nim:nvidia/llama-3.3-nemotron-super-49b-v1.5"
+    litellm_params:
+      model: "openai/nvidia-nim:nvidia/llama-3.3-nemotron-super-49b-v1.5"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "nvidia-nim:nvidia/llama-3.3-nemotron-super-49b-v1"
+    litellm_params:
+      model: "openai/nvidia-nim:nvidia/llama-3.3-nemotron-super-49b-v1"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "nvidia-nim:meta/llama-4-maverick-17b-128e-instruct"
+    litellm_params:
+      model: "openai/nvidia-nim:meta/llama-4-maverick-17b-128e-instruct"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "nvidia-nim:meta/llama-3.3-70b-instruct"
+    litellm_params:
+      model: "openai/nvidia-nim:meta/llama-3.3-70b-instruct"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "nvidia-nim:moonshotai/kimi-k2.6"
+    litellm_params:
+      model: "openai/nvidia-nim:moonshotai/kimi-k2.6"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "nvidia-nim:mistralai/mistral-small-4-119b-2603"
+    litellm_params:
+      model: "openai/nvidia-nim:mistralai/mistral-small-4-119b-2603"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "nvidia-nim:openai/gpt-oss-120b"
+    litellm_params:
+      model: "openai/nvidia-nim:openai/gpt-oss-120b"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  # ── github-models ─────────────────────────────────────────────────────────
+  - model_name: "github-models:gpt-4o"
+    litellm_params:
+      model: "openai/github-models:gpt-4o"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "github-models:gpt-4o-mini"
+    litellm_params:
+      model: "openai/github-models:gpt-4o-mini"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "github-models:gpt-4.1"
+    litellm_params:
+      model: "openai/github-models:gpt-4.1"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "github-models:gpt-4.1-mini"
+    litellm_params:
+      model: "openai/github-models:gpt-4.1-mini"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "github-models:gpt-4.1-nano"
+    litellm_params:
+      model: "openai/github-models:gpt-4.1-nano"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "github-models:DeepSeek-R1"
+    litellm_params:
+      model: "openai/github-models:DeepSeek-R1"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "github-models:DeepSeek-V3-0324"
+    litellm_params:
+      model: "openai/github-models:DeepSeek-V3-0324"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "github-models:Meta-Llama-3.1-405B-Instruct"
+    litellm_params:
+      model: "openai/github-models:Meta-Llama-3.1-405B-Instruct"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "github-models:Meta-Llama-3.1-8B-Instruct"
+    litellm_params:
+      model: "openai/github-models:Meta-Llama-3.1-8B-Instruct"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "github-models:Phi-4"
+    litellm_params:
+      model: "openai/github-models:Phi-4"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  # ── openai-custom (OpenRouter pass-through) ───────────────────────────────
+  - model_name: "openai-custom:openai/gpt-oss-20b:free"
+    litellm_params:
+      model: "openai/openai-custom:openai/gpt-oss-20b:free"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "openai-custom:deepseek/deepseek-v4-flash:free"
+    litellm_params:
+      model: "openai/openai-custom:deepseek/deepseek-v4-flash:free"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "openai-custom:nvidia/nemotron-3-super-120b-a12b:free"
+    litellm_params:
+      model: "openai/openai-custom:nvidia/nemotron-3-super-120b-a12b:free"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "openai-custom:nvidia/nemotron-3-nano-30b-a3b:free"
+    litellm_params:
+      model: "openai/openai-custom:nvidia/nemotron-3-nano-30b-a3b:free"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  # ── Short-name aliases (what claude-pick injects as --model) ──────────────
+  # CRITICAL: these model_name strings must exactly match what fallback chains
+  # reference below — character-for-character identical.
+  # Kiro versioned names — each maps to the specific Kiro model
+  - model_name: "claude-opus-4-7"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:claude-opus-4-7"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "claude-opus-4-6"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:claude-opus-4-6"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "claude-opus-4-5"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:claude-opus-4-5"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "claude-sonnet-4-6"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:claude-sonnet-4-6"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "claude-sonnet-4-6-thinking"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:claude-sonnet-4-6-thinking"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "claude-sonnet-4-5"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:claude-sonnet-4-5"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "claude-sonnet-4-5-20250929"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:claude-sonnet-4-5-20250929"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "claude-haiku-4-5"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:claude-haiku-4-5"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  # Generic tier-level aliases for fallback chains
+  - model_name: "claude-opus"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:claude-opus-4-7"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "claude-sonnet"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:claude-sonnet-4-6"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "claude-haiku"
+    litellm_params:
+      model: "openai/claude-kiro-oauth:claude-haiku-4-5"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "gemini-pro"
+    litellm_params:
+      model: "openai/gemini-antigravity:gemini-3.1-pro-high"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "gemini-flash"
+    litellm_params:
+      model: "openai/gemini-antigravity:gemini-3-flash"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "gemini-2.5-pro"
+    litellm_params:
+      model: "openai/gemini-cli-oauth:gemini-2.5-pro"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "gemini-2.5-flash"
+    litellm_params:
+      model: "openai/gemini-cli-oauth:gemini-2.5-flash"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+  - model_name: "gpt-5"
+    litellm_params:
+      model: "openai/openai-codex-oauth:gpt-5.5"
+      api_base: "http://127.0.0.1:3000/v1"
+      api_key: "os.environ/AICLIENT_TOKEN"
+
+router_settings:
+  routing_strategy: "usage-based-routing-v2"
+  num_retries: 3
+  retry_after: 1
+  timeout: 120
+  allowed_fails: 2
+  retry_policy:
+    AuthenticationErrorRetries: 0     # 401s surface immediately — never retry auth failures
+    RateLimitErrorRetries: 3
+    TimeoutErrorRetries: 2
+    ServiceUnavailableErrorRetries: 3
+  fallbacks:
+    # Level-3 descending chains — never upgrade tier
+    # Each key must exactly match a model_name entry above
+    - "claude-opus": ["claude-sonnet", "claude-haiku"]
+    - "claude-sonnet": ["claude-haiku"]
+    # Versioned bare names — Claude Code sends these directly (e.g. /model claude-sonnet-4-6)
+    # Without these entries LiteLLM logs "No fallback model group found" and surfaces raw errors
+    - "claude-opus-4-7": ["claude-sonnet-4-6", "claude-haiku-4-5"]
+    - "claude-opus-4-6": ["claude-sonnet-4-6", "claude-haiku-4-5"]
+    - "claude-opus-4-5": ["claude-sonnet-4-6", "claude-haiku-4-5"]
+    - "claude-sonnet-4-6": ["claude-haiku-4-5"]
+    - "claude-sonnet-4-6-thinking": ["claude-sonnet-4-6", "claude-haiku-4-5"]
+    - "claude-sonnet-4-5": ["claude-haiku-4-5"]
+    - "claude-sonnet-4-5-20250929": ["claude-haiku-4-5"]
+    - "claude-sonnet-4-0": ["claude-haiku-4-5"]
+    - "gemini-pro": ["gemini-flash"]
+    - "gemini-2.5-pro": ["gemini-pro", "gemini-flash"]
+    - "gpt-5": ["openai-codex-oauth:gpt-5.4", "openai-codex-oauth:gpt-5.2"]
+    # ── github-models — small-context Azure endpoint frequently 413s on Claude Code's
+    # full tool schema. Fall back to NVIDIA NIM (larger context) then claude-haiku.
+    - "github-models:gpt-4o-mini": ["nvidia-nim:meta/llama-3.3-70b-instruct", "claude-haiku"]
+    - "github-models:gpt-4o": ["nvidia-nim:meta/llama-3.3-70b-instruct", "claude-haiku"]
+    - "github-models:gpt-4.1": ["nvidia-nim:meta/llama-3.3-70b-instruct", "claude-haiku"]
+    - "github-models:gpt-4.1-mini": ["nvidia-nim:meta/llama-3.3-70b-instruct", "claude-haiku"]
+    - "github-models:gpt-4.1-nano": ["nvidia-nim:meta/llama-3.3-70b-instruct", "claude-haiku"]
+    - "github-models:DeepSeek-R1": ["nvidia-nim:meta/llama-3.3-70b-instruct", "claude-haiku"]
+    - "github-models:DeepSeek-V3-0324": ["nvidia-nim:meta/llama-3.3-70b-instruct", "claude-haiku"]
+    - "github-models:Meta-Llama-3.1-405B-Instruct": ["nvidia-nim:meta/llama-3.3-70b-instruct", "claude-haiku"]
+    - "github-models:Meta-Llama-3.1-8B-Instruct": ["nvidia-nim:meta/llama-3.3-70b-instruct", "claude-haiku"]
+    - "github-models:Phi-4": ["nvidia-nim:meta/llama-3.3-70b-instruct", "claude-haiku"]
+    # ── openai-custom — OpenRouter free-tier; subject to 402/credit limits.
+    # Fall back to equivalent NVIDIA NIM model (no auth cost) then claude-haiku.
+    - "openai-custom:openai/gpt-oss-20b:free": ["nvidia-nim:openai/gpt-oss-120b", "claude-haiku"]
+    - "openai-custom:deepseek/deepseek-v4-flash:free": ["nvidia-nim:meta/llama-3.3-70b-instruct", "claude-haiku"]
+    - "openai-custom:nvidia/nemotron-3-super-120b-a12b:free": ["nvidia-nim:nvidia/llama-3.3-nemotron-super-49b-v1.5", "claude-haiku"]
+    - "openai-custom:nvidia/nemotron-3-nano-30b-a3b:free": ["nvidia-nim:nvidia/llama-3.3-nemotron-super-49b-v1.5", "claude-haiku"]
+
+litellm_settings:
+  drop_params: false
+  set_verbose: false
+  stream_timeout: 600
+  request_timeout: 600
+  response_headers:
+    X-Accel-Buffering: "no"
+
+general_settings:
+  port: 4000
+  # CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY is set as a shell env var
+  # in _ensure_gateways (~/dotfiles/zsh/zshrc) before LiteLLM starts — not here
