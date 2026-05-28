@@ -1,6 +1,7 @@
 ---
 phase: 01-fix-remaining-tool-use-failures
 reviewed: 2026-05-28T00:00:00Z
+fixed: 2026-05-28T00:00:00Z
 depth: deep
 files_reviewed: 7
 files_reviewed_list:
@@ -16,7 +17,16 @@ findings:
   warning: 8
   info: 4
   total: 17
-status: issues_found
+fixed:
+  critical: 5
+  warning: 3
+  info: 0
+  total: 8
+open:
+  warning: 5
+  info: 4
+  total: 9
+status: partially_fixed
 ---
 
 # Phase 01: Code Review Report — Deep
