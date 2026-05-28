@@ -106,6 +106,7 @@ Do NOT create handoffs for routine fixes, configuration tweaks, or single-file c
 - [Architecture & Key Files](docs/ARCHITECT_REFERENCE.md)
 - [Debugging & Triage](docs/DEBUGGING.md)
 - [Maintenance & Upstream Merges](docs/MAINTENANCE.md)
+- [Upstream source](https://github.com/justlovemaki/AIClient2API) — check before applying upstream merges
 
 ## Documentation Routing
 

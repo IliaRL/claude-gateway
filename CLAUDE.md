@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Purpose
 
-This repo is the **master configuration and source tree** for a 3-tier AI gateway that routes Claude Code CLI through any external AI provider. Read `ULTIMATE-GOAL.MD` first for the full requirements spec. Consult `Model-Guide.md` before any architectural decision about model IDs, provider routing, or repository structure.
+This repo is the **master configuration and source tree** for a 3-tier AI gateway that routes Claude Code CLI through any external AI provider. Read `docs/ULTIMATE-GOAL.md` first for the full requirements spec. Consult `docs/Model-Guide.md` before any architectural decision about model IDs, provider routing, or repository structure.
 
 ---
 
@@ -24,8 +24,14 @@ MASTER-C/
 │   └── openai-custom/
 ├── Tier1-AIClient2API/   # Node.js proxy — connects to external providers
 ├── Tier2-LiteLLM/        # Python gateway — formats payloads for Claude Code CLI
-├── Model-Guide.md        # Master reference: model IDs, provider strings, docs links
-└── ULTIMATE-GOAL.MD      # Full architecture spec and requirements
+└── docs/                 # Architecture specs, best practices, routing guides
+    ├── AIClient-BP.md                  # AIClient2API best practices and validated patterns
+    ├── ANTHROPIC_GATEWAY_SPEC.md       # Saved official Claude Code LLM gateway spec
+    ├── Architecture-and-Proxy-Integration.md  # Env vars, SSE rules, header pass-through
+    ├── LiteLLM-BP.md                   # LiteLLM gateway best practices
+    ├── Model-Guide.md                  # Master reference: model IDs, provider strings
+    ├── Troubleshooting-and-Fixes.md    # Known issues registry with root causes and fixes
+    └── ULTIMATE-GOAL.md                # Full architecture spec and requirements
 ```
 
 ---
@@ -147,20 +153,6 @@ Claude Code CLI  →  Tier 3 (ZSH env injection)
 
 ---
 
-## Three-Level Fallback (Required)
-
-1. **Vertical rotation** — exhaust all account credentials for the selected model on the primary provider
-2. **Horizontal rotation** — if the primary provider fails, exhaust all accounts for that model across other providers
-3. **Tiered downgrade** — after all providers fail for the selected model, silently fall back to the next lower-tier model (Opus → Sonnet → Flash); never upgrade
-
----
-
-## Cockpit Quota Module (Tier 1)
-
-Polls `http://127.0.0.1:18081/report?token=C-Code-CLI-Model-API` on a sub-10-minute interval. Parses the plain-text Markdown table (accounts, models, quota percentages) and exposes a synchronous penalty scoring function to the load balancer. Filesystem fallback reads from `~/.antigravity_cockpit/accounts.json` and `~/.antigravity_cockpit/accounts/`.
-
----
-
 ## Package Manager
 
 Use **`pnpm`** for all Node.js dependency installation and builds. Never use `npm install` in this project.
@@ -169,7 +161,27 @@ Use **`pnpm`** for all Node.js dependency installation and builds. Never use `np
 
 ## Model ID Reference
 
-Exact model strings per provider are in `Model-Guide.md` Part 3. The `model:` value in `litellm_config.yaml` must exactly match the provider adapter's internal model map in `src/providers/provider-models.js` — mismatches are the #1 source of silent 404s.
+Exact model strings per provider are in `docs/Model-Guide.md` Part 3. The `model:` value in `litellm_config.yaml` must exactly match the provider adapter's internal model map in `src/providers/provider-models.js` — mismatches are the #1 source of silent 404s.
+
+---
+
+## Reference Docs
+
+| Document | Purpose |
+|---|---|
+| `docs/ULTIMATE-GOAL.md` | Full architecture spec and requirements |
+| `docs/Model-Guide.md` | Canonical model IDs, provider strings, context windows |
+| `docs/AIClient-BP.md` | AIClient2API best practices and validated patterns |
+| `docs/LiteLLM-BP.md` | LiteLLM gateway best practices |
+| `docs/Architecture-and-Proxy-Integration.md` | Env vars, SSE buffering rules, header pass-through spec |
+| `docs/Troubleshooting-and-Fixes.md` | Known issues registry — root causes, affected files, fix status |
+| `docs/ANTHROPIC_GATEWAY_SPEC.md` | Saved official Claude Code LLM gateway spec — wire protocol, header forwarding, model discovery format |
+| [Claude Code LLM Gateway docs](https://code.claude.com/docs/en/llm-gateway) | Live official spec — always-current source of truth for gateway requirements |
+| [Claude Code docs index](https://code.claude.com/docs/llms.txt) | Full documentation index — use via context7 MCP to look up any Claude Code feature or protocol detail |
+| [BerriAI/litellm](https://github.com/BerriAI/litellm) | Upstream LiteLLM source — check before modifying Tier 2 source code |
+| [justlovemaki/AIClient2API](https://github.com/justlovemaki/AIClient2API) | Upstream AIClient2API source — check before applying upstream merges to Tier 1 |
+
+**Standing rule:** For any question about Claude Code wire protocol, LLM gateway requirements, SSE streaming spec, tool-use schema, or official model IDs — fetch the relevant page from the docs index above (via context7 or `mcp__fetch__fetch`) before answering. The live docs are the source of truth; training knowledge may be stale.
 
 ---
 
@@ -231,7 +243,7 @@ Full `aiclient-*` skill suite covering every operational concern:
 - **`anthropic-skills:aiclient2api` does not exist** — the correct operational skill is `proxy-repair` at `~/.claude/skills/proxy-repair`.
 - **Kiro identity override:** Kiro occasionally responds as "Kiro" or "Amazon Q" on the first request in a session. The identity override prompt in `configs/input_system_prompt.txt` appends correctly but Kiro's internal system prompt can win on the first call. Pre-existing Kiro behavior, not a config bug. Subsequent calls in the same session return correct identity.
 
-# CLAUDE.md
+---
 
 Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
 
