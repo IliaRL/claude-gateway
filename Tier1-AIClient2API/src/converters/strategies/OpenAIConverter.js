@@ -578,14 +578,9 @@ export class OpenAIConverter extends BaseConverter {
             for (const toolCall of delta.tool_calls) {
                 const openaiIdx = toolCall.index ?? 0;
 
-                if (toolCall.function?.name) {
-                    // New tool call starting: close any open text/thinking block first.
-                    if (state.blockStarted && state.currentBlockType !== 'tool_use') {
-                        events.push({ type: "content_block_stop", index: state.blockIndex });
-                        state.blockIndex++;
-                        state.blockStarted = false;
-                    } else if (state.blockStarted && state.toolIndexMap.has(openaiIdx)) {
-                        // Parallel tool: close previous tool block before opening next.
+                if (toolCall.function?.name && !state.toolIndexMap.has(openaiIdx)) {
+                    // Close whatever block was open previously (text block OR previous parallel tool).
+                    if (state.blockStarted) {
                         events.push({ type: "content_block_stop", index: state.blockIndex });
                         state.blockIndex++;
                         state.blockStarted = false;
