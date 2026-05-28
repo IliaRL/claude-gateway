@@ -1140,6 +1140,9 @@ export async function handleModelListRequest(req, res, service, endpointType, CO
                             if (customConfig.contextLength) modelResponse.context_length = customConfig.contextLength;
                             if (customConfig.maxTokens) modelResponse.max_tokens = customConfig.maxTokens;
                             if (customConfig.description) modelResponse.description = customConfig.description;
+                        } else if (MODEL_CONTEXT_WINDOWS[modelId]) {
+                            // 注入默认模型上下文长度
+                            modelResponse.context_length = MODEL_CONTEXT_WINDOWS[modelId];
                         }
 
                         return modelResponse;
