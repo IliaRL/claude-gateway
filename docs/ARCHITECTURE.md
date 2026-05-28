@@ -43,8 +43,6 @@ External Provider
      NVIDIA NIM, OpenRouter, iFlow, Qwen)
 ```
 
-**Current operational note:** `claude-proxy` mode sets `ANTHROPIC_BASE_URL=http://127.0.0.1:3000`, routing Claude Code directly to Tier 1. LiteLLM (port 4000) still runs and is healthy, but is not in the active Claude Code request path — it was bypassed to eliminate SSE stream corruption caused by LiteLLM re-wrapping streaming chunks.
-
 ---
 
 ## Component Diagram
@@ -80,11 +78,14 @@ External Provider
 │  │  Level 1: vertical account rotation                  │   │
 │  │  Level 2: horizontal provider rotation               │   │
 │  │  Cockpit quota tracking + penalty scoring            │   │
+│  │  getCachedAvailableModels() — 30s TTL model list     │   │
 │  └──────────────────────────────────────────────────────┘   │
 │  ┌──────────────────────────────────────────────────────┐   │
 │  │  converters/ & convert/   (format translation)       │   │
 │  │  auth/                    (key injection/validation) │   │
 │  │  handlers/request-handler.js                         │   │
+│  │  utils/request-handlers.js (Gemini format detection) │   │
+│  │  services/response-cache.js (provider-prefixed keys) │   │
 │  └──────────────────────────────────────────────────────┘   │
 └──────────────────────┬──────────────────────────────────────┘
                        │ Native provider API calls
@@ -115,7 +116,7 @@ Required env vars injected into every Claude Code session:
 
 | Variable | Value | Purpose |
 |---|---|---|
-| `ANTHROPIC_BASE_URL` | `http://127.0.0.1:4000` (or `:3000` in direct mode) | Routes CLI to proxy |
+| `ANTHROPIC_BASE_URL` | `http://127.0.0.1:4000` | Routes CLI to Tier 2 (LiteLLM) |
 | `ENABLE_TOOL_SEARCH` | `true` | Restores Tool Search disabled by non-Anthropic base URLs |
 | `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` | Allows `/v1/models` discovery from LiteLLM |
 
@@ -188,7 +189,7 @@ Key responsibilities:
 | `core/config-manager.js` | Loads and validates config at startup |
 | `core/plugin-manager.js` | Provider plugin orchestration |
 | `providers/provider-models.js` | Canonical model ID map — the source of truth for valid model strings |
-| `providers/provider-pool-manager.js` | Account pool load-balancing and cooldown state |
+| `providers/provider-pool-manager.js` | Account pool load-balancing, cooldown state, and 30s TTL model list cache |
 | `providers/claude/` | Kiro/Claude provider adapter |
 | `providers/gemini/` | Gemini CLI and Antigravity adapters |
 | `providers/openai/` | OpenAI Codex adapter |
@@ -198,6 +199,8 @@ Key responsibilities:
 | `converters/` and `convert/` | Format translation between OpenAI spec and native provider APIs |
 | `auth/` | API key injection and validation |
 | `services/api-server.js` | Standalone API server entrypoint |
+| `services/response-cache.js` | Response cache with provider-protocol-prefixed keys |
+| `utils/request-handlers.js` | Gemini-protocol format detection and OpenAI → Gemini response conversion |
 | `utils/` | Error formatters and logging |
 
 ### Tier 1 — `Tier1-AIClient2API/configs/`
@@ -252,9 +255,11 @@ Tier 2 — Level 3: Tiered Downgrade
 | Abstraction | Location | Description |
 |---|---|---|
 | Model ID map | `src/providers/provider-models.js` | Canonical source of truth for all valid model strings per provider. LiteLLM model strings must exactly match entries here. |
-| Provider pool manager | `src/providers/provider-pool-manager.js` | Manages multi-account credential pools, cooldown state, and penalty scoring. |
+| Provider pool manager | `src/providers/provider-pool-manager.js` | Manages multi-account credential pools, cooldown state, penalty scoring, and a 30s TTL cache for available model lists (`getCachedAvailableModels()`). Cache is invalidated on provider health changes. |
 | Request handler | `src/handlers/request-handler.js` | Exposes the OpenAI-compatible `/v1/chat/completions` endpoint that LiteLLM targets. |
 | Format converters | `src/converters/` and `src/convert/` | Translate between OpenAI spec and native provider wire formats. Most format errors originate here. |
+| Response cache | `src/services/response-cache.js` | Caches responses with cache keys prefixed by provider protocol (e.g., `gemini:sha256hash`). Prefix isolation prevents OpenAI-format cached responses from being served to Gemini-protocol callers for the same model and content. |
+| Gemini format detection | `src/utils/request-handlers.js` | Detects when a Gemini-protocol caller would receive an OpenAI-format response due to protocol prefix collision (`gemini` and `gemini-cli-oauth` both resolve to `gemini`). Explicitly converts via `OpenAIConverter.toGeminiResponse()` before responding. |
 | LiteLLM router | `litellm/router.py` (Tier 2 source) | Multi-model routing, load balancing, and Level 3 downgrade fallback logic. |
 | LiteLLM config | `Tier2-LiteLLM/litellm_config.yaml` | Declares all 85 model entries, their `openai/` prefixed routing strings, and the fallback chain. |
 | Credentials | `Credentials/` (repo root) | One subfolder per provider. Never hardcode credentials elsewhere. |
@@ -283,6 +288,20 @@ Additional tolerance setting: `CLAUDE_CODE_STREAM_DELAY=50` can be exported to a
 | NVIDIA NIM | `forward-custom` | `Credentials/nvidia-nim/` |
 | OpenRouter | `forward-custom` | — |
 | Custom OpenAI-compatible | `openai-custom` | `Credentials/openai-custom/` |
+
+---
+
+## Test Suite
+
+Tier 1 ships 73 tests across 8 suites, covering unit and integration scenarios for provider adapters, format converters, pool management, and request handling.
+
+```bash
+pnpm test             # all 73 tests
+pnpm run test:unit
+pnpm run test:integration
+pnpm run test:coverage
+pnpm run test:verbose
+```
 
 ---
 

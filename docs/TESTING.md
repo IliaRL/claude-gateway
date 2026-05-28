@@ -49,6 +49,8 @@ Runs all `tests/unit/*.test.js` files:
 | `claude-converter-tool-use.test.js` | Claude format tool-use schema normalization |
 | `gemini-converter-streaming.test.js` | Gemini SSE streaming chunk conversion |
 | `grok-converter-streaming.test.js` | Grok streaming response conversion |
+| `openai-converter-block-dedup.test.js` | REQ-03: `content_block_start` deduplication — same-index duplicate `function.name` chunks emit exactly one block start; parallel tool calls (different indices) each get their own |
+| `openai-converter-gemini-response-json-guard.test.js` | F-03: `toGeminiResponse` with malformed JSON arguments — no `SyntaxError` thrown, valid `candidates` structure returned, tool name preserved |
 | `openai-converter-tool-call-integrity.test.js` | OpenAI tool-call ID and name buffering |
 | `openai-converter-tool-use.test.js` | OpenAI tool-use round-trip fidelity |
 
@@ -101,7 +103,7 @@ cd Tier1-AIClient2API
 TEST_SERVER_BASE_URL=http://127.0.0.1:3000 TEST_API_KEY=$AICLIENT_TOKEN pnpm test tests/api-integration.test.js
 ```
 
-`TEST_SERVER_BASE_URL` defaults to `http://127.0.0.1:3000` if unset. `TEST_API_KEY` defaults to the value in the test file if `AICLIENT_TOKEN` is not exported.
+`TEST_SERVER_BASE_URL` defaults to `http://127.0.0.1:3000` if unset. `TEST_API_KEY` defaults to `process.env.AICLIENT_TOKEN` (set by `~/dotfiles/zsh/zshrc`) if not passed explicitly. Any CI environment running integration tests must export `AICLIENT_TOKEN`.
 
 ---
 
@@ -142,7 +144,7 @@ cd Tier1-AIClient2API
 bash scripts/validate-skills.sh
 ```
 
-Asserts that all 62 skill reference points in `Tier1-AIClient2API/.claude/skills/` still point to valid files and line numbers. Run after any refactor that moves or renames source files.
+Asserts that all 73 skill reference points in `Tier1-AIClient2API/.claude/skills/` still point to valid files and line numbers. Run after any refactor that moves or renames source files.
 
 ---
 
@@ -238,7 +240,7 @@ For the canonical test sequence after any non-trivial change:
 
 ## Known Test Gotchas
 
-- **Integration tests require `AICLIENT_TOKEN`** — export it from your shell before running, or pass `TEST_API_KEY` explicitly. The fallback key in the test file may not match the running server's config.
+- **Integration tests require `AICLIENT_TOKEN`** — export it from your shell before running, or pass `TEST_API_KEY` explicitly. `TEST_API_KEY` falls back to `process.env.AICLIENT_TOKEN`; the hardcoded literal fallback was removed. Any CI environment must export this variable.
 - **Concurrent test file** (`tests/concurrent-test.js`) is not part of the Jest run. Execute it directly with `node tests/concurrent-test.js` when stress-testing the pool rotation logic.
 - **Full suite duration** — `unified-test-suite.cjs` tests all 39 models sequentially. Do not run it while the proxy is serving live Claude Code traffic — it consumes quota across all provider pools.
 - **SQLite state can override in-memory pool state** — if a test produces unexpected 429s after restart, check `pool_state.db` for corrupted `modelCooldowns` values (they must be objects, not the string `"[object Object]"`).

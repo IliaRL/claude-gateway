@@ -11,8 +11,8 @@ These variables are injected by the shell layer (`~/dotfiles/zsh/zshrc`) before 
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
-| `AICLIENT_TOKEN` | Required | — | Shared bearer token for Tier 1 and Tier 2. Must match `REQUIRED_API_KEY` in `configs/config.json`. <!-- VERIFY: exact token value --> |
-| `ANTHROPIC_BASE_URL` | Required | — | Set to `http://127.0.0.1:3000` (Tier 1 direct) or `http://127.0.0.1:4000` (via LiteLLM). Controls which tier Claude Code CLI hits. |
+| `AICLIENT_TOKEN` | Required | — | Shared bearer token for Tier 1 and Tier 2. Must match `REQUIRED_API_KEY` in `configs/config.json`. Also used by integration tests (see Testing section below). <!-- VERIFY: exact token value --> |
+| `ANTHROPIC_BASE_URL` | Required | — | Set to `http://127.0.0.1:4000` (via Tier 2 LiteLLM) by `claude-proxy`. Controls which tier Claude Code CLI hits. Can be manually set to `http://127.0.0.1:3000` to route directly to Tier 1, bypassing LiteLLM. |
 | `ANTHROPIC_API_KEY` | Required | — | Set to `$AICLIENT_TOKEN` by `claude-proxy`. Used by Claude Code CLI to authenticate against the gateway. |
 | `CLAUDE_MODEL` | Optional | — | Model ID injected by `claude-pick` / `claude-swap` when selecting a model from the menu. |
 | `ENABLE_TOOL_SEARCH` | Required | — | Must be `true` to restore Claude Code Tool Search capability when using a non-Anthropic base URL. |
@@ -21,6 +21,25 @@ These variables are injected by the shell layer (`~/dotfiles/zsh/zshrc`) before 
 | `CLAUDE_CODE_STREAM_DELAY` | Optional | `0` | Set to `50` (ms) to add jitter tolerance for SSE chunk delivery. Helps with occasional stream parse errors. |
 
 **Setting these variables:** All of the above are set automatically by the `claude-proxy`, `claude-pick`, or `start-proxies` shell functions defined in `~/dotfiles/zsh/zshrc`. Do not set them manually in `.env` files — the shell functions are the single source of truth.
+
+### Testing Environment Variables
+
+Integration tests (`tests/api-integration.test.js`) require an auth token to be present in the environment. There is no hardcoded fallback — if neither variable is set, authenticated test requests will fail.
+
+| Variable | Description |
+|---|---|
+| `AICLIENT_TOKEN` | Primary source. Set automatically by the shell environment if `claude-proxy` has been run. |
+| `TEST_API_KEY` | Alternative override. Takes precedence over `AICLIENT_TOKEN` if both are set. |
+
+Before running `pnpm test`, ensure one of these is exported in your shell session:
+
+```bash
+export AICLIENT_TOKEN="your-token-here"
+# or
+export TEST_API_KEY="your-token-here"
+```
+
+The `TEST_SERVER_BASE_URL` env var defaults to `http://127.0.0.1:3000` if unset — the integration test suite requires Tier 1 to be running at that address.
 
 ---
 
@@ -139,6 +158,10 @@ The config file is loaded at startup. CLI flags override values from the file; t
 |---|---|---|---|
 | `PROVIDER_POOLS_FILE_PATH` | Optional | `null` (runtime fallback applies the path) | Path to the provider pools credential file. **Contains live OAuth tokens — never commit.** |
 | `CUSTOM_MODELS_FILE_PATH` | Optional | `null` (runtime fallback applies the path) | Path to the custom models definition file. Used by the `openai-custom` (OpenRouter) provider. |
+
+### Model List Cache
+
+The `/v1/models` endpoint response is cached in memory by `provider-pool-manager.js` for up to 30 seconds. The cache is auto-invalidated on any pool health change (account added, removed, or flagged as unhealthy). There is no configuration knob for this TTL — it is hardcoded in the pool manager source.
 
 ### Minimal Working Config
 
@@ -276,14 +299,14 @@ Rules enforced by configuration:
 
 ### LiteLLM Settings
 
-Configured under `litellm_settings:`:
+Configured under `litellm_settings:` in `litellm_config.yaml`:
 
 | Key | Value | Description |
 |---|---|---|
-| `drop_params` | `false` | Do not silently strip unknown parameters — surface mismatches as errors. |
+| `drop_params` | `false` | Preserve all request parameters — never silently strip tool schemas or nested params. Surface mismatches as errors rather than hiding them. |
 | `set_verbose` | `false` | Disable LiteLLM verbose logging in production. |
 | `stream_timeout` | `600` | SSE stream timeout in seconds (10 minutes — supports long agentic loops). |
-| `request_timeout` | `600` | Total request timeout in seconds. |
+| `request_timeout` | `600` | Total request timeout in seconds. Matches `stream_timeout` to prevent premature connection closes on long streaming responses. |
 | `response_headers.X-Accel-Buffering` | `"no"` | Disables NGINX/proxy buffering on all responses. Required to prevent SSE chunk concatenation and JSON corruption during tool-use streaming. |
 
 ### General Settings
@@ -314,11 +337,11 @@ This file holds the full list of rotating accounts for each provider. It is the 
 
 ## Active Routing Mode
 
-**Current operational mode:** Claude Code CLI routes directly to Tier 1 (`ANTHROPIC_BASE_URL=http://127.0.0.1:3000`). LiteLLM (Tier 2, port 4000) is running and healthy but is not in the active Claude Code request path. It was bypassed to eliminate SSE stream corruption caused by LiteLLM re-wrapping streaming chunks.
+**Current operational mode:** `claude-proxy` sets `ANTHROPIC_BASE_URL=http://127.0.0.1:4000`, routing Claude Code CLI through Tier 2 (LiteLLM) before reaching Tier 1.
 
 To switch between modes:
-- `claude-proxy` — sets `ANTHROPIC_BASE_URL=http://127.0.0.1:3000` (direct to Tier 1)
-- To route via Tier 2 — manually set `ANTHROPIC_BASE_URL=http://127.0.0.1:4000` in the shell session
+- `claude-proxy` — sets `ANTHROPIC_BASE_URL=http://127.0.0.1:4000` (via Tier 2 LiteLLM, the active path)
+- To route directly to Tier 1, bypassing LiteLLM — manually set `ANTHROPIC_BASE_URL=http://127.0.0.1:3000` in the shell session
 
 See `docs/Troubleshooting-and-Fixes.md` before changing the active routing path.
 
