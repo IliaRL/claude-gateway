@@ -36,6 +36,14 @@ audited: 2026-05-28
 
 | Task ID | Plan | Requirement | Test Type | Automated Command | File | Status |
 |---------|------|-------------|-----------|-------------------|------|--------|
+| OPT-01-T1 | — | display_name: every OpenAI-format /v1/models entry starts with "Claude " (Gemini provider) | integration | `pnpm test -- --testPathPattern=api-integration -t "OpenAI /v1/models Gemini"` | `tests/api-integration.test.js` | ✅ green |
+| OPT-01-T2 | — | display_name: every OpenAI-format /v1/models entry starts with "Claude " (OpenAI provider) | integration | `pnpm test -- --testPathPattern=api-integration -t "OpenAI /v1/models OpenAI"` | `tests/api-integration.test.js` | ✅ green |
+| OPT-01-T3 | — | display_name: every OpenAI-format /v1/models entry starts with "Claude " (Claude provider) | integration | `pnpm test -- --testPathPattern=api-integration -t "OpenAI /v1/models Claude"` | `tests/api-integration.test.js` | ✅ green |
+| OPT-01-T4 | — | displayName: every Gemini-format /v1beta/models entry starts with "Claude " | integration | `pnpm test -- --testPathPattern=api-integration -t "Gemini /v1beta/models modelList"` | `tests/api-integration.test.js` | ✅ green |
+| OPT-01-T5 | — | buildFriendlyDisplayName: non-Claude model gets prefix | unit | `pnpm test -- --testPathPattern=request-handlers-display-name` | `tests/unit/request-handlers-display-name.test.js` | ✅ green |
+| OPT-01-T6 | — | buildFriendlyDisplayName: Claude model not double-prefixed | unit | `pnpm test -- --testPathPattern=request-handlers-display-name` | `tests/unit/request-handlers-display-name.test.js` | ✅ green |
+| OPT-01-T7 | — | buildFriendlyDisplayName: -oauth suffix and claude- prefix stripped from provider | unit | `pnpm test -- --testPathPattern=request-handlers-display-name` | `tests/unit/request-handlers-display-name.test.js` | ✅ green |
+| OPT-02-T1 | — | thinking budget floor: manual — send max_tokens=4096 to Antigravity Claude; confirm thinkingConfig not removed | manual | See Manual-Only Verifications | N/A | 📋 manual |
 | 01-01-T1 | 01-01 | REQ-05: Gemini 1M context injection | integration | `pnpm test -- --testPathPattern=api-integration` L486 `/v1/models` | `tests/api-integration.test.js` | ✅ green |
 | 01-01-T2 | 01-01 | REQ-05: LiteLLM SSE buffering config committed | integration | `grep stream_timeout Tier2-LiteLLM/litellm_config.yaml` | `Tier2-LiteLLM/litellm_config.yaml` | ✅ green |
 | 01-01-T3 | 01-01 | REQ-05: Tier 2 SSE passthrough verified | manual | `curl -N -sf http://127.0.0.1:4000/v1/chat/completions` | N/A | ✅ verified |
@@ -56,6 +64,7 @@ audited: 2026-05-28
 | Kiro anthropic-beta header value in outgoing request | REQ-02 | Requires live Kiro endpoint + request capture (mitmproxy) | Start proxy with PROMPT_LOG_MODE=file, issue Kiro tool call, check log for `anthropic-beta: tools-2024-04-04` |
 | LiteLLM SSE X-Accel-Buffering passthrough | REQ-05 | Header check requires HTTP layer inspection | `curl -v http://127.0.0.1:4000/v1/chat/completions` — assert `X-Accel-Buffering: no` in response headers |
 | End-to-end tool loop (10+ tool calls) | REQ-03 | Requires live Claude Code session with sub-agent | Run a deep agentic task (e.g., file-search loop) and confirm no stall or crash after 10 rounds |
+| Thinking budget floor: thinkingConfig preserved on low max_tokens | OPT-02 | Requires live Antigravity endpoint; no mock covers provider-side thinkingConfig silencing | Issue request to Antigravity Claude model with `max_tokens=4096`; enable PROMPT_LOG_MODE=file; confirm `thinkingConfig` key present in logged request |
 
 ---
 
@@ -67,6 +76,16 @@ audited: 2026-05-28
 | Resolved | 3 (F-03 test + REQ-03 dedup test + impl bug fix) |
 | Escalated | 3 (manual-only) |
 | Total tests after phase | 73 (was 62 pre-phase) |
+| All tests green | ✅ |
+
+## Validation Audit 2026-05-28 (post-optimization pass)
+
+| Metric | Count |
+|--------|-------|
+| Gaps found | 8 (display_name behavioral contract untested; thinking budget manual-only) |
+| Resolved | 7 automated (4 integration display_name + 7 unit for buildFriendlyDisplayName — net 80 total) |
+| Escalated | 1 manual-only (OPT-02: thinking budget floor requires live Antigravity endpoint) |
+| Total tests after audit | 80 (was 73 pre-audit) |
 | All tests green | ✅ |
 
 ---
