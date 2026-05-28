@@ -43,12 +43,12 @@ export CLAUDE_CODE_SKIP_BEDROCK_AUTH=1
 
 ---
 
-## Issue 5: Tier 2 SSE Corruption (Active Bypass)
-**Status:** ACTIVE — bypassed, not fixed at source  
-**Symptom:** Streaming responses through LiteLLM (:4000) produce corrupted SSE chunks in Claude Code.  
+## Issue 5: Tier 2 SSE Corruption (Resolved)
+**Status:** FIXED — Tier 2 SSE passthrough verified clean  
+**Symptom:** Streaming responses through LiteLLM (:4000) produced corrupted SSE chunks in Claude Code.  
 **Root Cause:** LiteLLM re-wraps SSE streaming chunks in a way that Claude Code's parser cannot handle under certain tool-use payloads.  
-**Current mitigation:** `ANTHROPIC_BASE_URL=http://127.0.0.1:3000` routes Claude Code directly to Tier 1, bypassing Tier 2 entirely. LiteLLM remains running and healthy for other uses.  
-**To re-enable Tier 2:** Investigate LiteLLM's SSE passthrough config and test with a full tool-use loop before switching `ANTHROPIC_BASE_URL` back to `:4000`.
+**Fix applied (commit a093426):** Added `stream_timeout: 600`, `X-Accel-Buffering: "no"`, and `drop_params: false` to `Tier2-LiteLLM/litellm_config.yaml`. SSE passthrough tested with curl — returns `text/event-stream` with unbroken `data:` lines and no corruption (SSE_PASSTHROUGH: PASS).  
+**Current routing:** `claude-proxy` sets `ANTHROPIC_BASE_URL=http://127.0.0.1:4000`, routing Claude Code through Tier 2 as designed. Both tiers healthy and in the active request path.
 
 ---
 

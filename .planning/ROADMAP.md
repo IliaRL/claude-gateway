@@ -15,9 +15,13 @@
 **Plans:** 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Commit Gemini context window fix + SSE buffering in LiteLLM + restore Tier 2 routing
-- [ ] 01-02-PLAN.md — Fix anthropic-beta header pass-through in claude-kiro.js (tools + thinking betas)
-- [ ] 01-03-PLAN.md — Fix empty-tool-name streaming bug in OpenAIConverter.toClaudeStreamChunk
+- [x] 01-01-PLAN.md — Commit Gemini context window fix + SSE buffering in LiteLLM (756fbd3, a093426)
+- [x] 01-02-PLAN.md — Fix anthropic-beta header pass-through in claude-kiro.js (0187ab7)
+- [x] 01-03-PLAN.md — Fix empty-tool-name streaming bug in OpenAIConverter.toClaudeStreamChunk (39228e9)
+- [x] BUG-1: Fix Gemini /v1beta/ native response format + cache key isolation (ce68821)
+- [x] BUG-2: Fix undici teardown — worker process exits cleanly (e75c505)
+
+**REQ-05 status:** COMPLETE — SSE passthrough verified clean (SSE_PASSTHROUGH: PASS). `claude-proxy` writes `:4000` to settings.json. Both tiers in active request path.
 
 **Success criteria:**
 - Both `:3000` and `:4000` healthy and in active request path
