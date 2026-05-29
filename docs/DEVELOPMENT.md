@@ -16,11 +16,11 @@ Developer guide for working on the 3-Tier AI Gateway. Covers local setup, build 
 
 ### Cloning and installing
 
-Tier 1 source lives at `MASTER-C/AIClient2API/` (its own git repo). `~/AIClient2API` is a **symlink** to it — the same files, so edits via either path are identical. Do not glob or scan inside it — `node_modules` (187 MB) and `.git` (11 MB) live there.
+Tier 1 source lives at `~/MASTER-C/AIClient2API/` — the repo root for all gateway components. Do not glob or scan inside it — `node_modules` (187 MB) lives there and is gitignored.
 
 ```bash
 # Install Tier 1 dependencies (pnpm only — never npm install)
-cd ~/AIClient2API && pnpm install
+cd ~/MASTER-C/AIClient2API && pnpm install
 ```
 
 Tier 2 dependencies are pre-installed in `Tier2-LiteLLM/.venv/` via `uv sync`. **Never recreate this environment** or run `pip install`, `make install-*`, or `uv sync` again. The correct Python binary is already at:
@@ -50,7 +50,7 @@ Never hardcode credential values in source files. `configs/provider_pools.json` 
 
 ## Build Commands
 
-All commands run from inside `AIClient2API/` (i.e., `~/AIClient2API/`).
+All commands run from inside `AIClient2API/` (i.e., `~/MASTER-C/AIClient2API/`).
 
 | Command | Description |
 |---|---|
@@ -93,7 +93,7 @@ node scripts/unified-test-suite.cjs  # all 39 models — runs several minutes
 start-proxies
 
 # Manual Tier 1 start
-cd ~/AIClient2API && pnpm start
+cd ~/MASTER-C/AIClient2API && pnpm start
 
 # Manual Tier 2 start — only after Tier 1 passes health check
 /Users/ilialiston/MASTER-C/Tier2-LiteLLM/.venv/bin/litellm \
@@ -200,8 +200,8 @@ export AICLIENT_TOKEN=your-token-here
 ### Running tests
 
 ```bash
-# All tests (run from ~/AIClient2API)
-cd ~/AIClient2API && pnpm test
+# All tests (run from ~/MASTER-C/AIClient2API)
+cd ~/MASTER-C/AIClient2API && pnpm test
 
 # Unit tests only
 pnpm run test:unit

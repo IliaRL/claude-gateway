@@ -22,7 +22,7 @@ MASTER-C/
 │   ├── nvidia-nim/
 │   ├── openai-codex-oauth/
 │   └── openai-custom/
-├── AIClient2API/         # Node.js proxy — connects to external providers (symlinked at ~/AIClient2API)
+├── AIClient2API/         # Node.js proxy — connects to external providers (Tier 1, port 3000)
 ├── Tier2-LiteLLM/        # Python gateway — formats payloads for Claude Code CLI
 └── docs/                 # Architecture specs, best practices, routing guides
     ├── AIClient-BP.md                  # AIClient2API best practices and validated patterns

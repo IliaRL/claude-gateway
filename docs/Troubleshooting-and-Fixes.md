@@ -95,6 +95,19 @@ export CLAUDE_CODE_SKIP_BEDROCK_AUTH=1
 
 ---
 
+## Issue 11: Tool-Use Reliability in Proxy Mode (open investigation)
+**Status:** OPEN — root causes identified; fixes partially applied; full resolution pending.  
+**Symptom:** When routing through the proxy, agents may silently stop calling tools mid-task, call fewer tools than expected, or stall in agentic loops. Model responses look normal.  
+**Root causes (from `Known-Errors/tool_failure_root_cause.md` investigation):**  
+1. **`ENABLE_TOOL_SEARCH` not reliably active** — placing it in `settings.json` is documented as unreliable for this var. Must also be a global shell export in `zshrc` (alongside other `AICLIENT_*` exports), not only inline at `claude-pick` call sites. Affects subagent spawning, IDE sessions, and `--resume` paths.  
+2. **`anthropic-beta` header pass-through unaudited** — for Kiro (real Anthropic endpoint), `anthropic-beta` and `anthropic-version` headers must be forwarded verbatim; verify `src/handlers/request-handler.js` and provider adapters don't strip them. For non-Anthropic providers, headers must be stripped outbound but response translator must synthesize correct Anthropic-format capability blocks.  
+3. **Empty tool-name streaming bug** — FIXED (WR-04/05 in Phase 2, 2026-05-29): converter now buffers tool-call chunks and only emits `content_block_start` once per `index`.  
+4. **`drop_params: true` in LiteLLM** — FIXED (Issue 2): removed global `drop_params`.  
+**Fix 1 (quick, low-risk):** Add `export ENABLE_TOOL_SEARCH=true` as a true shell export in `~/dotfiles/zsh/zshrc`, not just inline at `claude-pick`. Currently only inline injection.  
+**Fix 2 (audit needed):** Read `src/handlers/request-handler.js` to verify `anthropic-beta` is forwarded for Kiro and stripped + re-synthesized for other providers.
+
+---
+
 ## Diagnostic Quick Reference
 
 ```bash

@@ -12,9 +12,6 @@ Credentials/
 .DS_Store
 .metadata_never_index
 
-# Tier1 — AIClient2API is its own git repo (symlinked at ~/AIClient2API); versioned independently, not tracked here
-AIClient2API/
-
 # Tier2 LiteLLM — only track litellm_config.yaml; everything else is upstream source
 Tier2-LiteLLM/*
 !Tier2-LiteLLM/litellm_config.yaml

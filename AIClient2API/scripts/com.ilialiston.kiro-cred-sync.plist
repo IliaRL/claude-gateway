@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.ilialiston.kiro-cred-sync</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/homebrew/bin/python3</string>
+        <string>/Users/ilialiston/AIClient2API/scripts/sync-kiro-credentials.py</string>
+    </array>
+
+    <!-- Start on login -->
+    <key>RunAtLoad</key>
+    <true/>
+
+    <!-- Restart automatically if it exits -->
+    <key>KeepAlive</key>
+    <true/>
+
+    <!-- Throttle restarts to avoid tight crash loops -->
+    <key>ThrottleInterval</key>
+    <integer>15</integer>
+
+    <key>StandardOutPath</key>
+    <string>/Users/ilialiston/AIClient2API/scripts/kiro-cred-sync.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/ilialiston/AIClient2API/scripts/kiro-cred-sync.error.log</string>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/ilialiston/AIClient2API/scripts</string>
+</dict>
+</plist>
