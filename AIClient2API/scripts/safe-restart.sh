@@ -47,7 +47,7 @@ fi
 # swap and triggers a WindowServer userspace-watchdog KERNEL PANIC.
 # (Verified 2026-05-29: jetsam at 15.1GB/16GB resident; node MCP fleet 4.9GB was the
 #  largest consumer, with Antigravity IDE + Comet ~2GB each.) See Troubleshooting Issue 10.
-MIN_FREE_MB=${MIN_FREE_MB:-2048}
+MIN_FREE_MB=${MIN_FREE_MB:-4096}
 AVAIL_MB=$(vm_stat 2>/dev/null | awk -v ps=$(sysctl -n hw.pagesize) '
   /^Pages free/        {gsub(/\./,"",$NF); f=$NF}
   /^Pages inactive/    {gsub(/\./,"",$NF); i=$NF}
