@@ -34,6 +34,8 @@ src/plugins-user/
 .worktrees/
 .playwright-mcp/
 pool_state.db
+cockpit.db
+*.db
 configs/pwd
 
 
