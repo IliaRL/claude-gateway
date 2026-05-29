@@ -1,47 +1,38 @@
 # Model-Guide.md
-# 3-Tier AI Gateway — System Reference & Architecture Guide
+# 2-Tier AI Gateway — System Reference & Architecture Guide
 
-> **Purpose:** This is an informational reference for agents and developers working on the gateway. Use it to locate critical files, understand routing logic, and source exact model ID strings. It is not a strict specification — the authoritative source for any value is always the actual project file it points to.
+> **Purpose:** Informational reference for agents and developers working on the gateway. Use it to locate critical files, understand routing logic, and source exact model ID strings. It is not a strict specification — the authoritative source for any value is always the actual project file it points to.
 
-> **Naming note:** The subsections within Parts 1 and 2 use Priority Levels (P1, P2, P3) to indicate read-order importance. These are NOT the same as gateway Tiers 1/2/3.
-
----
-
-## Part 1: LiteLLM — Tier 2 Gateway Router
-
-**Project root:** `/Users/ilialiston/MASTER-C/Tier2-LiteLLM/`
-
-LiteLLM is the primary entry point for Claude Code CLI. It receives Anthropic-format `/v1/messages` requests, normalizes payloads, handles load balancing and fallback level 3 (tiered model downgrade), and forwards OpenAI-format requests downstream to Tier 1.
-
-### Priority Reading
-- `CLAUDE.md`: Conventions, patterns, and structure through a Claude lens.
-- `litellm_config.yaml`: **The active master config.** Defines model routing, API keys, fallback chains, and middleware.
-- `litellm/proxy/proxy_server.py`: FastAPI entrypoint.
-- `litellm/router.py`: Multi-model routing, load balancing, and Level 3 downgrade fallback logic.
+> **Naming note:** Subsection "Priority Levels" (P1, P2, P3) indicate read-order importance. These are NOT the same as gateway Tiers (Tier 1 = AIClient2API gateway; Tier 2 = ZSH CLI router).
 
 ---
 
-## Part 2: AIClient2API — Tier 1 Provider Proxy
+## Part 1: AIClient2API — Tier 1 Gateway (port 3000)
 
 **Project root:** `/Users/ilialiston/MASTER-C/AIClient2API/`
 
-AIClient2API sits behind LiteLLM and translates OpenAI-format requests from LiteLLM into native authenticated API calls for each provider (Gemini, Kiro, Codex, Grok, Antigravity, iFlow, Qwen, and custom providers).
+AIClient2API is the single gateway Claude Code talks to directly. It receives Anthropic-format
+`/v1/messages` (and OpenAI-format `/v1/chat/completions`) requests, performs account-pool load
+balancing, owns all three fallback levels, and translates each request into native authenticated
+API calls per provider (Gemini, Kiro, Codex, Grok, Antigravity, and custom providers).
 
-> ⚠️ **Critical — Model ID Mismatch:** The model string LiteLLM sends to AIClient2API **must exactly match** the model ID defined in that provider's adapter inside `src/providers/`. Verify the exact string in `src/providers/provider-models.js`.
+> ⚠️ **Critical — Model ID Mismatch:** A requested model string **must exactly match** the model ID defined in that provider's adapter inside `src/providers/`. Verify the exact string in `src/providers/provider-models.js`.
 
 ### Priority Reading
 - `src/providers/provider-models.js`: **The canonical model ID map.** Every valid model string for every provider lives here.
-- `configs/`: All configuration templates defining endpoints, provider pools, and routing rules.
-- `src/converters/` & `src/convert/`: Format translation between native provider APIs and OpenAI spec. Most LiteLLM-related format errors originate here.
+- `configs/config.json`: server config, `providerFallbackChain`, and `modelFallbackMapping` (the fallback ladders).
+- `configs/provider_pools.json`: per-account credential pools (live secrets — gitignored).
+- `src/providers/provider-pool-manager.js`: account selection + all three fallback levels.
+- `src/converters/` & `src/convert/`: format translation between native provider APIs and OpenAI/Anthropic spec. Most format errors originate here.
 
 ---
 
-## Part 3: Provider Model Directory
+## Part 2: Provider Model Directory
 
 > ⚠️ **Always verify model IDs against `src/providers/provider-models.js` before configuring.**
 
 ### Kiro / Claude
-**AIClient2API provider type:** `claude-kiro-oauth`
+**Provider type:** `claude-kiro-oauth`
 **Credential folder:** `/Users/ilialiston/MASTER-C/Credentials/claude-kiro-oauth/`
 
 | Model ID | Tier |
@@ -51,19 +42,19 @@ AIClient2API sits behind LiteLLM and translates OpenAI-format requests from Lite
 | `claude-haiku-4-5` | Fast |
 
 ### Antigravity
-**AIClient2API provider type:** `gemini-antigravity`
+**Provider type:** `gemini-antigravity`
 **Credential folder:** `/Users/ilialiston/MASTER-C/Credentials/gemini-antigravity/`
 
 | Model ID | Notes |
 |---|---|
-| `gemini-3-flash` | |
+| `gemini-3-flash` | Always-available terminal fallback model |
 | `gemini-3.5-flash-high` | Alias → `gemini-3-flash-agent` (Antigravity "High" tier) |
 | `gemini-3.1-pro-low` | |
 | `gemini-2.5-flash-thinking` | Extended reasoning |
 | `gemini-claude-sonnet-4-6` | Claude model via Antigravity |
 
 ### Gemini CLI OAuth
-**AIClient2API provider type:** `gemini-cli-oauth`
+**Provider type:** `gemini-cli-oauth`
 **Credential folder:** `/Users/ilialiston/MASTER-C/Credentials/gemini-cli-oauth/`
 
 | Model ID | Notes |
@@ -72,7 +63,7 @@ AIClient2API sits behind LiteLLM and translates OpenAI-format requests from Lite
 | `gemini-3.5-flash` | |
 
 ### OpenAI Codex
-**AIClient2API provider type:** `openai-codex-oauth`
+**Provider type:** `openai-codex-oauth`
 **Credential folder:** `/Users/ilialiston/MASTER-C/Credentials/openai-codex-oauth/`
 
 | Model ID | Notes |
@@ -80,26 +71,33 @@ AIClient2API sits behind LiteLLM and translates OpenAI-format requests from Lite
 | `gpt-5.5` | |
 | `gpt-5.4-mini` | |
 
-### Custom Providers
-AIClient2API supports dynamic provider types that accept whatever model ID you define in their config templates:
+### Custom / static-key providers
 
 | Provider Type | Use Case |
 |---|---|
-| `forward-custom` | Generic OpenAI-compatible endpoint pass-through. Used for GitHub Models, NVIDIA NIM, OpenRouter. |
-| `claude-custom` | Custom Claude-compatible endpoint. |
-| `openai-custom` | Custom OpenAI-compatible endpoint. |
-
-For `forward-custom` providers, the model ID in your config is whatever model string the target provider's API accepts.
+| `openai-custom` | OpenRouter and other OpenAI-compatible endpoints (models from `configs/custom_models.json`) |
+| `nvidia-nim` | NVIDIA NIM (static API key) |
+| `github-models` | GitHub Models (static PAT, needs `models:read` scope) |
 
 ---
 
-## Part 4: Fallback Downgrade Chain (Tier 2 — LiteLLM)
+## Part 3: Fallback Routing (all owned by Tier 1)
 
-LiteLLM owns Level 3 fallback (tiered model downgrade). Configure this in `litellm_config.yaml` using LiteLLM's `fallbacks` router setting. The downgrade chain must always descend — never upgrade:
+All three levels are implemented in `src/providers/provider-pool-manager.js` and configured by
+data in `configs/config.json`:
+
+1. **Vertical (Level 1)** — rotate accounts for the requested model on its provider.
+2. **Horizontal (Level 2)** — same model across other compatible providers (`providerFallbackChain`).
+3. **Tiered downgrade (Level 3)** — `modelFallbackMapping`: descend to a lower model only after the
+   requested model is fully exhausted. Chains must always descend and **terminate at a stable,
+   always-available model** (e.g. `gemini-3-flash`) — never cycle. Example ladders:
 
 ```text
-claude-opus-4-7  →  claude-sonnet-4-6  →  claude-haiku-4-5
-gemini-pro (alias)  →  gemini-flash  (gemini-3.1-pro-high has no fallback entry)
-gpt-5 (alias)  →  openai-codex-oauth:gpt-5.4  →  openai-codex-oauth:gpt-5.2  (gpt-5.5 has no fallback entry)
-grok models — no fallback chains configured in LiteLLM
+claude-opus-4-7 → claude-opus-4-6 → claude-opus-4-5 → gemini-claude-opus-4-6-thinking → claude-sonnet-4-5-20250929
+claude-sonnet-4-6 → gemini-claude-sonnet-4-6 → gemini-3.1-pro-low → gemini-3-flash (terminal)
+gemini-2.5-pro / gemini-3.1-pro-high → gemini-3.1-pro-low → gemini-3-flash (terminal)
 ```
+
+> The runtime has a cycle-guard, but cyclic config defeats the purpose of level-3 (it bounces then
+> returns null instead of degrading). Validate that every `targetModel` resolves to a catalog model
+> and that chains terminate. (Verified clean as of this milestone.)
