@@ -1,12 +1,12 @@
 #!/bin/bash
 # scripts/safe-restart.sh
-# Atomic restart for AIClient2API (3000) and LiteLLM (4000)
+# Atomic restart for AIClient2API (Tier 1, port 3000).
+# 2-tier architecture: Claude Code talks DIRECTLY to this proxy on :3000.
+# (Tier 2 / LiteLLM was removed — it corrupted the Anthropic SSE stream and added latency.)
 
 PORT=3000
 MASTER_PORT=3100
-LITELLM_PORT=4000
 LOG_FILE="/tmp/aiclient.log"
-LITELLM_LOG="/tmp/litellm.log"
 
 kill_listening_port() {
     local target_port=$1
@@ -35,10 +35,9 @@ kill_listening_port() {
 
 kill_listening_port $PORT "AIClient2API Proxy"
 kill_listening_port $MASTER_PORT "AIClient2API Master"
-kill_listening_port $LITELLM_PORT "LiteLLM Gateway"
 
-if [ ! -z "$(lsof -nP -iTCP:$PORT -sTCP:LISTEN -t 2>/dev/null)" ] || [ ! -z "$(lsof -nP -iTCP:$LITELLM_PORT -sTCP:LISTEN -t 2>/dev/null)" ]; then
-    echo "Error: Ports are still being listened on after kill."
+if [ ! -z "$(lsof -nP -iTCP:$PORT -sTCP:LISTEN -t 2>/dev/null)" ]; then
+    echo "Error: Port $PORT is still being listened on after kill."
     exit 1
 fi
 
@@ -65,23 +64,18 @@ fi
 echo "Memory headroom: ${AVAIL_MB}MB reclaimable — OK to start."
 
 # Rotate log if it exceeds 10MB to prevent I/O contention
-for lf in "$LOG_FILE" "$LITELLM_LOG"; do
-    if [ -f "$lf" ]; then
-        LOG_SIZE=$(stat -f%z "$lf" 2>/dev/null || echo 0)
-        if [ "$LOG_SIZE" -gt 10485760 ]; then
-            echo "Rotating large log file $lf..."
-            mv "$lf" "${lf}.old"
-        fi
+if [ -f "$LOG_FILE" ]; then
+    LOG_SIZE=$(stat -f%z "$LOG_FILE" 2>/dev/null || echo 0)
+    if [ "$LOG_SIZE" -gt 10485760 ]; then
+        echo "Rotating large log file $LOG_FILE..."
+        mv "$LOG_FILE" "${LOG_FILE}.old"
     fi
-done
+fi
 
-# Start Tier1 first — LiteLLM must NOT start until Tier1 is healthy.
-# Starting both simultaneously causes a thundering herd: LiteLLM fires 80 concurrent
-# health-check requests at :3000 before it has finished initializing, spiking CPU.
-echo "Starting AIClient2API (Tier1)..."
+echo "Starting AIClient2API (Tier 1)..."
 cd /Users/ilialiston/MASTER-C/AIClient2API && nohup pnpm start > $LOG_FILE 2>&1 &
 
-echo "Waiting for Tier1 to be ready..."
+echo "Waiting for Tier 1 to be ready..."
 PROXY_READY=0
 for i in $(seq 1 40); do
     if curl -sf -H "Authorization: Bearer $AICLIENT_TOKEN" \
@@ -99,29 +93,5 @@ if [ $PROXY_READY -eq 0 ]; then
     exit 1
 fi
 
-# Only start LiteLLM once Tier1 is confirmed healthy.
-echo "Starting LiteLLM Gateway (Tier2)..."
-nohup /Users/ilialiston/MASTER-C/Tier2-LiteLLM/.venv/bin/litellm \
-  --config /Users/ilialiston/MASTER-C/Tier2-LiteLLM/litellm_config.yaml \
-  --port $LITELLM_PORT > $LITELLM_LOG 2>&1 &
-
-echo "Waiting for Tier2 to be ready..."
-LITELLM_READY=0
-for i in $(seq 1 40); do
-    # nc check: LiteLLM enforces auth on /health and returns 401 — port open is enough
-    if nc -z 127.0.0.1 $LITELLM_PORT 2>/dev/null; then
-        echo "LiteLLM Gateway is ready!"
-        LITELLM_READY=1
-        break
-    fi
-    sleep 0.5
-done
-
-if [ $LITELLM_READY -eq 0 ]; then
-    echo "Error: LiteLLM did not start within 20 seconds."
-    tail -n 15 $LITELLM_LOG
-    exit 1
-fi
-
-echo "Both services restarted and ready."
+echo "AIClient2API (Tier 1) restarted and ready."
 exit 0

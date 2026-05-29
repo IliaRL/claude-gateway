@@ -30,10 +30,9 @@ CLAUDE_PROXY_BACKUP_FILE="${CLAUDE_PROXY_BACKUP_FILE:-$HOME/.claude/proxy_settin
 ANTIGRAVITY_SETTINGS_FILE="${ANTIGRAVITY_SETTINGS_FILE:-$HOME/Library/Application Support/Antigravity IDE/User/settings.json}"
 
 # Single source of truth for the proxy address/token.
-# PROXY_BASE points to Tier1 AIClient2API (:3000) DIRECTLY. Tier2 LiteLLM (:4000)
-# still re-wraps streaming responses — verified: it emits duplicate `message_start`
-# events and interleaves replies — so it is kept OUT of the Claude Code hot path.
-# This is the authoritative request + model-discovery path. See MASTER-C/CLAUDE.md.
+# PROXY_BASE points to Tier1 AIClient2API (:3000) — Claude Code talks to it directly.
+# 2-tier architecture: there is no LiteLLM middle tier. This is the authoritative
+# request + model-discovery path. See MASTER-C/CLAUDE.md.
 : "${PROXY_BASE:=http://127.0.0.1:3000}"
 : "${PROXY_TOKEN:=${AICLIENT_TOKEN:-sk-a60f3efdf9b97e63c84ab4a3583f9d1c}}"
 : "${AICLIENT_BASE:=${AICLIENT_BASE:-http://127.0.0.1:3000}}"
@@ -154,7 +153,7 @@ claude-proxy() {
 claude-native() {
   _claude_mode_require_jq || return 1
 
-  # NOTE: intentionally does NOT stop the proxy process. Killing :3000/:4000 while
+  # NOTE: intentionally does NOT stop the proxy process. Killing :3000 while
   # a Claude session is mid-execution disconnects it. Use stop-proxies explicitly
   # when you want to shut the gateway down.
 

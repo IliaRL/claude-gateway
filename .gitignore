@@ -11,10 +11,7 @@ Credentials/
 # OS noise
 .DS_Store
 .metadata_never_index
-
-# Tier2 LiteLLM — only track litellm_config.yaml; everything else is upstream source
-Tier2-LiteLLM/*
-!Tier2-LiteLLM/litellm_config.yaml
+*.tmp
 
 # Lock files (not committed for this config-only repo)
 package-lock.json

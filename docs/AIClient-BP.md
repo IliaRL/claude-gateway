@@ -1,12 +1,12 @@
 # AIClient2API Best Practices (Tier 1)
 
-This document covers best practices for configuring and operating AIClient2API as the Tier 1 proxy in the 3-Tier AI Gateway architecture. AIClient2API translates standard OpenAI or Anthropic requests into authenticated, provider-specific calls.
+This document covers best practices for configuring and operating AIClient2API as the Tier 1 gateway in the 2-tier AI Gateway architecture. AIClient2API translates standard OpenAI or Anthropic requests into authenticated, provider-specific calls.
 
 ## 1. Core Architecture
 
 AIClient2API acts as a local bridge that translates client-only API protocols (like Gemini CLI, Antigravity, Kiro, Codex, and Grok) into standard OpenAI or Anthropic REST interfaces. 
 
-In the 3-Tier stack, it receives OpenAI-formatted requests from Tier 2 (LiteLLM) on `http://127.0.0.1:3000/v1` and maps them directly to the native APIs of the designated upstream providers.
+It receives OpenAI- or Anthropic-formatted requests from Claude Code directly on `http://127.0.0.1:3000` and maps them to the native APIs of the designated upstream providers.
 
 ## 2. Configuration & Reliability 
 
@@ -21,11 +21,11 @@ To achieve 99.9% uptime and prevent rate-limiting bottlenecks, implement the fol
 
 * **API Key Alignment**: The proxy relies on a static API key for AI inference requests (the "AI Business Path"). You must define `REQUIRED_API_KEY` in `configs/config.json`.
 * **Do Not Mix Auth Tokens**: The proxy utilizes two distinct authentication paths. Do not use the dynamic Admin Token (used for management endpoints) for AI inference. 
-* **Model ID Exact Match**: The model string sent from LiteLLM must perfectly match the string expected by AIClient2API's `src/providers/provider-models.js`. A mismatch results in a 404.
+* **Model ID Exact Match**: The requested model string must perfectly match the string expected by AIClient2API's `src/providers/provider-models.js`. A mismatch results in a 404.
 
 ## 4. Error Diagnostics
 
-* **401 Unauthorized**: The incoming request (from Tier 2) failed to pass the `Authorization` header, or the key does not match `REQUIRED_API_KEY`.
+* **401 Unauthorized**: The incoming request failed to pass the `Authorization` header, or the key does not match `REQUIRED_API_KEY`.
 * **403 Forbidden**: The upstream provider blocked the proxy. This is typically an expired OAuth token (ensure Auto-Refresh is active) or a blocked TLS fingerprint (ensure TLS Sidecar is enabled).
 * **404 Not Found**: A routing mismatch. Verify the model ID matches the internal map, and ensure the URL path does not contain duplicated segments (e.g., `/v1/v1/chat/completions`).
 * **429 Too Many Requests**: The provider pool is exhausted. Add more accounts or increase `RATE_LIMIT_COOLDOWN_MS`.

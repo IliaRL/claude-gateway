@@ -1,7 +1,7 @@
 <!-- generated-by: gsd-doc-writer -->
 # TESTING.md
 
-Testing guide for the 3-Tier AI Gateway — unit tests, integration tests, smoke tests, and live proxy verification.
+Testing guide for the 2-tier AI Gateway — unit tests, integration tests, smoke tests, and live proxy verification.
 
 ---
 
@@ -26,12 +26,6 @@ cd AIClient2API && pnpm install
 ```
 
 Integration tests (`tests/api-integration.test.js`) require Tier 1 to be running at `http://127.0.0.1:3000` before execution. Unit tests in `tests/unit/` run offline.
-
-### Tier 2 — LiteLLM
-
-Tier 2 has no project-level test suite. Health is verified through the live endpoint checks described in the [Proxy Health Verification](#proxy-health-verification) section.
-
----
 
 ## Running Tests
 
@@ -202,7 +196,7 @@ A full end-to-end test validates every layer: Claude Code CLI → Tier 1 → pro
 claude-mode-status
 ```
 
-In proxy mode, `ANTHROPIC_BASE_URL` is `http://127.0.0.1:3000`. Claude Code routes directly to Tier 1 (Tier 2 / LiteLLM is bypassed in the current active path — see Issue 5 in `docs/Troubleshooting-and-Fixes.md`).
+In proxy mode, `ANTHROPIC_BASE_URL` is `http://127.0.0.1:3000`. Claude Code routes directly to the Tier 1 gateway (there is no LiteLLM middle tier).
 
 **Step 2: Send a test request through Claude Code**
 
