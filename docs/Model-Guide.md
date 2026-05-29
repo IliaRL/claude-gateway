@@ -23,7 +23,7 @@ LiteLLM is the primary entry point for Claude Code CLI. It receives Anthropic-fo
 
 ## Part 2: AIClient2API — Tier 1 Provider Proxy
 
-**Project root:** `/Users/ilialiston/MASTER-C/Tier1-AIClient2API/`
+**Project root:** `/Users/ilialiston/MASTER-C/AIClient2API/`
 
 AIClient2API sits behind LiteLLM and translates OpenAI-format requests from LiteLLM into native authenticated API calls for each provider (Gemini, Kiro, Codex, Grok, Antigravity, iFlow, Qwen, and custom providers).
 

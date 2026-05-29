@@ -22,7 +22,7 @@ MASTER-C/
 │   ├── nvidia-nim/
 │   ├── openai-codex-oauth/
 │   └── openai-custom/
-├── Tier1-AIClient2API/   # Node.js proxy — connects to external providers
+├── AIClient2API/         # Node.js proxy — connects to external providers (symlinked at ~/AIClient2API)
 ├── Tier2-LiteLLM/        # Python gateway — formats payloads for Claude Code CLI
 └── docs/                 # Architecture specs, best practices, routing guides
     ├── AIClient-BP.md                  # AIClient2API best practices and validated patterns
@@ -42,7 +42,7 @@ MASTER-C/
 
 ```bash
 # Install dependencies
-cd Tier1-AIClient2API && pnpm install
+cd AIClient2API && pnpm install
 
 # Start (production)
 pnpm start            # node src/core/master.js
@@ -85,7 +85,7 @@ All credentials must be sourced from `/Users/ilialiston/MASTER-C/Credentials/`. 
 
 ## ⚠️ CPU Safety Rules (MacBook Air, Apple Silicon)
 
-**Tier 1 symlink:** `Tier1-AIClient2API/` is a symlink to `~/AIClient2API/`. Never glob, list, or scan inside it — node_modules (187MB) and .git (11MB) live there. `.claudesignore` excludes the heavy subdirs; do not remove those entries.
+**Tier 1 directory:** `AIClient2API/` is the real Tier-1 proxy dir (`~/AIClient2API` is a symlink pointing to it). Never glob, list, or scan inside it — node_modules (187MB) and .git (11MB) live there. `.claudesignore` excludes the heavy subdirs; do not remove those entries.
 
 **Startup order is mandatory:** Tier1 MUST be healthy before Tier2 starts. `safereset` enforces this. If you start them in parallel, LiteLLM fires 80 concurrent health-check requests at :3000 before it is ready — instant CPU spike. Never run LiteLLM startup commands manually while Tier1 is still initializing.
 
@@ -146,10 +146,14 @@ Shell layer — not in this repo. Lives in `~/dotfiles/zsh/zshrc`. The key comma
 
 ```
 Claude Code CLI  →  Tier 3 (ZSH env injection)
-    →  Tier 2 LiteLLM (:4000)  [payload normalization, retry, fallback]
     →  Tier 1 AIClient2API (:3000)  [provider auth, protocol translation]
     →  External provider (Kiro, Antigravity, Gemini, Codex, Grok, etc.)
 ```
+
+**Active path is :3000 direct.** Tier 2 LiteLLM (:4000) runs but is bypassed for Claude Code —
+it re-wraps streaming responses (verified: duplicate `message_start` events) and corrupts the
+Anthropic SSE stream. It remains available for non-streaming normalization/fallback and is tracked
+for a future re-wrap fix. See `docs/Architecture-and-Proxy-Integration.md`.
 
 ---
 
@@ -212,7 +216,7 @@ Key skills: `proxy-repair` and `config` at `~/.claude/skills/`; `verify` from `a
 | `tier-config-auditor` | Before merging provider config changes; verify Credentials ↔ provider map ↔ LiteLLM consistency |
 | `security-reviewer` | Pre-commit security audit of credential handling, env var injection patterns, and file access |
 
-### Tier 1 Project Skills (`Tier1-AIClient2API/.claude/skills/`)
+### Tier 1 Project Skills (`AIClient2API/.claude/skills/`)
 
 Full `aiclient-*` skill suite covering every operational concern:
 

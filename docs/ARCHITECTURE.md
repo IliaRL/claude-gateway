@@ -31,7 +31,7 @@ Claude Code CLI
     │
     ▼
 [Tier 1] AIClient2API — port 3000
-    Tier1-AIClient2API/src/
+    AIClient2API/src/
     Receives: OpenAI /v1/chat/completions format
     Performs: provider auth, OAuth lifecycle, protocol translation
     Owns: Level 1 fallback (vertical account rotation)
@@ -66,7 +66,7 @@ External Provider
                        │ OpenAI /v1/chat/completions
 ┌──────────────────────▼──────────────────────────────────────┐
 │  TIER 1 — AIClient2API Provider Proxy  :3000                │
-│  Tier1-AIClient2API/src/                                    │
+│  AIClient2API/src/                                    │
 │  ┌─────────────────┐  ┌──────────────────────────────────┐ │
 │  │  core/          │  │  providers/                      │ │
 │  │  master.js      │  │  provider-models.js (model map)  │ │
@@ -163,7 +163,7 @@ grok-4.20-heavy    →  grok-4.20        →  grok-4.1-mini
 
 ### Tier 1 — AIClient2API Provider Proxy (port 3000)
 
-**Location:** `Tier1-AIClient2API/` (symlink to `~/AIClient2API/`)
+**Location:** `AIClient2API/` (symlink to `~/AIClient2API/`)
 **Entrypoint:** `src/core/master.js`
 **Config:** `configs/config.json`, `configs/provider_pools.json`
 
@@ -181,7 +181,7 @@ Key responsibilities:
 
 ## Directory Structure
 
-### Tier 1 — `Tier1-AIClient2API/src/`
+### Tier 1 — `AIClient2API/src/`
 
 | Path | Role |
 |---|---|
@@ -203,7 +203,7 @@ Key responsibilities:
 | `utils/request-handlers.js` | Display name helper (`buildFriendlyDisplayName()`), Gemini-protocol format detection, and OpenAI → Gemini response conversion |
 | `utils/` | Error formatters and logging |
 
-### Tier 1 — `Tier1-AIClient2API/configs/`
+### Tier 1 — `AIClient2API/configs/`
 
 | File | Purpose |
 |---|---|

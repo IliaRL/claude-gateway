@@ -12,18 +12,8 @@ Credentials/
 .DS_Store
 .metadata_never_index
 
-# Tier1 — exclude heavy, sensitive, and runtime-only files
-Tier1-AIClient2API/node_modules/
-Tier1-AIClient2API/.git/
-Tier1-AIClient2API/build/
-Tier1-AIClient2API/cockpit.db
-Tier1-AIClient2API/memory/
-Tier1-AIClient2API/pnpm-lock.yaml
-Tier1-AIClient2API/mcp_config_copy.json
-Tier1-AIClient2API/fix_mcp.py
-Tier1-AIClient2API/test_*.js
-Tier1-AIClient2API/test-*.sh
-Tier1-AIClient2API/test-*.js
+# Tier1 — AIClient2API is its own git repo (symlinked at ~/AIClient2API); versioned independently, not tracked here
+AIClient2API/
 
 # Tier2 LiteLLM — only track litellm_config.yaml; everything else is upstream source
 Tier2-LiteLLM/*

@@ -45,9 +45,9 @@ The `TEST_SERVER_BASE_URL` env var defaults to `http://127.0.0.1:3000` if unset 
 
 ## Tier 1 — AIClient2API Config File
 
-**File:** `Tier1-AIClient2API/configs/config.json`  
-**Source of defaults:** `Tier1-AIClient2API/src/core/config-manager.js`  
-**Example:** `Tier1-AIClient2API/configs/config.json.example`
+**File:** `AIClient2API/configs/config.json`  
+**Source of defaults:** `AIClient2API/src/core/config-manager.js`  
+**Example:** `AIClient2API/configs/config.json.example`
 
 The config file is loaded at startup. CLI flags override values from the file; the file overrides the defaults baked into `config-manager.js`.
 
@@ -139,7 +139,7 @@ The config file is loaded at startup. CLI flags override values from the file; t
 | `LOG_ENABLED` | Optional | `true` | Master switch for the structured logger. |
 | `LOG_OUTPUT_MODE` | Optional | `"all"` | Where log output goes. `"all"` = both console and file. |
 | `LOG_LEVEL` | Optional | `"info"` | Log verbosity: `"debug"`, `"info"`, `"warn"`, `"error"`. |
-| `LOG_DIR` | Optional | `"logs"` | Directory for log file output (relative to the `Tier1-AIClient2API/` root). |
+| `LOG_DIR` | Optional | `"logs"` | Directory for log file output (relative to the `AIClient2API/` root). |
 | `LOG_INCLUDE_REQUEST_ID` | Optional | `true` | Adds a request correlation ID to every log line. |
 | `LOG_INCLUDE_TIMESTAMP` | Optional | `true` | Adds ISO timestamps to every log line. |
 | `LOG_MAX_FILE_SIZE` | Optional | `10485760` | Maximum log file size in bytes before rotation (default: 10 MB). |
@@ -242,7 +242,7 @@ Each provider has its own subdirectory. The credential file format differs per p
 | `Credentials/openai-codex-oauth/` | OpenAI Codex | OAuth session tokens <!-- VERIFY: exact file names and schema --> |
 | `Credentials/openai-custom/` | OpenRouter | OpenRouter API key |
 
-**Important:** The live operational credential pools (with OAuth tokens for all rotating accounts) are in `Tier1-AIClient2API/configs/provider_pools.json`, not in `Credentials/`. The `Credentials/` directory holds the per-provider bootstrap credentials used during initial authentication or token refresh. `provider_pools.json` must never be committed to git.
+**Important:** The live operational credential pools (with OAuth tokens for all rotating accounts) are in `AIClient2API/configs/provider_pools.json`, not in `Credentials/`. The `Credentials/` directory holds the per-provider bootstrap credentials used during initial authentication or token refresh. `provider_pools.json` must never be committed to git.
 
 ---
 
@@ -268,7 +268,7 @@ Each model entry follows this pattern:
 **Critical rules:**
 - `model_name` is what callers (including Claude Code) send as the `model` field.
 - `model` under `litellm_params` uses `openai/` prefix — this tells LiteLLM to use the OpenAI adapter and route to Tier 1's OpenAI-compatible endpoint, avoiding the `/v1/messages` path that does not exist in AIClient2API.
-- The string after `openai/` must **exactly match** the provider adapter's internal model map in `Tier1-AIClient2API/src/providers/provider-models.js`. A mismatch causes silent 404s.
+- The string after `openai/` must **exactly match** the provider adapter's internal model map in `AIClient2API/src/providers/provider-models.js`. A mismatch causes silent 404s.
 - `api_key` uses the `os.environ/` prefix so LiteLLM reads `AICLIENT_TOKEN` from the environment at runtime.
 
 ### Router Settings
@@ -323,8 +323,8 @@ Configured under `general_settings:`:
 
 ## Tier 1 — Provider Pools File
 
-**File:** `Tier1-AIClient2API/configs/provider_pools.json`  
-**Example:** `Tier1-AIClient2API/configs/provider_pools.json.example`
+**File:** `AIClient2API/configs/provider_pools.json`  
+**Example:** `AIClient2API/configs/provider_pools.json.example`
 
 This file holds the full list of rotating accounts for each provider. It is the live credential store — it contains active OAuth tokens, session cookies, and API keys for all accounts across all providers.
 

@@ -11,18 +11,18 @@ Testing guide for the 3-Tier AI Gateway — unit tests, integration tests, smoke
 
 **Framework:** Jest 29.7.0 with Babel transpilation for ESM support.
 
-**Config:** `Tier1-AIClient2API/jest.config.js`
+**Config:** `AIClient2API/jest.config.js`
 
 - Test environment: `node`
 - Test match pattern: `**/tests/**/*.test.js`
 - Timeout: 30 000 ms per test
-- Coverage directory: `Tier1-AIClient2API/coverage/`
+- Coverage directory: `AIClient2API/coverage/`
 - Coverage reporters: `text`, `lcov`, `html`
 
 **Prerequisites:** Tier 1 dependencies must be installed first.
 
 ```bash
-cd Tier1-AIClient2API && pnpm install
+cd AIClient2API && pnpm install
 ```
 
 Integration tests (`tests/api-integration.test.js`) require Tier 1 to be running at `http://127.0.0.1:3000` before execution. Unit tests in `tests/unit/` run offline.
@@ -38,7 +38,7 @@ Tier 2 has no project-level test suite. Health is verified through the live endp
 ### Unit Tests (offline, no running server required)
 
 ```bash
-cd Tier1-AIClient2API
+cd AIClient2API
 pnpm test
 ```
 
@@ -58,7 +58,7 @@ Runs all `tests/unit/*.test.js` files:
 ### Watch Mode
 
 ```bash
-cd Tier1-AIClient2API
+cd AIClient2API
 pnpm run test:watch
 ```
 
@@ -67,7 +67,7 @@ Reruns affected tests on every file save. Use during active converter developmen
 ### Verbose Output
 
 ```bash
-cd Tier1-AIClient2API
+cd AIClient2API
 pnpm run test:verbose
 ```
 
@@ -76,7 +76,7 @@ Prints each `it()` / `describe()` block result individually.
 ### Silent Mode
 
 ```bash
-cd Tier1-AIClient2API
+cd AIClient2API
 pnpm run test:silent
 ```
 
@@ -85,11 +85,11 @@ Suppresses console output from test code. Useful in CI where log noise obscures 
 ### Coverage Report
 
 ```bash
-cd Tier1-AIClient2API
+cd AIClient2API
 pnpm run test:coverage
 ```
 
-Generates coverage under `Tier1-AIClient2API/coverage/`. Open `coverage/index.html` in a browser for the HTML report.
+Generates coverage under `AIClient2API/coverage/`. Open `coverage/index.html` in a browser for the HTML report.
 
 No minimum coverage threshold is configured in `jest.config.js`.
 
@@ -100,7 +100,7 @@ No minimum coverage threshold is configured in `jest.config.js`.
 cd ~/AIClient2API && npm start
 
 # In a separate shell, run integration tests
-cd Tier1-AIClient2API
+cd AIClient2API
 TEST_SERVER_BASE_URL=http://127.0.0.1:3000 TEST_API_KEY=$AICLIENT_TOKEN pnpm test tests/api-integration.test.js
 ```
 
@@ -117,7 +117,7 @@ Smoke tests hit real provider endpoints. They require Tier 1 to be running and a
 ### Quick Smoke Test (~90 seconds, 7 suites, 5 models)
 
 ```bash
-cd Tier1-AIClient2API
+cd AIClient2API
 node scripts/master-smoke-test.cjs
 ```
 
@@ -134,7 +134,7 @@ Per-model checks performed by the smoke test:
 ### Full Test Suite (all 39 models, use after major changes only)
 
 ```bash
-cd Tier1-AIClient2API
+cd AIClient2API
 pnpm run test:suite
 ```
 
@@ -143,11 +143,11 @@ Equivalent to `node scripts/unified-test-suite.cjs`. This exercises every model 
 ### Skill Reference Validation
 
 ```bash
-cd Tier1-AIClient2API
+cd AIClient2API
 bash scripts/validate-skills.sh
 ```
 
-Asserts that all 62 assertion points in `Tier1-AIClient2API/.claude/skills/` still point to valid files and line numbers. Run after any refactor that moves or renames source files.
+Asserts that all 62 assertion points in `AIClient2API/.claude/skills/` still point to valid files and line numbers. Run after any refactor that moves or renames source files.
 
 ---
 
@@ -183,10 +183,10 @@ Look for `[Warmup] failed=N` lines — a non-zero value means one or more OAuth 
 
 To inspect the exact payload transformation through the converter stack:
 
-1. Edit `Tier1-AIClient2API/configs/config.json` — set `"PROMPT_LOG_MODE": "file"`.
+1. Edit `AIClient2API/configs/config.json` — set `"PROMPT_LOG_MODE": "file"`.
 2. Restart Tier 1 via `./scripts/safe-restart.sh`.
 3. Send a request.
-4. Read `Tier1-AIClient2API/logs/prompt_log_*.log`.
+4. Read `AIClient2API/logs/prompt_log_*.log`.
 
 Reset `PROMPT_LOG_MODE` to `""` after debugging — log files grow quickly under load.
 

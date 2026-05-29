@@ -42,14 +42,14 @@ MASTER-C/
 │   ├── nvidia-nim/
 │   ├── openai-codex-oauth/
 │   └── openai-custom/
-├── Tier1-AIClient2API/       # Node.js proxy — symlink to ~/AIClient2API/
+├── AIClient2API/       # Node.js proxy — symlink to ~/AIClient2API/
 ├── Tier2-LiteLLM/            # Python gateway — litellm 1.87.0
 │   ├── litellm_config.yaml   # Active config (85 model entries)
 │   └── .venv/                # Pre-built Python env — do not touch
 └── docs/                     # Architecture, config, and best-practice docs
 ```
 
-> **Symlink note:** `Tier1-AIClient2API/` is a symlink to `~/AIClient2API/`. Never glob, list, or scan inside it — `node_modules` (187 MB) and `.git` (11 MB) live there.
+> **Symlink note:** `AIClient2API/` is a symlink to `~/AIClient2API/`. Never glob, list, or scan inside it — `node_modules` (187 MB) and `.git` (11 MB) live there.
 
 ---
 
@@ -208,7 +208,7 @@ The shell functions are defined in `~/dotfiles/zsh/zshrc`. Run `source ~/dotfile
 
 ### Model returns 404 silently
 
-The model string sent by LiteLLM must exactly match the provider adapter's internal model map in `Tier1-AIClient2API/src/providers/provider-models.js`. A mismatch is the most common source of silent 404s. Cross-reference `docs/Model-Guide.md` for the canonical model ID list.
+The model string sent by LiteLLM must exactly match the provider adapter's internal model map in `AIClient2API/src/providers/provider-models.js`. A mismatch is the most common source of silent 404s. Cross-reference `docs/Model-Guide.md` for the canonical model ID list.
 
 ### SSE stream errors / JSON parse failures during tool use
 
@@ -216,7 +216,7 @@ Every proxy layer must inject `X-Accel-Buffering: no` on streaming responses. Ch
 
 ### OAuth token expired / provider returns 401
 
-Use the `aiclient-credentials` skill or the `proxy-debugger` agent. Check `Tier1-AIClient2API/configs/provider_pools.json` for `needsRefresh` or `needsReauth` flags on affected accounts.
+Use the `aiclient-credentials` skill or the `proxy-debugger` agent. Check `AIClient2API/configs/provider_pools.json` for `needsRefresh` or `needsReauth` flags on affected accounts.
 
 ---
 

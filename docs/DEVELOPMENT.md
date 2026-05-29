@@ -16,7 +16,7 @@ Developer guide for working on the 3-Tier AI Gateway. Covers local setup, build 
 
 ### Cloning and installing
 
-Tier 1 source lives at `~/AIClient2API/` on disk. `Tier1-AIClient2API/` is a directory copy of that source — changes to one do not automatically propagate to the other. Do not glob or scan inside it — `node_modules` (187 MB) and `.git` (11 MB) live there.
+Tier 1 source lives at `MASTER-C/AIClient2API/` (its own git repo). `~/AIClient2API` is a **symlink** to it — the same files, so edits via either path are identical. Do not glob or scan inside it — `node_modules` (187 MB) and `.git` (11 MB) live there.
 
 ```bash
 # Install Tier 1 dependencies (pnpm only — never npm install)
@@ -50,7 +50,7 @@ Never hardcode credential values in source files. `configs/provider_pools.json` 
 
 ## Build Commands
 
-All commands run from inside `Tier1-AIClient2API/` (i.e., `~/AIClient2API/`).
+All commands run from inside `AIClient2API/` (i.e., `~/AIClient2API/`).
 
 | Command | Description |
 |---|---|
@@ -120,7 +120,7 @@ LiteLLM fires approximately 80 concurrent health-check requests at Tier 1 on sta
 
 Before editing any core Tier 1 file, follow this sequence:
 
-1. **Read the skill first.** For any file under `src/`, `configs/`, or `scripts/`, read `aiclient-master` at `Tier1-AIClient2API/.claude/skills/` before touching anything.
+1. **Read the skill first.** For any file under `src/`, `configs/`, or `scripts/`, read `aiclient-master` at `AIClient2API/.claude/skills/` before touching anything.
 2. **Run the preflight skill** (`aiclient-preflight`) before editing `adapter.js`, `provider-models.js`, `utils.js`, or any converter.
 3. **Read the file before editing it.** Never assume current state — check `configs/config.json` before modifying it; search `src/providers/provider-models.js` before adding a model ID.
 4. **Verify after changes.** Check `/provider_health` endpoint shows ≥25 healthy accounts. Run the smoke test before claiming anything works.
@@ -187,7 +187,7 @@ The model string in `litellm_config.yaml` (after the `openai/` prefix) must exac
 
 ## Testing
 
-Tests live in `Tier1-AIClient2API/tests/` and use Jest with Babel for ESM support (`"type": "module"` in `package.json`). The test timeout is 30 seconds per test.
+Tests live in `AIClient2API/tests/` and use Jest with Babel for ESM support (`"type": "module"` in `package.json`). The test timeout is 30 seconds per test.
 
 ### Auth token requirement
 
@@ -254,7 +254,7 @@ Invoke the `proxy-debugger` custom agent for any 429, 502, auth error, or model 
 
 ### aiclient-debug skill
 
-Read the `aiclient-debug` skill (`Tier1-AIClient2API/.claude/skills/`) for request tracing, latency analysis, and `ECONNREFUSED` diagnosis patterns.
+Read the `aiclient-debug` skill (`AIClient2API/.claude/skills/`) for request tracing, latency analysis, and `ECONNREFUSED` diagnosis patterns.
 
 ---
 
@@ -289,4 +289,4 @@ Before committing provider or routing changes, confirm `/provider_health` shows 
 | `docs/Architecture-and-Proxy-Integration.md` | SSE buffering rules, env vars, header pass-through |
 | `docs/Troubleshooting-and-Fixes.md` | Known issues registry with root causes and fix status |
 | `docs/ANTHROPIC_GATEWAY_SPEC.md` | Official Claude Code LLM gateway wire protocol |
-| `Tier1-AIClient2API/CLAUDE.md` | Project rules, quick commands, skill routing table |
+| `AIClient2API/CLAUDE.md` | Project rules, quick commands, skill routing table |

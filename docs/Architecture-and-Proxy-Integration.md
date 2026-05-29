@@ -8,10 +8,10 @@ This document defines the architectural routing rules, proxy constraints, and of
 The full active request path is:
 
 ```
-Claude Code CLI → Tier 2 LiteLLM (:4000) → Tier 1 AIClient2API (:3000) → External provider
+Claude Code CLI → Tier 1 AIClient2API (:3000) → External provider
 ```
 
-Both tiers are active. The previous bypass of Tier 2 (routing directly to `:3000`) was resolved in commit `a093426` after SSE passthrough was verified clean. The active path now goes through LiteLLM for payload normalization before reaching AIClient2API for provider auth and protocol translation.
+**Tier 1 :3000 is the authoritative request and model-discovery path.** Tier 2 LiteLLM (:4000) still runs but is kept **out of the Claude Code hot path**: a live streaming test confirmed LiteLLM re-wraps streaming responses — it emits duplicate `message_start` events and interleaves replies — which corrupts the Anthropic SSE stream. The `a093426` SSE buffering change did **not** resolve this. Routing Claude Code directly to `:3000` produces a single, well-formed Anthropic event sequence. LiteLLM remains available for non-streaming normalization/fallback experiments and is tracked for a future re-wrap fix.
 
 **Startup order is mandatory:** Tier 1 must be healthy before Tier 2 starts. LiteLLM fires ~80 concurrent health-check requests at `:3000` on startup — if Tier 1 is still initializing, this causes an immediate CPU spike. Use `start-proxies` (the `_ensure_gateways` alias) or `safereset`; never start both tiers in parallel manually.
 
@@ -19,13 +19,13 @@ Both tiers are active. The previous bypass of Tier 2 (routing directly to `:3000
 
 Claude Code contains hardcoded internal logic that alters its behavior based on the `ANTHROPIC_BASE_URL`. If the URL does not point to an official Anthropic endpoint (e.g., `api.anthropic.com`), the CLI assumes it is hitting an AWS Bedrock or Vertex endpoint and disables several native features — most importantly, **Tool Search**.
 
-To bypass this internal limitation and restore full functionality when routing through the proxy, export the following environment variables in the ZSH initialization profile. `claude-proxy` writes `ANTHROPIC_BASE_URL=http://127.0.0.1:4000` (Tier 2 LiteLLM) to `~/.claude/settings.json`.
+To bypass this internal limitation and restore full functionality when routing through the proxy, export the following environment variables in the ZSH initialization profile. `claude-proxy` writes `ANTHROPIC_BASE_URL=http://127.0.0.1:3000` (Tier 1 AIClient2API) to `~/.claude/settings.json`.
 
 ```bash
 # Force the CLI to enable the Tool Search capability despite a custom Base URL
 export ENABLE_TOOL_SEARCH=true
 
-# Allow the CLI to fetch available models from LiteLLM's /v1/models endpoint
+# Allow the CLI to fetch available models from Tier 1's /v1/models endpoint
 export CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1
 ```
 
@@ -33,7 +33,7 @@ The `claude-proxy` shell function (defined in `~/AIClient2API/scripts/claude-mod
 
 | Variable | Value | Purpose |
 |---|---|---|
-| `ANTHROPIC_BASE_URL` | `http://127.0.0.1:4000` | Routes Claude Code through Tier 2 LiteLLM |
+| `ANTHROPIC_BASE_URL` | `http://127.0.0.1:3000` | Routes Claude Code directly to Tier 1 AIClient2API (LiteLLM :4000 bypassed — corrupts SSE) |
 | `ANTHROPIC_API_KEY` | `$PROXY_TOKEN` | Proxy auth token |
 | `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` | Enables model list fetch from `/v1/models` |
 | `ENABLE_TOOL_SEARCH` | `true` | Restores Tool Search on non-Anthropic base URL |
