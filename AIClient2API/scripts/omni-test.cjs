@@ -4,10 +4,20 @@
 /**
  * AIClient2API Quota-Safe Omni-Test Suite
  *
+ * ⚠️ DEPRECATED (2026-05-30) — low-confidence / false positives.
+ * max_tokens=3 is too small for the model to actually generate (reasoning models in
+ * particular emit nothing usable), and it only checks HTTP 200 + that a "content"
+ * field exists, so an empty 200 passes. Use the accurate, quota-safe replacement:
+ *     node scripts/live-verify.cjs            # full
+ *     node scripts/live-verify.cjs --quick    # one model per provider
+ * Kept only for the shell-alias / proxy-health checks; do not trust its model results.
+ *
  * One lightweight request per active provider (max_tokens=3, 2s delay between tests).
  * Tests: proxy health, shell aliases, tool-calling, per-provider latency.
  * Never triggers 429 or burns through quota.
  */
+
+console.warn('\x1b[33m[deprecated] omni-test.cjs is low-confidence — use scripts/live-verify.cjs\x1b[0m');
 
 const { execSync } = require('child_process');
 const { readFileSync } = require('fs');

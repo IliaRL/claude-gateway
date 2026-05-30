@@ -1,3 +1,12 @@
+// ⚠️ DEPRECATED (2026-05-30) — known false positives.
+// This script passes on HTTP 200 + loose matching (e.g. weak SSE substring checks),
+// so models that fail in real Claude Code use can still report green.
+// Use the accurate, quota-safe replacement instead:
+//     node scripts/live-verify.cjs            # full
+//     node scripts/live-verify.cjs --quick    # one model per provider
+// Kept only for backward compatibility; do not rely on its results.
+console.warn('\x1b[33m[deprecated] master-smoke-test.cjs has known false positives — use scripts/live-verify.cjs\x1b[0m');
+
 const http = require('http');
 
 const API_KEY = process.env.AICLIENT_TOKEN || 'sk-a60f3efdf9b97e63c84ab4a3583f9d1c';

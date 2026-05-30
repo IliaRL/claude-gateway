@@ -217,6 +217,11 @@ function handleWorkerMessage(message) {
             logger.info('[Master] Worker requested restart');
             restartWorker();
             break;
+        case 'fatal_error':
+            logger.error(`[Master] Fatal error from worker: ${message.error}. Stopping restarts.`);
+            workerStatus.isStopping = true; // Prevent automatic restarts
+            process.exit(1);
+            break;
         case 'status':
             logger.info('[Master] Worker status:', message.data);
             break;

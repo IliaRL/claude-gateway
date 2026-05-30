@@ -315,6 +315,19 @@ async function startServer() {
 
     // 设置服务器的最大连接数
     serverInstance.maxConnections = 1000;
+    
+    serverInstance.on('error', (err) => {
+        if (err.code === 'EADDRINUSE') {
+            logger.error(`[Server] Port ${CONFIG.SERVER_PORT} is already in use. Aborting startup.`);
+            if (process.send) {
+                process.send({ type: 'fatal_error', error: 'EADDRINUSE' });
+            }
+            process.exit(1); // Exit with error code to prevent automatic restart masking
+        } else {
+            logger.error('[Server] Unexpected server error:', err);
+        }
+    });
+
     serverInstance.listen(CONFIG.SERVER_PORT, CONFIG.HOST, async () => {
         logger.info(`--- Unified API Server Configuration ---`);
         const configuredProviders = Array.isArray(CONFIG.DEFAULT_MODEL_PROVIDERS) && CONFIG.DEFAULT_MODEL_PROVIDERS.length > 0
@@ -431,8 +444,22 @@ async function startServer() {
                         return { providerType, uuid: accountConfig?.uuid, status: 'failed', error: err?.message || String(err) };
                     }
                 };
+                const runWarmupSequentially = async () => {
+                    const results = [];
+                    for (const target of warmupTargets) {
+                        try {
+                            const result = await warmOne(target);
+                            results.push({ status: 'fulfilled', value: result });
+                        } catch (err) {
+                            results.push({ status: 'rejected', reason: err });
+                        }
+                        // Small delay to prevent CPU/RAM spikes
+                        await new Promise(r => setTimeout(r, 500));
+                    }
+                    return results;
+                };
 
-                Promise.allSettled(warmupTargets.map(warmOne)).then(results => {
+                runWarmupSequentially().then(results => {
                     const elapsedMs = Date.now() - startedAt;
                     let initialized = 0, alreadyInit = 0, failed = 0, noService = 0;
                     for (const r of results) {

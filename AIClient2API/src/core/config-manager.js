@@ -151,6 +151,12 @@ export async function initializeConfig(args = process.argv.slice(2), configFileP
         logger.error('[Config Error] Could not read Master-C-Code-Config/Credentials.md:', err.message);
     }
 
+    // Override with environment variable if present
+    if (process.env.AICLIENT_TOKEN) {
+        currentConfig.REQUIRED_API_KEY = process.env.AICLIENT_TOKEN;
+        logger.info('[Config] Set REQUIRED_API_KEY from AICLIENT_TOKEN environment variable');
+    }
+
 
     // CLI argument definitions: { flag, configKey, type, validValues? }
     // type: 'string' | 'int' | 'bool' | 'enum'

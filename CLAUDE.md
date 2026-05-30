@@ -92,7 +92,7 @@ All credentials must be sourced from `/Users/ilialiston/MASTER-C/Credentials/`. 
 
 **Tier 1 directory:** `AIClient2API/` is the real Tier-1 gateway dir (`~/AIClient2API` is a symlink pointing to it). Never glob, list, or scan inside it — `node_modules` (187MB) and `.git` live there. `.claudesignore` excludes the heavy subdirs; do not remove those entries.
 
-**Memory headroom guard:** Starting the gateway when RAM is near-full pushes resident memory past the jetsam threshold and triggers a WindowServer-watchdog kernel panic. `scripts/safe-restart.sh` and the `_ensure_gateways` shell helper enforce a **4 GB reclaimable-RAM floor** before launch — never bypass it. See `docs/Troubleshooting-and-Fixes.md` (Issue 10).
+**Memory headroom guard:** Starting the gateway when RAM is near-full pushes resident memory past the jetsam threshold and triggers a WindowServer-watchdog kernel panic. `scripts/safe-restart.sh` and the `_ensure_gateways` shell helper enforce a **2 GB reclaimable-RAM floor** (reclaimable = `free + speculative + inactive + purgeable`) before launch — never bypass it. All four locations (`safe-restart.sh`, `_ensure_gateways` in zshrc, `live-verify.cjs`, this doc) must stay in sync. See `docs/Troubleshooting-and-Fixes.md` (Issue 10).
 
 **Restart only via `./scripts/safe-restart.sh`** — it kills only the port-3000/3100 listeners, never the parent Claude process.
 

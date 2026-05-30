@@ -75,10 +75,10 @@ _claude_mode_write_settings() {
       printf '{"native_model": "%s"}' "$old_model" >"$CLAUDE_PROXY_BACKUP_FILE"
     fi
     # Set proxy env vars and switch model to a direct proxy catalog entry.
-    # Only ANTHROPIC_API_KEY is set — ANTHROPIC_AUTH_TOKEN is for Anthropic OAuth/native auth
-    # and must never be present alongside ANTHROPIC_API_KEY (causes Claude Code conflict + silent drops).
+    # ANTHROPIC_AUTH_TOKEN carries the proxy token via the Authorization: Bearer channel.
+    # ANTHROPIC_API_KEY must not coexist with it (Claude Code auth conflict + silent request drops).
     jq --arg base "$base" --arg token "$token" --arg model "$PROXY_CLI_MODEL" \
-      '.env = (.env // {}) | .env.ANTHROPIC_BASE_URL = $base | .env.ANTHROPIC_API_KEY = $token | .env.CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY = "1" | .env.CLAUDE_CODE_ATTRIBUTION_HEADER = "0" | .env.ENABLE_TOOL_SEARCH = "true" | del(.env.ANTHROPIC_AUTH_TOKEN) | .model = $model' \
+      '.env = (.env // {}) | .env.ANTHROPIC_BASE_URL = $base | .env.ANTHROPIC_AUTH_TOKEN = $token | .env.CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY = "1" | .env.CLAUDE_CODE_ATTRIBUTION_HEADER = "0" | .env.ENABLE_TOOL_SEARCH = "true" | del(.env.ANTHROPIC_API_KEY) | .model = $model' \
       "$CLAUDE_SETTINGS_FILE" >"$tmp" && mv "$tmp" "$CLAUDE_SETTINGS_FILE"
     # Clear the claude.ai OAuth token from config.json so ANTHROPIC_API_KEY is the
     # sole auth method and Claude Code doesn't show the "both a token and an API key
@@ -96,11 +96,11 @@ _claude_mode_write_settings() {
         '.["claude.model"] = $model
          | .["terminal.integrated.env.osx"] = (
              (.["terminal.integrated.env.osx"] // {})
-             + {ANTHROPIC_BASE_URL: $base, ANTHROPIC_API_KEY: $token,
+             + {ANTHROPIC_BASE_URL: $base, ANTHROPIC_AUTH_TOKEN: $token,
                 AICLIENT_BASE: $base, AICLIENT_TOKEN: $token,
                 CLAUDE_CODE_ATTRIBUTION_HEADER: "0",
                 ENABLE_TOOL_SEARCH: "true"}
-             | del(.ANTHROPIC_AUTH_TOKEN)
+             | del(.ANTHROPIC_API_KEY)
            )' \
         "$ANTIGRAVITY_SETTINGS_FILE" >"$ag_tmp" && mv "$ag_tmp" "$ANTIGRAVITY_SETTINGS_FILE"
     fi
@@ -138,8 +138,8 @@ claude-proxy() {
 
   _claude_mode_write_settings on "$base" "$token" || return 1
   export ANTHROPIC_BASE_URL="$base"
-  export ANTHROPIC_API_KEY="$token"
-  unset ANTHROPIC_AUTH_TOKEN
+  export ANTHROPIC_AUTH_TOKEN="$token"
+  unset ANTHROPIC_API_KEY
   export CLAUDE_CODE_ATTRIBUTION_HEADER=0
   export ENABLE_TOOL_SEARCH=true
 

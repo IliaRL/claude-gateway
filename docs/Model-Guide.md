@@ -35,11 +35,20 @@ API calls per provider (Gemini, Kiro, Codex, Grok, Antigravity, and custom provi
 **Provider type:** `claude-kiro-oauth`
 **Credential folder:** `/Users/ilialiston/MASTER-C/Credentials/claude-kiro-oauth/`
 
-| Model ID | Tier |
-|---|---|
-| `claude-opus-4-7` | Flagship |
-| `claude-sonnet-4-6` | Balanced |
-| `claude-haiku-4-5` | Fast |
+| Model ID | Tier | Context |
+|---|---|---|
+| `claude-opus-4-8` | Flagship (Experimental) | 1M |
+| `claude-opus-4-7` | Flagship | 1M |
+| `claude-sonnet-4-6` | Balanced | 1M |
+| `claude-opus-4-5` | Flagship (prior) | 200K |
+| `claude-haiku-4-5` | Fast | 200K |
+
+> **Wire format:** Kiro gateway-facing IDs are hyphenated (`claude-opus-4-8`); the adapter maps
+> them to dotted CodeWhisperer wire IDs (`claude-opus-4.8`) via `FULL_MODEL_MAPPING` in
+> `src/providers/claude/claude-kiro.js`. There is only **one** Sonnet 4.6 and it is **1M** context
+> (the `-thinking` entry is the same upstream model in thinking mode — not a separate 200K variant).
+> Opus 4.5 is **200K** (not 1M). Context windows live in `MODEL_CONTEXT_TOKENS` (claude-kiro.js) and
+> `MODEL_CONTEXT_WINDOWS` (converters/utils.js) — keep both in sync.
 
 ### Antigravity
 **Provider type:** `gemini-antigravity`
@@ -60,7 +69,11 @@ API calls per provider (Gemini, Kiro, Codex, Grok, Antigravity, and custom provi
 | Model ID | Notes |
 |---|---|
 | `gemini-3.1-pro-preview` | |
-| `gemini-3.5-flash` | |
+
+> **No `gemini-3.5-flash` here.** Live probing confirmed Google Code Assist (the Gemini-CLI backend)
+> hard-404s `gemini-3.5-flash` — it was a phantom that only appeared to work via silent Antigravity
+> fallback. Flash 3.5 (`gemini-3.5-flash-high`, etc.) is served by **Antigravity only** (see the
+> Antigravity table above), via the `FLASH_ALIASES` map in `antigravity-core.js`.
 
 ### OpenAI Codex
 **Provider type:** `openai-codex-oauth`
@@ -93,7 +106,7 @@ data in `configs/config.json`:
    always-available model** (e.g. `gemini-3-flash`) — never cycle. Example ladders:
 
 ```text
-claude-opus-4-7 → claude-opus-4-6 → claude-opus-4-5 → gemini-claude-opus-4-6-thinking → claude-sonnet-4-5-20250929
+claude-opus-4-8 → claude-opus-4-7 → claude-opus-4-6 → claude-opus-4-5 → gemini-claude-opus-4-6-thinking → claude-sonnet-4-5-20250929
 claude-sonnet-4-6 → gemini-claude-sonnet-4-6 → gemini-3.1-pro-low → gemini-3-flash (terminal)
 gemini-2.5-pro / gemini-3.1-pro-high → gemini-3.1-pro-low → gemini-3-flash (terminal)
 ```

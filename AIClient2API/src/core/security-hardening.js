@@ -42,10 +42,17 @@ function normalizeFsPath(targetPath) {
     return String(targetPath);
 }
 
-// Helper to check if caller stack trace belongs to a plugin
 function getPluginStack() {
     const err = new Error();
-    const stack = err.stack || '';
+    const stack = err.stack;
+    if (!stack) return null;
+    
+    // Fast path: if the stack doesn't contain the plugins directory, skip expensive parsing
+    if (!stack.includes('/src/plugins/') && !stack.includes('/src/plugins-user/') && 
+        !stack.includes('\\src\\plugins\\') && !stack.includes('\\src\\plugins-user\\')) {
+        return null;
+    }
+
     const lines = stack.split('\n');
     for (const line of lines) {
         if (line.includes('node:internal') || line.includes('node:')) continue;

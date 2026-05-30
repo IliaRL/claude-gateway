@@ -88,9 +88,11 @@ export const MODEL_MAX_OUTPUT_TOKENS = {
     'claude-sonnet-4-5': 64000,
     'claude-sonnet-4-5-20250929': 64000,
     'claude-sonnet-4-6': 64000,
+    'claude-sonnet-4-6-thinking': 64000,
     'claude-opus-4-5': 32000,
     'claude-opus-4-6': 32000,
     'claude-opus-4-7': 32000,
+    'claude-opus-4-8': 128000,           // Opus 4.8: 128K max output per Kiro docs
     // OpenAI Codex OAuth
     'gpt-5.2': 32768,
     'gpt-5.3-codex': 32768,
@@ -144,14 +146,25 @@ export const MODEL_CONTEXT_WINDOWS = {
     'gemini-2.5-flash-thinking': 1048576,
     'gemini-claude-sonnet-4-6': 200000,
     'gemini-claude-opus-4-6-thinking': 200000,
-    // Kiro / Anthropic Claude models
+    // Kiro / Anthropic Claude models — context windows per Kiro official docs (Kiro-models.md, reconciled 2026-05-30)
     'claude-haiku-4-5': 200000,
+    'claude-haiku-4-5-20251001': 200000,
+    'claude-sonnet-4-0': 200000,
     'claude-sonnet-4-5': 200000,
     'claude-sonnet-4-5-20250929': 200000,
-    'claude-sonnet-4-6': 200000,
-    'claude-opus-4-5': 1000000,
+    'claude-sonnet-4-6': 1000000,            // FIX: Kiro docs list Sonnet 4.6 at 1M (was 200K)
+    'claude-sonnet-4-6-thinking': 1000000,   // same upstream model as claude-sonnet-4.6
+    'claude-opus-4-5': 200000,               // FIX: Kiro docs list Opus 4.5 at 200K (was 1M)
+    'claude-opus-4-5-20251101': 200000,
     'claude-opus-4-6': 1000000,
     'claude-opus-4-7': 1000000,
+    'claude-opus-4-8': 1000000,              // Opus 4.8 (2026-05-28): 1M context
+    // Kiro third-party models
+    'deepseek-3-2': 128000,
+    'minimax-m2-5': 200000,
+    'glm-5': 200000,
+    'minimax-m2-1': 200000,
+    'qwen3-coder-next': 256000,
     // OpenAI Codex OAuth
     'gpt-5.2': 128000,
     'gpt-5.3-codex': 128000,

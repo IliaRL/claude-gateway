@@ -4,7 +4,7 @@ import url from 'url';
 
 // Define target path
 const TARGET_DIR = '/Users/ilialiston/MASTER-C/Credentials';
-const PROJECT_DIR = '/Users/ilialiston/AIClient2API';
+const PROJECT_DIR = process.env.SYNC_PROJECT_DIR || '/Users/ilialiston/MASTER-C/AIClient2API';
 
 export async function syncCredentials(options = {}) {
     const dryRun = options.dryRun || false;

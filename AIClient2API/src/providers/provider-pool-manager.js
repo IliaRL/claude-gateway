@@ -15,6 +15,15 @@ import { broadcastEvent } from '../ui-modules/event-broadcast.js';
 import { ENDPOINT_TYPE } from '../utils/common.js';
 import { CooldownManager } from './cooldown-manager.js';
 import * as cockpitQuota from '../utils/cockpit-quota.js';
+import { MODEL_CONTEXT_WINDOWS } from '../converters/utils.js';
+
+// Compact context-window tag for /model picker display names, e.g. " [1M]" / " [200K]".
+// Null-safe: unknown models get no tag. Sourced from the canonical MODEL_CONTEXT_WINDOWS map.
+function _contextWindowTag(model) {
+    const n = MODEL_CONTEXT_WINDOWS[model];
+    if (!n || !Number.isFinite(n)) return '';
+    return n >= 1000000 ? ` [${Math.round(n / 1000000)}M]` : ` [${Math.round(n / 1000)}K]`;
+}
 
 function getCustomModelAliasesForProvider(config, providerType) {
     const customModels = Array.isArray(config?.customModels) ? config.customModels : [];
@@ -1371,6 +1380,12 @@ export class ProviderPoolManager {
                 // Also check per-account configured supported models
                 const supported = getConfiguredSupportedModels(providerType, cfg);
                 if (supported.length > 0 && !supported.includes(modelId)) return false;
+                
+                // Add the missing notSupportedModels check!
+                if (cfg.notSupportedModels && Array.isArray(cfg.notSupportedModels) && cfg.notSupportedModels.includes(modelId)) {
+                    return false;
+                }
+
                 return true;
             });
             if (anyHealthy) return true;
@@ -1648,9 +1663,12 @@ export class ProviderPoolManager {
                         .split(/[-/:]+/)
                         .map(w => w.charAt(0).toUpperCase() + w.slice(1))
                         .join(' ');
+                    // Append a context-window tag (e.g. " [1M]") so e.g. the two Sonnet 4.6
+                    // entries surface their context size at a glance in the /model picker.
+                    const _ctx = _contextWindowTag(model);
                     entry.display_name = _friendly.startsWith('Claude')
-                        ? `${_friendly} (${_providerShort})`
-                        : `Claude ${_friendly} (${_providerShort})`;
+                        ? `${_friendly}${_ctx} (${_providerShort})`
+                        : `Claude ${_friendly}${_ctx} (${_providerShort})`;
 
                     allModels.push(entry);
                     // Claude Code's /model picker filters to /^(claude|anthropic)/i.

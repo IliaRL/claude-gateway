@@ -1,50 +1,14 @@
-# Ignore heavy dependency folders
+# Prevent semgrep from scanning vendor/generated directories.
+# Without this, securecoder/Aikido spawns 37-171 concurrent semgrep-core-proprietary
+# processes (57GB virtual) trying to scan 187MB of node_modules, causing kernel panics.
 node_modules/
-venv/
-.venv/
-env/
-.env/
-__pycache__/
-*.pyc
-
-# Ignore compiled/build outputs
-build/
-dist/
-out/
-target/
-*.node
-*.dylib
-*.so
-*.dll
-
-# Ignore caches and temporary data
-.claude/
-.gemini/
-.remember/
-.playwright-mcp/
-.serena/
-.worktrees/
-.vscode/
-.antigravity/
-.antigravity-ide/
 logs/
 *.log
-*.db
-*.db-shm
-*.db-wal
-
-# Ignore system diagnostics and massive files
-sysdiagnose*
-*.ips
-*.panic
-*.spin
-*.archive
-
-# Lockfiles
-package-lock.json
+dist/
+build/
+coverage/
+.pnpm-store/
 pnpm-lock.yaml
-yarn.lock
-
-# Git
-.git/
-
+*.lock
+scripts/omni-test.cjs
+scripts/master-smoke-test.cjs

@@ -53,8 +53,10 @@ export const PROVIDER_MODELS = Object.assign(Object.create(null), {
         'gemini-2.5-pro',
         'gemini-2.5-flash',
         'gemini-2.5-flash-lite',
-        // Upstream merge 2026-05-21: new gemini-3.5-flash variant
-        'gemini-3.5-flash',
+        // NOTE: 'gemini-3.5-flash' removed 2026-05-30 — phantom. Google Code Assist (the
+        // gemini-cli upstream) hard-404s this ID ("Requested entity was not found").
+        // The real Flash 3.5 low/medium/high tiers live on gemini-antigravity (see below),
+        // which has proper FLASH_ALIASES + thinkingLevel handling. Verified by live probe.
     ],
     'gemini-antigravity': [
         'gemini-3-flash',
@@ -97,6 +99,10 @@ export const PROVIDER_MODELS = Object.assign(Object.create(null), {
         'claude-opus-4-5-20251101',
         'claude-opus-4-6',
         'claude-opus-4-7',
+        // 2026-05-28: Opus 4.8 (Experimental, launched 2026-05-28) — 1M context, 128K max
+        // output. Verified live: the dotted upstream wire id is claude-opus-4.8 (mapped in
+        // claude-kiro.js FULL_MODEL_MAPPING). Source: Kiro official docs (Kiro-models.md).
+        'claude-opus-4-8',
         // Third-party models available via Kiro (dot-variants removed — display transform handles dots)
         'deepseek-3-2',
         'minimax-m2-5',

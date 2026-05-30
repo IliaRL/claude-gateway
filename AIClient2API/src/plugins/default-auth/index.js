@@ -81,7 +81,8 @@ const defaultAuthPlugin = {
         }
 
         // 认证失败，记录日志但不发送响应（由 request-handler 统一处理）
-        logger.info(`[Default Auth] Unauthorized request. Headers: Authorization=${req.headers['authorization'] ? 'present' : 'N/A'}, x-api-key=${req.headers['x-api-key'] || 'N/A'}, x-goog-api-key=${req.headers['x-goog-api-key'] || 'N/A'}`);
+        logger.info(`[Default Auth] Unauthorized request. authHeader="${req.headers['authorization']}", x-api-key="${req.headers['x-api-key']}"`);
+        logger.info(`[Default Auth] All headers: ${JSON.stringify(req.headers)}`);
         
         // 返回 null 表示此插件不授权，让其他插件或默认逻辑处理
         return { handled: false, authorized: null };
