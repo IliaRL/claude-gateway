@@ -516,7 +516,7 @@
     "id": "mistralai/mistral-large-3-675b-instruct-2512",
     "displayName": "Mistral Large 3 675B Instruct (2025-12)",
     "provider": "nvidia-nim",
-    "contextWindow": 128000,
+    "contextWindow": 1000000,
     "maxOutput": 8192,
     "fallbackTarget": null,
     "converterStrategy": "openai"
