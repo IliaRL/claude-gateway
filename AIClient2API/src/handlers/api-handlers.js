@@ -27,6 +27,7 @@ import {
     getCustomModelListProvider
 } from '../providers/provider-models.js';
 import { ProviderStrategyFactory } from '../utils/provider-strategies.js';
+import { buildModelEntry } from '../utils/request-handlers.js';
 
 export async function handleStreamRequest(res, service, model, requestBody, fromProvider, toProvider, PROMPT_LOG_MODE, PROMPT_LOG_FILENAME, providerPoolManager, pooluuid, customName, retryContext = null) {
     let fullResponseText = '';
@@ -290,18 +291,9 @@ export async function handleModelListRequest(req, res, service, endpointType, CO
 
 export function buildConfiguredModelListResponse(models, providerType, listEndpointType) {
     if (listEndpointType === ENDPOINT_TYPE.OPENAI_MODEL_LIST) {
-        const now = new Date();
         return {
             object: 'list',
-            data: models.map(id => ({
-                id,
-                object: 'model',
-                type: 'model',
-                display_name: id,
-                owned_by: providerType,
-                created: Math.floor(now.getTime() / 1000),
-                created_at: now.toISOString()
-            }))
+            data: models.map(id => buildModelEntry(id, providerType, null))
         };
     }
     return { models: models.map(id => ({ name: `models/${id}`, baseModelId: id, version: 'v1', displayName: id, supportedGenerationMethods: ['generateContent', 'countTokens'] })) };

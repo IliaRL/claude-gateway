@@ -17,6 +17,7 @@ import { CooldownManager } from './cooldown-manager.js';
 import * as cockpitQuota from '../utils/cockpit-quota.js';
 import { MODEL_CONTEXT_WINDOWS } from '../converters/utils.js';
 import { healthGuard } from '../utils/health-guard.js';
+import { buildFriendlyDisplayName, buildModelEntry } from '../utils/request-handlers.js';
 
 // Compact context-window tag for /model picker display names, e.g. " [1M]" / " [200K]".
 // Null-safe: unknown models get no tag. Sourced from the canonical MODEL_CONTEXT_WINDOWS map.
@@ -1651,25 +1652,18 @@ export class ProviderPoolManager {
 
                 for (const model of models) {
                     const isClaudeProvider = /^(claude|anthropic)/i.test(providerType);
-                    const entry = {
-                        id: `${providerType}:${model}`,
-                        provider: providerType,
-                        model: model
-                    };
-                    // Build a canonical "Claude FriendlyName (provider)" display name for every model.
-                    // Claude Code's /model picker shows display_name, so every entry needs one.
-                    const _providerShort = providerType.replace(/^claude-/i, '').replace(/-oauth$/i, '');
-                    const _friendly = model
-                        .replace(/(\d+)[.-](\d+)/g, '$1.$2')
-                        .split(/[-/:]+/)
-                        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-                        .join(' ');
                     // Append a context-window tag (e.g. " [1M]") so e.g. the two Sonnet 4.6
                     // entries surface their context size at a glance in the /model picker.
                     const _ctx = _contextWindowTag(model);
-                    entry.display_name = _friendly.startsWith('Claude')
-                        ? `${_friendly}${_ctx} (${_providerShort})`
-                        : `Claude ${_friendly}${_ctx} (${_providerShort})`;
+                    const _baseName = buildFriendlyDisplayName(model, providerType);
+                    // Insert the context tag before the trailing " (provider)" suffix.
+                    const _displayName = _ctx ? _baseName.replace(/ \(/, `${_ctx} (`) : _baseName;
+                    const entry = {
+                        id: `${providerType}:${model}`,
+                        provider: providerType,
+                        model: model,
+                        display_name: _displayName
+                    };
 
                     allModels.push(entry);
                     // Claude Code's /model picker filters to /^(claude|anthropic)/i.
@@ -1679,7 +1673,7 @@ export class ProviderPoolManager {
                     if (!isClaudeProvider) {
                         allModels.push({
                             id: `claude-${providerType}:${model}`,
-                            display_name: entry.display_name,
+                            display_name: _displayName,
                             provider: providerType,
                             model: model
                         });
@@ -1696,18 +1690,11 @@ export class ProviderPoolManager {
         // 根据 endpointType 转换为对应格式        
         if (endpointType === ENDPOINT_TYPE.OPENAI_MODEL_LIST) {
             // OpenAI 格式聚合
-            const now = new Date();
             return {
                 object: "list",
                 data: allModels.map(m => ({
-                    id: m.id,
-                    object: "model",
-                    type: "model",
-                    display_name: m.display_name || m.id,
-                    owned_by: m.provider,
-                    customName: m.customName,
-                    created: Math.floor(now.getTime() / 1000),
-                    created_at: now.toISOString()
+                    ...buildModelEntry(m.id, m.provider, m.display_name || null),
+                    customName: m.customName
                 }))
             };
         } else if (endpointType === ENDPOINT_TYPE.GEMINI_MODEL_LIST) {
