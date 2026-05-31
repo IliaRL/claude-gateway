@@ -4,7 +4,13 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { createRequire } from 'module';
 import logger from '../utils/logger.js';
+
+const _require = createRequire(import.meta.url);
+const _catalog = JSON.parse(_require('fs').readFileSync(
+    new URL('../../configs/model-catalog.json', import.meta.url).pathname, 'utf8'
+));
 
 // =============================================================================
 // 常量定义
@@ -58,140 +64,19 @@ export const OPENAI_RESPONSES_DEFAULT_OUTPUT_TOKEN_LIMIT = 128000;
 
 // =============================================================================
 // 每模型最大输出 token 数 (max output tokens per model)
-// Used to inject accurate per-model defaults when clients omit max_tokens.
-// Values sourced from provider API docs / listModels() introspection.
+// Derived from configs/model-catalog.json — do not hardcode values here.
 // =============================================================================
-export const MODEL_MAX_OUTPUT_TOKENS = {
-    // Gemini CLI OAuth models — API reports outputTokenLimit: 65535
-    'gemini-3.1-pro-preview': 65535,
-    'gemini-3-flash-preview': 65535,
-    'gemini-3.1-flash-lite-preview': 65535,
-    'gemini-2.5-pro': 65535,
-    'gemini-2.5-flash': 65535,
-    'gemini-2.5-flash-lite': 65535,
-    // Gemini Antigravity models
-    'gemini-3-flash': 65535,
-    'gemini-3.1-pro-high': 65535,
-    'gemini-3.1-pro-low': 65535,
-    'gemini-3.5-flash-extra-low': 65535,
-    'gemini-3.5-flash-low': 65535,
-    'gemini-3.5-flash-medium': 65535,   // alias → gemini-3.5-flash-low
-    'gemini-3.5-flash-high': 65535,     // alias → gemini-3-flash-agent
-    'gemini-3.1-flash-image': 65535,
-    'gemini-3-flash-agent': 65535,
-    'gemini-2.5-flash-thinking': 65535,
-    // Antigravity Claude-via-Gemini models
-    'gemini-claude-sonnet-4-6': 64000,
-    'gemini-claude-opus-4-6-thinking': 32000,
-    // Kiro / Anthropic Claude models
-    'claude-haiku-4-5': 32000,
-    'claude-sonnet-4-5': 64000,
-    'claude-sonnet-4-5-20250929': 64000,
-    'claude-sonnet-4-6': 64000,
-    'claude-sonnet-4-6-thinking': 64000,
-    'claude-opus-4-5': 32000,
-    'claude-opus-4-6': 32000,
-    'claude-opus-4-7': 32000,
-    'claude-opus-4-8': 128000,           // Opus 4.8: 128K max output per Kiro docs
-    // OpenAI Codex OAuth
-    'gpt-5.2': 32768,
-    'gpt-5.3-codex': 32768,
-    'gpt-5.4': 32768,
-    'gpt-5.4-mini': 32768,
-    'gpt-5.5': 32768,
-    // GitHub Models
-    'gpt-4o': 16384,
-    'gpt-4o-mini': 16384,
-    'gpt-4.1': 32768,
-    'gpt-4.1-mini': 32768,
-    'gpt-4.1-nano': 32768,
-    'DeepSeek-R1': 32768,
-    // NVIDIA NIM
-    'nvidia/llama-3.3-nemotron-super-49b-v1.5': 131072,
-    'nvidia/llama-3.3-nemotron-super-49b-v1': 131072,
-    'meta/llama-4-maverick-17b-128e-instruct': 8192,
-    'meta/llama-3.3-70b-instruct': 131072,
-    'moonshotai/kimi-k2.6': 32768,
-    'mistralai/mistral-small-4-119b-2603': 32768,
-    'openai/gpt-oss-120b': 32768,
-    // OpenRouter free-tier models (base IDs after :free suffix is stripped)
-    'openai/gpt-oss-20b': 16384,
-    'deepseek/deepseek-v4-flash': 32768,
-    'nvidia/nemotron-3-super-120b-a12b': 131072,
-    'nvidia/nemotron-3-nano-30b-a3b': 131072,
-};
+export const MODEL_MAX_OUTPUT_TOKENS = Object.fromEntries(
+    _catalog.map(m => [m.id, m.maxOutput])
+);
 
 // =============================================================================
 // 每模型输入上下文窗口大小 (input context window per model)
-// Used by the status line to show accurate "left" context relative to the
-// actual model in use, not Claude Code's assumed context size.
+// Derived from configs/model-catalog.json — do not hardcode values here.
 // =============================================================================
-export const MODEL_CONTEXT_WINDOWS = {
-    // Gemini models — 1M input context (API reports inputTokenLimit: 1024000)
-    'gemini-3.1-pro-preview': 1048576,
-    'gemini-3-flash-preview': 1048576,
-    'gemini-3.1-flash-lite-preview': 1048576,
-    'gemini-2.5-pro': 1048576,
-    'gemini-2.5-flash': 1048576,
-    'gemini-2.5-flash-lite': 1048576,
-    'gemini-3-flash': 1048576,
-    'gemini-3.1-pro-high': 1048576,
-    'gemini-3.1-pro-low': 1048576,
-    'gemini-3.5-flash-extra-low': 1048576,
-    'gemini-3.5-flash-low': 1048576,
-    'gemini-3.5-flash-medium': 1048576,   // alias → gemini-3.5-flash-low
-    'gemini-3.5-flash-high': 1048576,     // alias → gemini-3-flash-agent
-    'gemini-3.1-flash-image': 1048576,
-    'gemini-3-flash-agent': 1048576,
-    'gemini-2.5-flash-thinking': 1048576,
-    'gemini-claude-sonnet-4-6': 200000,
-    'gemini-claude-opus-4-6-thinking': 200000,
-    // Kiro / Anthropic Claude models — context windows per Kiro official docs (Kiro-models.md, reconciled 2026-05-30)
-    'claude-haiku-4-5': 200000,
-    'claude-haiku-4-5-20251001': 200000,
-    'claude-sonnet-4-0': 200000,
-    'claude-sonnet-4-5': 200000,
-    'claude-sonnet-4-5-20250929': 200000,
-    'claude-sonnet-4-6': 1000000,            // FIX: Kiro docs list Sonnet 4.6 at 1M (was 200K)
-    'claude-sonnet-4-6-thinking': 1000000,   // same upstream model as claude-sonnet-4.6
-    'claude-opus-4-5': 200000,               // FIX: Kiro docs list Opus 4.5 at 200K (was 1M)
-    'claude-opus-4-5-20251101': 200000,
-    'claude-opus-4-6': 1000000,
-    'claude-opus-4-7': 1000000,
-    'claude-opus-4-8': 1000000,              // Opus 4.8 (2026-05-28): 1M context
-    // Kiro third-party models
-    'deepseek-3-2': 128000,
-    'minimax-m2-5': 200000,
-    'glm-5': 200000,
-    'minimax-m2-1': 200000,
-    'qwen3-coder-next': 256000,
-    // OpenAI Codex OAuth
-    'gpt-5.2': 128000,
-    'gpt-5.3-codex': 128000,
-    'gpt-5.4': 128000,
-    'gpt-5.4-mini': 128000,
-    'gpt-5.5': 128000,
-    // GitHub Models
-    'gpt-4o': 128000,
-    'gpt-4o-mini': 128000,
-    'gpt-4.1': 1000000,
-    'gpt-4.1-mini': 1000000,
-    'gpt-4.1-nano': 1000000,
-    'DeepSeek-R1': 128000,
-    // NVIDIA NIM
-    'nvidia/llama-3.3-nemotron-super-49b-v1.5': 131072,
-    'nvidia/llama-3.3-nemotron-super-49b-v1': 131072,
-    'meta/llama-4-maverick-17b-128e-instruct': 1048576,
-    'meta/llama-3.3-70b-instruct': 131072,
-    'moonshotai/kimi-k2.6': 131072,
-    'mistralai/mistral-small-4-119b-2603': 131072,
-    'openai/gpt-oss-120b': 128000,
-    // OpenRouter free-tier models (base IDs after :free suffix is stripped)
-    'openai/gpt-oss-20b': 128000,
-    'deepseek/deepseek-v4-flash': 128000,
-    'nvidia/nemotron-3-super-120b-a12b': 128000,
-    'nvidia/nemotron-3-nano-30b-a3b': 128000,
-};
+export const MODEL_CONTEXT_WINDOWS = Object.fromEntries(
+    _catalog.map(m => [m.id, m.contextWindow])
+);
 
 /**
  * Returns the max output tokens for a model, falling back to a protocol default.

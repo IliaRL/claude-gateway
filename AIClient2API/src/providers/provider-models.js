@@ -1,6 +1,24 @@
+import { createRequire } from 'module';
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
 import { convertData } from '../convert/convert.js';
 import { MODEL_PROVIDER } from '../utils/common.js';
 import { CONFIG } from '../core/config-manager.js';
+
+const _require = createRequire(import.meta.url);
+const _catalogPath = resolve(dirname(fileURLToPath(import.meta.url)), '../../configs/model-catalog.json');
+const _catalog = JSON.parse(_require('fs').readFileSync(_catalogPath, 'utf8'));
+
+const _byProvider = {};
+for (const entry of _catalog) {
+    if (!_byProvider[entry.provider]) _byProvider[entry.provider] = [];
+    _byProvider[entry.provider].push(entry.id);
+}
+// Seed managed-list providers that have no static models in the catalog
+// (their model lists come from live API calls at runtime).
+for (const p of ['claude-custom', 'openai-custom', 'openaiResponses-custom', 'forward-api']) {
+    if (!_byProvider[p]) _byProvider[p] = [];
+}
 
 /**
  * 获取模型配置元数据
@@ -42,168 +60,9 @@ export function getCustomModelConfig(modelId, provider = null) {
 /**
  * 各提供商支持的模型列表
  * 用于前端UI选择不支持的模型
+ * Loaded from configs/model-catalog.json — do not hardcode model IDs here.
  */
-export const PROVIDER_MODELS = Object.assign(Object.create(null), {
-    'gemini-cli-oauth': [
-        // Active gemini-cli-oauth models (gemma removed 2026-05-15 — no longer
-        // exposed on the upstream account).
-        'gemini-3.1-pro-preview',
-        'gemini-3-flash-preview',
-        'gemini-3.1-flash-lite-preview',
-        'gemini-2.5-pro',
-        'gemini-2.5-flash',
-        'gemini-2.5-flash-lite',
-        // NOTE: 'gemini-3.5-flash' removed 2026-05-30 — phantom. Google Code Assist (the
-        // gemini-cli upstream) hard-404s this ID ("Requested entity was not found").
-        // The real Flash 3.5 low/medium/high tiers live on gemini-antigravity (see below),
-        // which has proper FLASH_ALIASES + thinkingLevel handling. Verified by live probe.
-    ],
-    'gemini-antigravity': [
-        'gemini-3-flash',
-        'gemini-3.1-pro-high',
-        'gemini-3.1-pro-low',
-        // Antigravity 3.5 Flash tiers — cockpit display names map to these API model IDs:
-        //   "Gemini 3.5 Flash (High)"   → gemini-3-flash-agent   (already listed above)
-        //   "Gemini 3.5 Flash (Medium)" → gemini-3.5-flash-low
-        //   "Gemini 3.5 Flash (Low)"    → gemini-3.5-flash-extra-low
-        // Friendly aliases so /model picker shows intuitive names (resolved in antigravity-core.js):
-        'gemini-3.5-flash-extra-low',
-        'gemini-3.5-flash-low',
-        'gemini-3.5-flash-medium',   // alias → gemini-3.5-flash-low
-        'gemini-3.5-flash-high',     // alias → gemini-3-flash-agent
-        'gemini-claude-sonnet-4-6',
-        'gemini-claude-opus-4-6-thinking',
-        // Live-verified 2026-05-21: excluded models confirmed working
-        'gemini-3.1-flash-image',
-        'gemini-3-flash-agent',
-        'gemini-2.5-flash-thinking',
-        'gemini-2.5-flash',
-        'gemini-2.5-flash-lite',
-    ],
-    'claude-custom': [],
-    'claude-kiro-oauth': [
-        'claude-haiku-4-5',
-        'claude-haiku-4-5-20251001',
-        'claude-sonnet-4-0',
-        'claude-sonnet-4-5',
-        'claude-sonnet-4-5-20250929',
-        // 2026-05-22: Sonnet 4.6 served natively by Kiro (FULL_MODEL_MAPPING -> claude-sonnet-4.6).
-        // Added because the Antigravity Claude-via-Vertex passthrough now returns 403 for all
-        // Claude tiers; Kiro is the live path for real Sonnet 4.6.
-        'claude-sonnet-4-6',
-        // 2026-05-22: Thinking variant — same upstream model (claude-sonnet-4.6) but the
-        // -thinking suffix auto-injects thinking:{type:"enabled"} in claude-kiro.js so
-        // Claude Code users can select thinking mode without a custom request param.
-        'claude-sonnet-4-6-thinking',
-        'claude-opus-4-5',
-        'claude-opus-4-5-20251101',
-        'claude-opus-4-6',
-        'claude-opus-4-7',
-        // 2026-05-28: Opus 4.8 (Experimental, launched 2026-05-28) — 1M context, 128K max
-        // output. Verified live: the dotted upstream wire id is claude-opus-4.8 (mapped in
-        // claude-kiro.js FULL_MODEL_MAPPING). Source: Kiro official docs (Kiro-models.md).
-        'claude-opus-4-8',
-        // Third-party models available via Kiro (dot-variants removed — display transform handles dots)
-        'deepseek-3-2',
-        'minimax-m2-5',
-        'glm-5',
-        'minimax-m2-1',
-        'qwen3-coder-next',
-    ],
-    'openai-custom': [],
-    'openaiResponses-custom': [],
-    'openai-qwen-oauth': [
-        'coder-model',
-        'vision-model',
-        'qwen3-coder-flash',
-    ],
-    'openai-iflow': [
-        // iFlow 特有模型
-        'iflow-rome-30ba3b',
-        // Qwen 模型
-        'qwen3-coder-plus',
-        'qwen3-max',
-        'qwen3-vl-plus',
-        'qwen3-max-preview',
-        'qwen3-32b',
-        'qwen3-235b-a22b-thinking-2507',
-        'qwen3-235b-a22b-instruct',
-        'qwen3-235b',
-        // Kimi 模型
-        'kimi-k2-0905',
-        'kimi-k2',
-        // GLM 模型
-        'glm-4.6',
-        // DeepSeek 模型
-        'deepseek-v3.2',
-        'deepseek-r1',
-        'deepseek-v3',
-        // 手动定义
-        'glm-4.7',
-        'glm-5',
-        'kimi-k2.5',
-        'minimax-m2.1',
-        'minimax-m2.5',
-    ],
-    'openai-codex-oauth': [
-        // Verified live on 2026-05-15. gpt-5.3-codex-spark returned 400 invalid
-        // request upstream and was removed; re-add if Codex enables it.
-        // gpt-5.2-codex confirmed invalid (400) for ChatGPT-based Codex accounts.
-        'gpt-5.2',
-        'gpt-5.3-codex',
-        'gpt-5.4',
-        'gpt-5.4-mini',
-        'gpt-5.5',
-    ],
-    'github-models': [
-        // Live-verified 2026-05-22 against models.inference.ai.azure.com.
-        // Dead: gpt-5-mini, claude-haiku-4-5, o3-mini, o1/o1-mini/o1-preview,
-        //       Mistral variants, Meta-Llama 70B/3.3/3.2, Phi-3.5, Cohere, AI21.
-        'gpt-4o',
-        'gpt-4o-mini',
-        'gpt-4.1',
-        'gpt-4.1-mini',
-        'gpt-4.1-nano',
-        'DeepSeek-R1',
-        'DeepSeek-V3-0324',
-        'Meta-Llama-3.1-405B-Instruct',
-        'Meta-Llama-3.1-8B-Instruct',
-        'Phi-4',
-    ],
-    'nvidia-nim': [
-        // Verified live against integrate.api.nvidia.com on 2026-05-15 with the
-        // configured account. Older entries (nvidia/llama-3.1-nemotron-ultra-253b,
-        // qwen/qwen3-235b-a22b, microsoft/phi-4-reasoning-plus,
-        // deepseek-ai/deepseek-r1-0528, google/gemma-3-27b-it,
-        // moonshotai/kimi-k2-instruct, nvidia/llama-3.3-nemotron-super-49b)
-        // 404/410 on this key and were removed.
-        // Reduced 2026-05-26: removed kimi-k2.6, llama-3.3-70b-instruct,
-        // minimax-m2.7, deepseek-v4-pro due to cold-start latency >30s.
-        // Re-ordered fastest-first for routing performance.
-        'meta/llama-3.2-3b-instruct',
-        'meta/llama-4-maverick-17b-128e-instruct',
-        'nvidia/llama-3.3-nemotron-super-49b-v1',
-        'nvidia/llama-3.3-nemotron-super-49b-v1.5',
-        'openai/gpt-oss-20b',
-        'openai/gpt-oss-120b',
-        'mistralai/mistral-small-4-119b-2603',
-        'mistralai/mistral-large-3-675b-instruct-2512'
-    ],
-    'forward-api': [],
-    'grok-web': [
-        'grok-4.1-mini',
-        'grok-4.1-thinking',
-        'grok-4.20',
-        'grok-4.20-auto',
-        'grok-4.20-fast',
-        'grok-4.20-expert',
-        'grok-4.20-heavy',
-        'grok-imagine-1.0',
-        'grok-imagine-1.0-edit',
-        'grok-imagine-1.0-fast',
-        'grok-imagine-1.0-fast-edit',
-    ]
-});
+export const PROVIDER_MODELS = Object.assign(Object.create(null), _byProvider);
 
 export const MANAGED_MODEL_LIST_PROVIDERS = [
     'openai-custom',
