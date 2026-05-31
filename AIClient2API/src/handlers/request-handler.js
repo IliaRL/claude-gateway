@@ -258,6 +258,61 @@ export function createRequestHandler(config, providerPoolManager) {
                         }
                     }
 
+                    // TraceStore endpoints (persistent 1-hour window, queryable)
+                    // GET /v1/traces/summary  → aggregated stats for the last hour
+                    // GET /v1/traces          → filtered list (error, provider, model, since, limit)
+                    // GET /v1/traces/:id      → single trace by requestId
+                    if (method === 'GET' && path === '/v1/traces/summary') {
+                        try {
+                            const summary = traceStore.summary();
+                            res.writeHead(200, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({
+                                window: '1h',
+                                total: summary.total ?? 0,
+                                errors: summary.errors ?? 0,
+                                errorRate: summary.total > 0 ? ((summary.errors / summary.total) * 100).toFixed(1) + '%' : '0%',
+                                avgLatencyMs: summary.avgLatencyMs != null ? Math.round(summary.avgLatencyMs) : null,
+                            }));
+                            return true;
+                        } catch (error) {
+                            handleError(res, { status: 500, message: `traces/summary error: ${error.message}` }, currentConfig.MODEL_PROVIDER, null, req);
+                            return;
+                        }
+                    }
+
+                    if (method === 'GET' && path === '/v1/traces') {
+                        try {
+                            const { error, provider, model, since, limit } = requestUrl.searchParams
+                                ? Object.fromEntries(requestUrl.searchParams.entries())
+                                : {};
+                            const traces = traceStore.query({ error, provider, model, since, limit });
+                            res.writeHead(200, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({ total: traces.length, traces }));
+                            return true;
+                        } catch (error) {
+                            handleError(res, { status: 500, message: `traces query error: ${error.message}` }, currentConfig.MODEL_PROVIDER, null, req);
+                            return;
+                        }
+                    }
+
+                    if (method === 'GET' && path.startsWith('/v1/traces/')) {
+                        try {
+                            const requestId = path.slice('/v1/traces/'.length);
+                            const trace = traceStore.getById(requestId);
+                            if (!trace) {
+                                res.writeHead(404, { 'Content-Type': 'application/json' });
+                                res.end(JSON.stringify({ error: 'Trace not found' }));
+                            } else {
+                                res.writeHead(200, { 'Content-Type': 'application/json' });
+                                res.end(JSON.stringify(trace));
+                            }
+                            return true;
+                        } catch (error) {
+                            handleError(res, { status: 500, message: `traces/:id error: ${error.message}` }, currentConfig.MODEL_PROVIDER, null, req);
+                            return;
+                        }
+                    }
+
                     // Cockpit quota snapshot endpoint — exposes in-memory quota cache for the live dashboard
                     if (method === 'GET' && path === '/api/quota') {
                         try {
