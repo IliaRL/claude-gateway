@@ -342,6 +342,7 @@ export function handleError(res, error, provider = null, fromProvider = null, re
         if (metadata.isFallback) headers['X-Proxy-Fallback-Used'] = 'true';
         if (metadata.actualProvider) headers['X-Proxy-Actual-Provider'] = metadata.actualProvider;
         if (metadata.actualModel) headers['X-Proxy-Actual-Model'] = metadata.actualModel;
+        if (error.retryAfter != null) headers['Retry-After'] = String(error.retryAfter);
         res.writeHead(statusCode, headers);
     }
     res.end(JSON.stringify(errorResponse));

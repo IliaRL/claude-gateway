@@ -549,7 +549,10 @@ export async function getApiService(config, requestedModel = null, options = {})
         } else {
             const errorMsg = `[API Service] No healthy provider found in pool for ${config.MODEL_PROVIDER}${actualModelName ? ` supporting model: ${actualModelName}` : ''}`;
             logger.error(errorMsg);
-            throw new Error(errorMsg);
+            const err = new Error(errorMsg);
+            err.statusCode = 503;
+            err.retryAfter = 60;
+            throw err;
         }
     } else if (effectiveProvider === MODEL_PROVIDER.AUTO && actualModelName) {
         // 如果在 AUTO 模式下依然没能解析出具体提供商，则报错
@@ -622,13 +625,16 @@ export async function getApiServiceWithFallback(config, requestedModel = null, o
         } else {
             const errorMsg = `[API Service] No healthy provider found in pool for ${config.MODEL_PROVIDER}${actualModelName ? ` supporting model: ${actualModelName}` : ''}`;
             logger.error(errorMsg);
-            throw new Error(errorMsg);
+            const err = new Error(errorMsg);
+            err.statusCode = 503;
+            err.retryAfter = 60;
+            throw err;
         }
     } else if (effectiveProvider === MODEL_PROVIDER.AUTO && actualModelName) {
         // 如果在 AUTO 模式下依然没能解析出具体提供商，则报错
         throw new Error(`[API Service] Auto-routing failed: Model name must include a provider prefix (e.g., 'provider:model'). Received: '${actualModelName}'`);
     }
-    
+
     const service = getServiceAdapter(serviceConfig);
     
     return {
