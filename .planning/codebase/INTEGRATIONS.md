@@ -1,15 +1,18 @@
-# External Integrations
+---
+last_mapped_commit: $(git rev-parse HEAD)
+---
+# Integrations (2026-05-31)
 
-## Supported AI Providers
-1. **Kiro** (via OAuth/Session credentials in `~/.kiro/`)
-2. **Antigravity** (via `~/.antigravity/oauth_creds.json`)
-3. **Gemini** (CLI OAuth)
-4. **OpenAI Codex** (OAuth)
-5. **Grok**
-6. **GitHub Models**
-7. **NVIDIA NIM**
-8. **OpenRouter**
+## AI Model Providers
+The gateway (Tier 1) connects to the following external APIs:
+- **Anthropic / Kiro**: Native integration.
+- **Google Antigravity / Gemini CLI**: Uses `google-auth-library` and REST endpoints.
+- **OpenAI / Codex**: Uses the official `openai` SDK and `axios`.
+- **OpenRouter / OpenAI-Custom**: Handled via standard OpenAI-compatible REST endpoints.
+- **NVIDIA NIM / GitHub Models**: Integrated through OpenAI-compatible converters.
 
-## Infrastructure Integrations
-- **Cockpit Quota DB**: SQLite at `/Users/ilialiston/AIClient2API/cockpit.db`
-- **Cockpit API**: `http://127.0.0.1:18081/report` (Quota polling)
+## Local Persistence
+- **SQLite DB**: Local `.db` files (`pool_state.db`, `cockpit.db`) used for tracking quota exhaustion, request traces, and fallback health.
+
+## Infrastructure Hooks
+- **Tier 2 Interop**: Shell hooks in `~/dotfiles/zsh/zshrc` dynamically inject `ANTHROPIC_BASE_URL` to route the `claude` CLI through this gateway on port 3000.
