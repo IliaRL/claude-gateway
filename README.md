@@ -97,5 +97,5 @@ proxy-status
 - **pnpm** is the package manager for Tier 1. Never use `npm install`.
 - Credentials live in `Credentials/` (gitignored) — never commit them.
 - The gateway auto-refreshes OAuth tokens; static-key providers (NIM, GitHub, OpenRouter) don't need refresh.
-- Restart with `./AIClient2API/scripts/safe-restart.sh` (enforces the memory-headroom guard).
+- Restart with `./AIClient2API/scripts/safe-restart.sh` (enforces the memory-headroom guard and triggers `live-verify.cjs`).
 - See `CLAUDE.md` for the full operating manual.

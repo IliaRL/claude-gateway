@@ -96,6 +96,6 @@ Not in this repo. Sources `AIClient2API/scripts/claude-mode.sh`. Responsibilitie
 ---
 
 ## Cross-cutting concerns
-- **Memory safety:** `scripts/safe-restart.sh` + `_ensure_gateways` abort startup below a 4 GB reclaimable-RAM floor (jetsam crash prevention — Troubleshooting Issue 10).
+- **Memory safety:** `scripts/safe-restart.sh` + `_ensure_gateways` abort startup below a 2 GB reclaimable-RAM floor (jetsam crash prevention — Troubleshooting Issue 10), and run `live-verify.cjs` to validate API reasoning paths.
 - **Identity headers:** per-provider system-prompt prefixes handle model identity; `SYSTEM_PROMPT_FILE_PATH` is intentionally empty (Troubleshooting Issue 8).
 - **Observability:** status-line telemetry (`/tmp/aiclient_last_model`) reports model, context window, tokens, latency, TTFT, fallback count, and downgrade flag.
