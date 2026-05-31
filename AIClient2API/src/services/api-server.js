@@ -11,6 +11,8 @@ import { getTLSSidecar } from '../utils/tls-sidecar.js';
 import { HEALTH_CHECK } from '../utils/constants.js';
 import PreflightHealthMonitor from './preflight-health.js';
 import * as cockpitQuota from '../utils/cockpit-quota.js';
+import { healthGuard } from '../utils/health-guard.js';
+import { validateAndRepairProviderPools } from '../utils/provider-pools-validator.js';
 
 /**
  * @license
@@ -259,7 +261,10 @@ function setupSignalHandlers() {
 async function startServer() {
     // Initialize configuration
     await initializeConfig(process.argv.slice(2), 'configs/config.json');
-    
+
+    // Repair known provider_pools.json corruption before pool manager loads state
+    validateAndRepairProviderPools(CONFIG.PROVIDER_POOLS_FILE_PATH || 'configs/provider_pools.json');
+
     // 自动关联 configs 目录中的配置文件到对应的提供商
     // logger.info('[Initialization] Checking for unlinked provider configs...');
     // await autoLinkProviderConfigs(CONFIG);
@@ -390,6 +395,11 @@ async function startServer() {
         if (poolManager) {
             logger.info('[Initialization] Performing initial health checks for provider pools...');
             poolManager.performInitialHealthChecks();
+
+            const hgConfig = CONFIG.healthGuard || {};
+            healthGuard._config = { ...healthGuard._config, ...hgConfig };
+            healthGuard.attach(poolManager);
+            logger.info('[HealthGuard] Attached to pool manager');
         }
 
         // 非阻塞预热：在 listen 回调之外异步初始化 OAuth 后端适配器，
