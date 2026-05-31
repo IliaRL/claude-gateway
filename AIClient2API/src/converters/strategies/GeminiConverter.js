@@ -5,6 +5,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { BaseConverter } from '../BaseConverter.js';
+import { validateAndRepair } from '../../utils/response-validator.js';
 import {
     checkAndAssignOrDefault,
     OPENAI_DEFAULT_MAX_TOKENS,
@@ -693,7 +694,7 @@ export class GeminiConverter extends BaseConverter {
             }
         }
 
-        return {
+        const _resp = {
             id: `msg_${uuidv4()}`,
             type: "message",
             role: "assistant",
@@ -708,6 +709,7 @@ export class GeminiConverter extends BaseConverter {
                 output_tokens: geminiResponse.usageMetadata?.candidatesTokenCount || 0
             }
         };
+        return validateAndRepair(_resp, { provider: 'gemini', model: geminiResponse?.model });
     }
 
     /**

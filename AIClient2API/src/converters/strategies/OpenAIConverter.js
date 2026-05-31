@@ -6,6 +6,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import logger from '../../utils/logger.js';
 import { BaseConverter } from '../BaseConverter.js';
+import { validateAndRepair } from '../../utils/response-validator.js';
+
 import { CodexConverter } from './CodexConverter.js';
 import {
     extractAndProcessSystemMessages as extractSystemMessages,
@@ -459,7 +461,7 @@ export class OpenAIConverter extends BaseConverter {
             "anthropic"
         );
 
-        return {
+        const _resp = {
             id: `msg_${uuidv4()}`,
             type: "message",
             role: "assistant",
@@ -474,6 +476,7 @@ export class OpenAIConverter extends BaseConverter {
                 output_tokens: openaiResponse.usage?.completion_tokens || 0
             }
         };
+        return validateAndRepair(_resp, { provider: 'openai', model: openaiResponse?.model });
     }
 
     /**

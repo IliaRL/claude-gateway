@@ -6,6 +6,7 @@
 import {v4 as uuidv4} from 'uuid';
 import logger from '../../utils/logger.js';
 import {BaseConverter} from '../BaseConverter.js';
+import { validateAndRepair } from '../../utils/response-validator.js';
 import {
     checkAndAssignOrDefault,
     cleanJsonSchemaForOpenAI,
@@ -2278,7 +2279,7 @@ export class ClaudeConverter extends BaseConverter {
             });
         }
 
-        return {
+        const _resp = {
             id: codexResponse.response?.id || `msg_${uuidv4().replace(/-/g, '')}`,
             type: "message",
             role: "assistant",
@@ -2290,6 +2291,7 @@ export class ClaudeConverter extends BaseConverter {
                 output_tokens: codexResponse.response?.usage?.output_tokens || 0
             }
         };
+        return validateAndRepair(_resp, { provider: 'claude', model });
     }
 
     /**
