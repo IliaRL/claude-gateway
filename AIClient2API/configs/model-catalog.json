@@ -162,15 +162,6 @@
     "converterStrategy": "gemini"
   },
   {
-    "id": "gemini-2.5-flash-lite",
-    "displayName": "Gemini 2.5 Flash Lite",
-    "provider": "gemini-antigravity",
-    "contextWindow": 1048576,
-    "maxOutput": 65535,
-    "fallbackTarget": null,
-    "converterStrategy": "gemini"
-  },
-  {
     "id": "claude-haiku-4-5",
     "displayName": "Claude Haiku 4.5",
     "provider": "claude-kiro-oauth",
