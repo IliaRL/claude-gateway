@@ -825,7 +825,7 @@ export class GeminiConverter extends BaseConverter {
                     }
                     const toolName = normalizeToolName(part.functionCall.name);
                     const remappedArgs = remapFunctionCallArgs(toolName, part.functionCall.args || {});
-                    const toolId = part.functionCall.id || `${toolName}-${uuidv4().split('-')[0]}`;
+                    const toolId = part.functionCall.id || `toolu_${uuidv4().replace(/-/g, '').slice(0, 24)}`;
                     events.push({ type: "content_block_start", index: state.blockIndex, content_block: { type: "tool_use", id: toolId, name: toolName, input: {} } });
                     events.push({ type: "content_block_delta", index: state.blockIndex, delta: { type: "input_json_delta", partial_json: JSON.stringify(remappedArgs) } });
                     events.push({ type: "content_block_stop", index: state.blockIndex });
@@ -839,10 +839,21 @@ export class GeminiConverter extends BaseConverter {
                 events.push({ type: "content_block_stop", index: state.blockIndex });
                 state.blockStarted = false;
             }
-            const stopReason = candidate.finishReason === 'STOP' ? 'end_turn' :
-                               candidate.finishReason === 'MAX_TOKENS' ? 'max_tokens' :
-                               candidate.finishReason === 'TOOL_CALLS' ? 'tool_use' :
-                               candidate.finishReason.toLowerCase();
+            const _geminiFinishReasonMap = {
+                STOP: 'end_turn',
+                MAX_TOKENS: 'max_tokens',
+                TOOL_CALLS: 'tool_use',
+                // Gemini-specific — all map to end_turn so Claude Code sees a clean completion
+                MALFORMED_FUNCTION_CALL: 'end_turn',
+                SAFETY: 'end_turn',
+                RECITATION: 'end_turn',
+                BLOCKLIST: 'end_turn',
+                PROHIBITED_CONTENT: 'end_turn',
+                SPII: 'end_turn',
+                MODEL_ARMOR: 'end_turn',
+                OTHER: 'end_turn',
+            };
+            const stopReason = _geminiFinishReasonMap[candidate.finishReason] ?? 'end_turn';
             const messageDelta = {
                 type: "message_delta",
                 delta: { stop_reason: stopReason, stop_sequence: null }
@@ -941,7 +952,7 @@ export class GeminiConverter extends BaseConverter {
                 // [FIX] 使用 Gemini 提供的 id，如果没有则生成
                 const toolUseBlock = {
                     type: 'tool_use',
-                    id: part.functionCall.id || `${toolName}-${uuidv4().split('-')[0]}`,
+                    id: part.functionCall.id || `toolu_${uuidv4().replace(/-/g, '').slice(0, 24)}`,
                     name: toolName,
                     input: remappedArgs
                 };
@@ -1055,7 +1066,7 @@ export class GeminiConverter extends BaseConverter {
                         // [FIX] 使用 Gemini 提供的 id
                         const toolUseBlock = {
                             type: 'tool_use',
-                            id: part.functionCall.id || `${toolName}-${uuidv4().split('-')[0]}`,
+                            id: part.functionCall.id || `toolu_${uuidv4().replace(/-/g, '').slice(0, 24)}`,
                             name: toolName,
                             input: remappedArgs
                         };

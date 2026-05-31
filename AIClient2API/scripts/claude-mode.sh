@@ -77,8 +77,8 @@ _claude_mode_write_settings() {
     # Set proxy env vars and switch model to a direct proxy catalog entry.
     # ANTHROPIC_AUTH_TOKEN carries the proxy token via the Authorization: Bearer channel.
     # ANTHROPIC_API_KEY must not coexist with it (Claude Code auth conflict + silent request drops).
-    jq --arg base "$base" --arg token "$token" --arg model "$PROXY_CLI_MODEL" \
-      '.env = (.env // {}) | .env.ANTHROPIC_BASE_URL = $base | .env.ANTHROPIC_AUTH_TOKEN = $token | .env.CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY = "1" | .env.CLAUDE_CODE_ATTRIBUTION_HEADER = "0" | .env.ENABLE_TOOL_SEARCH = "true" | del(.env.ANTHROPIC_API_KEY) | .model = $model' \
+    jq --arg base "$base" --arg token "$token" \
+      '.env = (.env // {}) | .env.ANTHROPIC_BASE_URL = $base | .env.ANTHROPIC_AUTH_TOKEN = $token | .env.CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY = "1" | .env.CLAUDE_CODE_ATTRIBUTION_HEADER = "0" | .env.ENABLE_TOOL_SEARCH = "true" | del(.env.ANTHROPIC_API_KEY)' \
       "$CLAUDE_SETTINGS_FILE" >"$tmp" && mv "$tmp" "$CLAUDE_SETTINGS_FILE"
     # Clear the claude.ai OAuth token from config.json so ANTHROPIC_API_KEY is the
     # sole auth method and Claude Code doesn't show the "both a token and an API key
@@ -109,8 +109,8 @@ _claude_mode_write_settings() {
     local native_model
     native_model="$(jq -r '.native_model // empty' "$CLAUDE_PROXY_BACKUP_FILE" 2>/dev/null)"
     [ -z "$native_model" ] && native_model="$NATIVE_CLI_MODEL"
-    jq --arg m "$native_model" \
-      'if has("env") then .env |= (del(.ANTHROPIC_BASE_URL, .ANTHROPIC_AUTH_TOKEN, .ANTHROPIC_API_KEY, .CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY, .CLAUDE_CODE_ATTRIBUTION_HEADER, .ENABLE_TOOL_SEARCH)) else . end | .model = $m' \
+    jq \
+      'if has("env") then .env |= (del(.ANTHROPIC_BASE_URL, .ANTHROPIC_AUTH_TOKEN, .ANTHROPIC_API_KEY, .CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY, .CLAUDE_CODE_ATTRIBUTION_HEADER, .ENABLE_TOOL_SEARCH)) else . end' \
       "$CLAUDE_SETTINGS_FILE" >"$tmp" && mv "$tmp" "$CLAUDE_SETTINGS_FILE"
     # Also sync Antigravity IDE settings: restore native model, strip proxy env vars
     if [ -f "$ANTIGRAVITY_SETTINGS_FILE" ]; then

@@ -1,0 +1,32 @@
+<h2>Where should we enforce Claude compatibility?</h2>
+<p class="subtitle">To fix output quality and syntax compatibility, we have a few architectural options for how the gateway can intervene.</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Strict Output Interceptor (Middleware)</h3>
+      <p>A streaming parser sits between the model and Claude Code. If a model starts outputting wrong syntax (e.g., markdown JSON instead of XML), the interceptor catches it and translates it into Claude XML on the fly.</p>
+      <div style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 4px; font-family: monospace; font-size: 12px;">
+        Model: ```json { "tool": "ls" } ``` <br>
+        Gateway: &lt;invoke name="ls"&gt; ... &lt;/invoke&gt;
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Model-Specific Prompt Injection</h3>
+      <p>We build a "prompt augmentation" layer. Before the request goes to the provider, we inject very strong, model-specific instructions (e.g. "You are Qwen. Do not use JSON. Use this XML format: ..."). Relies on the model following instructions.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Continuous E2E Validation Suite</h3>
+      <p>Instead of hacking the stream, we build a rigorous test suite that runs automated Claude Code scenarios against all models. If a model fails the compatibility tests, it gets automatically marked as "unsupported" or downgraded until its prompt is fixed.</p>
+    </div>
+  </div>
+</div>

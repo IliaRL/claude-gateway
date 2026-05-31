@@ -1167,6 +1167,11 @@ export class ClaudeConverter extends BaseConverter {
                     return;
                 }
 
+                // [Schema Guard] Store raw schema for response-side dynamicFlattenToolArguments
+                if (tool.input_schema) {
+                    toolStateManager.storeToolSchema(tool.name, tool.input_schema);
+                }
+
                 // 清理 input_schema
                 let inputSchema = tool.input_schema;
                 if (inputSchema && typeof inputSchema === 'object') {
