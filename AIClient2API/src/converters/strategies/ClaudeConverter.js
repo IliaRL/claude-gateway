@@ -689,20 +689,18 @@ export class ClaudeConverter extends BaseConverter {
 
         // message_stop 事件
         if (claudeChunk.type === 'message_stop') {
-            return null;
-            // const chunk = {
-            //     id: chunkId,
-            //     object: "chat.completion.chunk",
-            //     created: timestamp,
-            //     model: model,
-            //     system_fingerprint: "",
-            //     choices: [{
-            //         index: 0,
-            //         delta: {},
-            //         finish_reason: 'stop'
-            //     }]
-            // };
-            // return chunk;
+            return {
+                id: chunkId,
+                object: "chat.completion.chunk",
+                created: timestamp,
+                model: model,
+                system_fingerprint: "",
+                choices: [{
+                    index: 0,
+                    delta: {},
+                    finish_reason: 'stop'
+                }]
+            };
         }
 
         // 兼容旧格式：如果是字符串，直接作为文本内容
@@ -1935,6 +1933,7 @@ export class ClaudeConverter extends BaseConverter {
                 generateOutputItemDone(responseId),
                 generateResponseCompleted(responseId, savedUsage)
             );
+            streamStateManager.cleanup(responseId);
         }
 
         return events;

@@ -2366,16 +2366,24 @@ You are Claude, a helpful AI assistant made by Anthropic. You must NEVER refer t
 
         let stream = null;
         let releaseThrottle = () => {};
+        const streamTimeoutMs = this.config.STREAM_TIMEOUT_MS ?? 120000;
+        const abortController = new AbortController();
+        let streamTimeoutTimer = null;
         try {
             const axiosConfig = {
                 method: 'post',
                 url: requestUrl,
                 data: requestData,
                 headers,
-                responseType: 'stream'
+                responseType: 'stream',
+                signal: abortController.signal
             };
             this._applySidecar(axiosConfig);
             releaseThrottle = await acquireKiroRequestSlot(this.config);
+            streamTimeoutTimer = setTimeout(() => {
+                logger.warn(`[Kiro] Stream timeout after ${streamTimeoutMs}ms — aborting`);
+                abortController.abort();
+            }, streamTimeoutMs);
             const response = await this.axiosInstance.request(axiosConfig);
 
             stream = response.data;
@@ -2419,7 +2427,17 @@ You are Claude, a helpful AI assistant made by Anthropic. You must NEVER refer t
             if (stream && typeof stream.destroy === 'function') {
                 stream.destroy();
             }
-            
+
+            // AbortController fired — stream stalled past STREAM_TIMEOUT_MS
+            if (error.name === 'AbortError' || error.code === 'ERR_CANCELED' || error.name === 'CanceledError') {
+                logger.error(`[Kiro] Stream timed out after ${streamTimeoutMs}ms — switching credential`);
+                const timeoutError = new Error(`Kiro stream timeout after ${streamTimeoutMs}ms`);
+                timeoutError.code = 'STREAM_TIMEOUT';
+                timeoutError.shouldSwitchCredential = true;
+                timeoutError.skipErrorCount = true;
+                throw timeoutError;
+            }
+
             const status = error.response?.status;
             const errorCode = error.code;
             const errorMessage = error.message || '';
@@ -2511,6 +2529,7 @@ You are Claude, a helpful AI assistant made by Anthropic. You must NEVER refer t
             logger.error(`[Kiro] Stream API call failed (Status: ${status}, Code: ${errorCode}):`,  error.message);
             throw error;
         } finally {
+            if (streamTimeoutTimer) clearTimeout(streamTimeoutTimer);
             releaseThrottle();
             // 确保流被关闭，释放资源
             if (stream && typeof stream.destroy === 'function') {
