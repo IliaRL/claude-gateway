@@ -110,6 +110,24 @@ export function buildFriendlyDisplayName(modelId, providerType) {
         : `Claude ${friendly} (${providerShort})`;
 }
 
+/**
+ * Build a single Anthropic-gateway-compatible model entry.
+ * Satisfies both the legacy OpenAI schema (id, obted, owned_by)
+ * and the Anthropic gateway requirements (type, display_name, created_at).
+ */
+export function buildModelEntry(modelId, providerType, displayName) {
+    const now = new Date();
+    return {
+        id: modelId,
+        object: 'model',
+        type: 'model',
+        display_name: displayName || buildFriendlyDisplayName(modelId, providerType),
+        owned_by: providerType,
+        created: Math.floor(now.getTime() / 1000),
+        created_at: now.toISOString()
+    };
+}
+
 function appendCustomModelsToModelList(clientModelList, customEntries, providerType, listEndpointType) {
     const entries = Array.isArray(customEntries) ? customEntries : [];
     const hasMetadataValue = (value) => value !== undefined && value !== null;
@@ -1152,20 +1170,14 @@ export async function handleModelListRequest(req, res, service, endpointType, CO
                     object: 'list',
                     data: models.map(modelId => {
                         const customConfig = getCustomModelConfig(modelId, providerType);
-                        const modelResponse = {
-                            id: modelId,
-                            object: 'model',
-                            created: Math.floor(Date.now() / 1000),
-                            owned_by: providerType,
-                            display_name: buildFriendlyDisplayName(modelId, providerType)
-                        };
+                        const displayName = customConfig?.name || buildFriendlyDisplayName(modelId, providerType);
+                        const modelResponse = buildModelEntry(modelId, providerType, displayName);
 
                         // 注入自定义元数据
                         if (customConfig) {
                             if (customConfig.contextLength) modelResponse.context_length = customConfig.contextLength;
                             if (customConfig.maxTokens) modelResponse.max_tokens = customConfig.maxTokens;
                             if (customConfig.description) modelResponse.description = customConfig.description;
-                            if (customConfig.name) modelResponse.display_name = customConfig.name;
                         }
 
                         return modelResponse;

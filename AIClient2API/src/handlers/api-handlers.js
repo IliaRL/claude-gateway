@@ -288,9 +288,21 @@ export async function handleModelListRequest(req, res, service, endpointType, CO
     } catch (error) { handleError(res, error, CONFIG.MODEL_PROVIDER, fromProvider); }
 }
 
-function buildConfiguredModelListResponse(models, providerType, listEndpointType) {
+export function buildConfiguredModelListResponse(models, providerType, listEndpointType) {
     if (listEndpointType === ENDPOINT_TYPE.OPENAI_MODEL_LIST) {
-        return { object: 'list', data: models.map(id => ({ id, object: 'model', created: Math.floor(Date.now() / 1000), owned_by: providerType })) };
+        const now = new Date();
+        return {
+            object: 'list',
+            data: models.map(id => ({
+                id,
+                object: 'model',
+                type: 'model',
+                display_name: id,
+                owned_by: providerType,
+                created: Math.floor(now.getTime() / 1000),
+                created_at: now.toISOString()
+            }))
+        };
     }
     return { models: models.map(id => ({ name: `models/${id}`, baseModelId: id, version: 'v1', displayName: id, supportedGenerationMethods: ['generateContent', 'countTokens'] })) };
 }

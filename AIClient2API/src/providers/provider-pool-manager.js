@@ -1696,14 +1696,18 @@ export class ProviderPoolManager {
         // 根据 endpointType 转换为对应格式        
         if (endpointType === ENDPOINT_TYPE.OPENAI_MODEL_LIST) {
             // OpenAI 格式聚合
+            const now = new Date();
             return {
                 object: "list",
                 data: allModels.map(m => ({
                     id: m.id,
                     object: "model",
-                    created: Math.floor(Date.now() / 1000),
+                    type: "model",
+                    display_name: m.display_name || m.id,
                     owned_by: m.provider,
-                    ...(m.display_name ? { display_name: m.display_name } : {})
+                    customName: m.customName,
+                    created: Math.floor(now.getTime() / 1000),
+                    created_at: now.toISOString()
                 }))
             };
         } else if (endpointType === ENDPOINT_TYPE.GEMINI_MODEL_LIST) {
