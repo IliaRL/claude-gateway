@@ -15,6 +15,7 @@ import { getPluginManager } from '../core/plugin-manager.js';
 import { randomUUID } from 'crypto';
 import { handleGrokAssetsProxy } from '../utils/grok-assets-proxy.js';
 import { createTrace, pushTrace, getAllTraces, getTrace, serializeTraceForHeader } from '../utils/trace-buffer.js';
+import { traceStore } from '../utils/trace-store.js';
 
 /**
  * Generate a short unique request ID (8 characters)
@@ -92,6 +93,7 @@ export function createRequestHandler(config, providerPoolManager) {
                     if (status) trace.status = status;
                     else if (trace.status === 'pending') trace.status = 'ok';
                     pushTrace(trace);
+                    traceStore.persist(trace);
                     // Append a trailer with final trace (works on HTTP/1.1 chunked responses).
                     if (trace.debugRequested) {
                         try {
