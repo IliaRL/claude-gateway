@@ -6,7 +6,10 @@ Credentials/
 
 # Claude Code and MCP configs (contain sensitive endpoints/keys)
 .mcp.json
-.claude/
+.claude/*
+# Agent definitions are code (no credentials) — track them
+!.claude/agents
+!.claude/agents/**
 
 # OS noise
 .DS_Store
