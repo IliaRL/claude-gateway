@@ -16,6 +16,7 @@ import { ENDPOINT_TYPE } from '../utils/common.js';
 import { CooldownManager } from './cooldown-manager.js';
 import * as cockpitQuota from '../utils/cockpit-quota.js';
 import { MODEL_CONTEXT_WINDOWS } from '../converters/utils.js';
+import { healthGuard } from '../utils/health-guard.js';
 
 // Compact context-window tag for /model picker display names, e.g. " [1M]" / " [200K]".
 // Null-safe: unknown models get no tag. Sourced from the canonical MODEL_CONTEXT_WINDOWS map.
@@ -1883,6 +1884,8 @@ export class ProviderPoolManager {
             }
 
             this._log('warn', `Immediately marked provider as unhealthy: ${this._getDisplayName(providerConfig)} for type ${providerType}. Reason: ${errorMessage || 'Authentication error'}`);
+            const uuid = providerConfig?.uuid ?? providerConfig?.customName ?? 'unknown';
+            healthGuard.recordAuthFailure(uuid, providerType, providerConfig);
             this._debouncedSave(providerType);
         }
     }
@@ -1977,6 +1980,8 @@ export class ProviderPoolManager {
             }
             
             this._log('info', `Marked provider as healthy: ${this._getDisplayName(provider.config)} for type ${providerType}${resetUsageCount ? ' (usage count reset)' : ''}`);
+            const uuid = providerConfig?.uuid ?? providerConfig?.customName ?? 'unknown';
+            healthGuard.recordSuccess(uuid);
             this._debouncedSave(providerType);
         }
     }
