@@ -1884,8 +1884,37 @@ export class ProviderPoolManager {
             }
 
             this._log('warn', `Immediately marked provider as unhealthy: ${this._getDisplayName(providerConfig)} for type ${providerType}. Reason: ${errorMessage || 'Authentication error'}`);
+            this._debouncedSave(providerType);
+        }
+    }
+
+    /**
+     * Marks a provider as needing re-authentication due to an explicit 401/403 credential rejection.
+     * This is the correct hook for recording auth failures in HealthGuard — it fires only on
+     * actual credential rejection, not on health-check timeouts, 500s, or refresh exhaustion.
+     * @param {string} providerType - The type of the provider.
+     * @param {object} providerConfig - The configuration of the provider to mark.
+     * @param {string} [errorMessage] - Optional error message to store.
+     */
+    markProviderNeedsReauth(providerType, providerConfig, errorMessage = null) {
+        if (!providerConfig?.uuid) {
+            this._log('error', 'Invalid providerConfig in markProviderNeedsReauth');
+            return;
+        }
+
+        const provider = this._findProvider(providerType, providerConfig.uuid);
+        if (provider) {
+            provider.config.needsReauth = true;
+            provider.config.lastErrorTime = new Date().toISOString();
+            if (errorMessage) {
+                provider.config.lastErrorMessage = errorMessage;
+            }
+
+            this._log('warn', `Marked provider as needsReauth: ${this._getDisplayName(providerConfig)} for type ${providerType}. Reason: ${errorMessage || '401/403 credential rejection'}`);
+
             const uuid = providerConfig?.uuid ?? providerConfig?.customName ?? 'unknown';
             healthGuard.recordAuthFailure(uuid, providerType, providerConfig);
+
             this._debouncedSave(providerType);
         }
     }
