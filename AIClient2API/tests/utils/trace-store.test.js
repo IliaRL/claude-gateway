@@ -67,3 +67,52 @@ test('persist is idempotent: duplicate requestId replaces the row', () => {
   expect(found.status).toBe('error');
   expect(store.count()).toBe(1);
 });
+
+test('query: filter by status=error returns only errors', () => {
+  store.persist(makeTrace({ requestId: 'ok-1', status: 'ok' }));
+  store.persist(makeTrace({ requestId: 'err-1', status: 'error' }));
+  store.persist(makeTrace({ requestId: 'err-2', status: 'error' }));
+  const results = store.query({ error: true });
+  expect(results.every(r => r.status === 'error')).toBe(true);
+  expect(results.length).toBe(2);
+});
+
+test('query: filter by provider', () => {
+  store.persist(makeTrace({ requestId: 'a', provider: 'openai-custom' }));
+  store.persist(makeTrace({ requestId: 'b', provider: 'gemini-antigravity' }));
+  const results = store.query({ provider: 'gemini-antigravity' });
+  expect(results.every(r => r.provider === 'gemini-antigravity')).toBe(true);
+  expect(results.length).toBe(1);
+});
+
+test('query: filter by since=1h excludes old traces', () => {
+  const now = Date.now();
+  store.persist(makeTrace({ requestId: 'new', startedAt: now - 1_000 }));        // 1s ago - include
+  store.persist(makeTrace({ requestId: 'old', startedAt: now - 3_700_000 }));    // >1h ago - exclude
+  const results = store.query({ since: '1h' });
+  expect(results.some(r => r.requestId === 'new')).toBe(true);
+  expect(results.some(r => r.requestId === 'old')).toBe(false);
+});
+
+test('query: invalid since value returns empty array without throwing', () => {
+  expect(() => store.query({ since: 'banana' })).not.toThrow();
+  const results = store.query({ since: 'banana' });
+  expect(Array.isArray(results)).toBe(true);
+});
+
+test('query: limit is respected', () => {
+  for (let i = 0; i < 10; i++) store.persist(makeTrace({ requestId: `lim-${i}` }));
+  const results = store.query({ limit: 3 });
+  expect(results.length).toBe(3);
+});
+
+test('summary: returns total, errors, avgLatencyMs for last 1h', () => {
+  const now = Date.now();
+  store.persist(makeTrace({ requestId: 's1', status: 'ok',    totalRTTMs: 100, startedAt: now - 1_000 }));
+  store.persist(makeTrace({ requestId: 's2', status: 'error', totalRTTMs: 300, startedAt: now - 2_000 }));
+  store.persist(makeTrace({ requestId: 's3', status: 'ok',    totalRTTMs: 200, startedAt: now - 4_000_000 })); // >1h, excluded
+  const s = store.summary();
+  expect(s.total).toBe(2);
+  expect(s.errors).toBe(1);
+  expect(s.avgLatencyMs).toBeCloseTo(200, 0);
+});

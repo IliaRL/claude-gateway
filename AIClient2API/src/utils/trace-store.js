@@ -93,10 +93,80 @@ export class TraceStore {
     return this._stmtCount.get().n;
   }
 
+  /**
+   * Query traces with optional filters.
+   * @param {object} opts
+   * @param {boolean} [opts.error]       If true, only return status='error' rows
+   * @param {string}  [opts.provider]    Exact provider match
+   * @param {string}  [opts.model]       LIKE %model% match
+   * @param {string}  [opts.since]       Time window: '1h', '30m', '24h', '7d'
+   * @param {number}  [opts.limit=50]    Max rows returned (capped at 200)
+   * @returns {object[]}
+   */
+  query({ error, provider, model, since, limit = 50 } = {}) {
+    const conditions = [];
+    const params = [];
+
+    if (error === true || error === 'true') {
+      conditions.push(`status = 'error'`);
+    }
+    if (provider) {
+      conditions.push(`provider = ?`);
+      params.push(provider);
+    }
+    if (model) {
+      conditions.push(`model LIKE ?`);
+      params.push(`%${model}%`);
+    }
+    const sinceMs = _parseSince(since);
+    if (sinceMs !== null) {
+      conditions.push(`startedAt > ?`);
+      params.push(Date.now() - sinceMs);
+    }
+
+    const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+    const safeLimit = Math.min(Math.max(1, Number(limit) || 50), 200);
+    params.push(safeLimit);
+
+    return this._db.prepare(
+      `SELECT * FROM request_traces ${where} ORDER BY startedAt DESC LIMIT ?`
+    ).all(...params);
+  }
+
+  /**
+   * Aggregate stats for the last 1 hour.
+   * @returns {{ total: number, errors: number, avgLatencyMs: number|null }}
+   */
+  summary() {
+    const since = Date.now() - 3_600_000;
+    return this._db.prepare(`
+      SELECT
+        COUNT(*) as total,
+        SUM(CASE WHEN status = 'error' THEN 1 ELSE 0 END) as errors,
+        AVG(totalRTTMs) as avgLatencyMs
+      FROM request_traces
+      WHERE startedAt > ?
+    `).get(since);
+  }
+
   /** Close the database (call in tests / graceful shutdown). */
   close() {
     this._db.close();
   }
+}
+
+/**
+ * Parse a human-readable since string into milliseconds.
+ * Valid formats: '30m', '1h', '24h', '7d'
+ * @returns {number|null}  null if unrecognized
+ */
+function _parseSince(since) {
+  if (!since) return null;
+  const match = String(since).match(/^(\d+)(m|h|d)$/);
+  if (!match) return null;
+  const [, n, unit] = match;
+  const multipliers = { m: 60_000, h: 3_600_000, d: 86_400_000 };
+  return Number(n) * multipliers[unit];
 }
 
 /** Singleton for use in production. */
