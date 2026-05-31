@@ -1,0 +1,632 @@
+[
+  {
+    "id": "gemini-3.1-pro-preview",
+    "displayName": "Gemini 3.1 Pro Preview",
+    "provider": "gemini-cli-oauth",
+    "contextWindow": 1048576,
+    "maxOutput": 65535,
+    "fallbackTarget": null,
+    "converterStrategy": "gemini"
+  },
+  {
+    "id": "gemini-3-flash-preview",
+    "displayName": "Gemini 3 Flash Preview",
+    "provider": "gemini-cli-oauth",
+    "contextWindow": 1048576,
+    "maxOutput": 65535,
+    "fallbackTarget": null,
+    "converterStrategy": "gemini"
+  },
+  {
+    "id": "gemini-3.1-flash-lite-preview",
+    "displayName": "Gemini 3.1 Flash Lite Preview",
+    "provider": "gemini-cli-oauth",
+    "contextWindow": 1048576,
+    "maxOutput": 65535,
+    "fallbackTarget": null,
+    "converterStrategy": "gemini"
+  },
+  {
+    "id": "gemini-2.5-pro",
+    "displayName": "Gemini 2.5 Pro",
+    "provider": "gemini-cli-oauth",
+    "contextWindow": 1048576,
+    "maxOutput": 65535,
+    "fallbackTarget": null,
+    "converterStrategy": "gemini"
+  },
+  {
+    "id": "gemini-2.5-flash",
+    "displayName": "Gemini 2.5 Flash",
+    "provider": "gemini-cli-oauth",
+    "contextWindow": 1048576,
+    "maxOutput": 65535,
+    "fallbackTarget": null,
+    "converterStrategy": "gemini"
+  },
+  {
+    "id": "gemini-2.5-flash-lite",
+    "displayName": "Gemini 2.5 Flash Lite",
+    "provider": "gemini-cli-oauth",
+    "contextWindow": 1048576,
+    "maxOutput": 65535,
+    "fallbackTarget": null,
+    "converterStrategy": "gemini"
+  },
+  {
+    "id": "gemini-3-flash",
+    "displayName": "Gemini 3 Flash",
+    "provider": "gemini-antigravity",
+    "contextWindow": 1048576,
+    "maxOutput": 65535,
+    "fallbackTarget": null,
+    "converterStrategy": "gemini"
+  },
+  {
+    "id": "gemini-3.1-pro-high",
+    "displayName": "Gemini 3.1 Pro High",
+    "provider": "gemini-antigravity",
+    "contextWindow": 1048576,
+    "maxOutput": 65535,
+    "fallbackTarget": null,
+    "converterStrategy": "gemini"
+  },
+  {
+    "id": "gemini-3.1-pro-low",
+    "displayName": "Gemini 3.1 Pro Low",
+    "provider": "gemini-antigravity",
+    "contextWindow": 1048576,
+    "maxOutput": 65535,
+    "fallbackTarget": null,
+    "converterStrategy": "gemini"
+  },
+  {
+    "id": "gemini-3.5-flash-extra-low",
+    "displayName": "Gemini 3.5 Flash Extra Low",
+    "provider": "gemini-antigravity",
+    "contextWindow": 1048576,
+    "maxOutput": 65535,
+    "fallbackTarget": null,
+    "converterStrategy": "gemini"
+  },
+  {
+    "id": "gemini-3.5-flash-low",
+    "displayName": "Gemini 3.5 Flash Low",
+    "provider": "gemini-antigravity",
+    "contextWindow": 1048576,
+    "maxOutput": 65535,
+    "fallbackTarget": null,
+    "converterStrategy": "gemini"
+  },
+  {
+    "id": "gemini-3.5-flash-medium",
+    "displayName": "Gemini 3.5 Flash Medium",
+    "provider": "gemini-antigravity",
+    "contextWindow": 1048576,
+    "maxOutput": 65535,
+    "fallbackTarget": null,
+    "converterStrategy": "gemini"
+  },
+  {
+    "id": "gemini-3.5-flash-high",
+    "displayName": "Gemini 3.5 Flash High",
+    "provider": "gemini-antigravity",
+    "contextWindow": 1048576,
+    "maxOutput": 65535,
+    "fallbackTarget": null,
+    "converterStrategy": "gemini"
+  },
+  {
+    "id": "gemini-claude-sonnet-4-6",
+    "displayName": "Gemini Claude Sonnet 4.6",
+    "provider": "gemini-antigravity",
+    "contextWindow": 200000,
+    "maxOutput": 64000,
+    "fallbackTarget": null,
+    "converterStrategy": "gemini"
+  },
+  {
+    "id": "gemini-claude-opus-4-6-thinking",
+    "displayName": "Gemini Claude Opus 4.6 Thinking",
+    "provider": "gemini-antigravity",
+    "contextWindow": 200000,
+    "maxOutput": 32000,
+    "fallbackTarget": null,
+    "converterStrategy": "gemini"
+  },
+  {
+    "id": "gemini-3.1-flash-image",
+    "displayName": "Gemini 3.1 Flash Image",
+    "provider": "gemini-antigravity",
+    "contextWindow": 1048576,
+    "maxOutput": 65535,
+    "fallbackTarget": null,
+    "converterStrategy": "gemini"
+  },
+  {
+    "id": "gemini-3-flash-agent",
+    "displayName": "Gemini 3 Flash Agent",
+    "provider": "gemini-antigravity",
+    "contextWindow": 1048576,
+    "maxOutput": 65535,
+    "fallbackTarget": null,
+    "converterStrategy": "gemini"
+  },
+  {
+    "id": "gemini-2.5-flash-thinking",
+    "displayName": "Gemini 2.5 Flash Thinking",
+    "provider": "gemini-antigravity",
+    "contextWindow": 1048576,
+    "maxOutput": 65535,
+    "fallbackTarget": null,
+    "converterStrategy": "gemini"
+  },
+  {
+    "id": "gemini-2.5-flash-lite",
+    "displayName": "Gemini 2.5 Flash Lite",
+    "provider": "gemini-antigravity",
+    "contextWindow": 1048576,
+    "maxOutput": 65535,
+    "fallbackTarget": null,
+    "converterStrategy": "gemini"
+  },
+  {
+    "id": "claude-haiku-4-5",
+    "displayName": "Claude Haiku 4.5",
+    "provider": "claude-kiro-oauth",
+    "contextWindow": 200000,
+    "maxOutput": 32000,
+    "fallbackTarget": null,
+    "converterStrategy": "claude"
+  },
+  {
+    "id": "claude-haiku-4-5-20251001",
+    "displayName": "Claude Haiku 4.5 (2025-10-01)",
+    "provider": "claude-kiro-oauth",
+    "contextWindow": 200000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "claude"
+  },
+  {
+    "id": "claude-sonnet-4-0",
+    "displayName": "Claude Sonnet 4.0",
+    "provider": "claude-kiro-oauth",
+    "contextWindow": 200000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "claude"
+  },
+  {
+    "id": "claude-sonnet-4-5",
+    "displayName": "Claude Sonnet 4.5",
+    "provider": "claude-kiro-oauth",
+    "contextWindow": 200000,
+    "maxOutput": 64000,
+    "fallbackTarget": null,
+    "converterStrategy": "claude"
+  },
+  {
+    "id": "claude-sonnet-4-5-20250929",
+    "displayName": "Claude Sonnet 4.5 (2025-09-29)",
+    "provider": "claude-kiro-oauth",
+    "contextWindow": 200000,
+    "maxOutput": 64000,
+    "fallbackTarget": null,
+    "converterStrategy": "claude"
+  },
+  {
+    "id": "claude-sonnet-4-6",
+    "displayName": "Claude Sonnet 4.6",
+    "provider": "claude-kiro-oauth",
+    "contextWindow": 1000000,
+    "maxOutput": 64000,
+    "fallbackTarget": null,
+    "converterStrategy": "claude"
+  },
+  {
+    "id": "claude-sonnet-4-6-thinking",
+    "displayName": "Claude Sonnet 4.6 Thinking",
+    "provider": "claude-kiro-oauth",
+    "contextWindow": 1000000,
+    "maxOutput": 64000,
+    "fallbackTarget": null,
+    "converterStrategy": "claude"
+  },
+  {
+    "id": "claude-opus-4-5",
+    "displayName": "Claude Opus 4.5",
+    "provider": "claude-kiro-oauth",
+    "contextWindow": 200000,
+    "maxOutput": 32000,
+    "fallbackTarget": null,
+    "converterStrategy": "claude"
+  },
+  {
+    "id": "claude-opus-4-5-20251101",
+    "displayName": "Claude Opus 4.5 (2025-11-01)",
+    "provider": "claude-kiro-oauth",
+    "contextWindow": 200000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "claude"
+  },
+  {
+    "id": "claude-opus-4-6",
+    "displayName": "Claude Opus 4.6",
+    "provider": "claude-kiro-oauth",
+    "contextWindow": 1000000,
+    "maxOutput": 32000,
+    "fallbackTarget": null,
+    "converterStrategy": "claude"
+  },
+  {
+    "id": "claude-opus-4-7",
+    "displayName": "Claude Opus 4.7",
+    "provider": "claude-kiro-oauth",
+    "contextWindow": 1000000,
+    "maxOutput": 32000,
+    "fallbackTarget": null,
+    "converterStrategy": "claude"
+  },
+  {
+    "id": "claude-opus-4-8",
+    "displayName": "Claude Opus 4.8",
+    "provider": "claude-kiro-oauth",
+    "contextWindow": 1000000,
+    "maxOutput": 128000,
+    "fallbackTarget": null,
+    "converterStrategy": "claude"
+  },
+  {
+    "id": "deepseek-3-2",
+    "displayName": "DeepSeek 3.2",
+    "provider": "claude-kiro-oauth",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "claude"
+  },
+  {
+    "id": "minimax-m2-5",
+    "displayName": "MiniMax M2.5",
+    "provider": "claude-kiro-oauth",
+    "contextWindow": 200000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "claude"
+  },
+  {
+    "id": "glm-5",
+    "displayName": "GLM-5",
+    "provider": "claude-kiro-oauth",
+    "contextWindow": 200000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "claude"
+  },
+  {
+    "id": "minimax-m2-1",
+    "displayName": "MiniMax M2.1",
+    "provider": "claude-kiro-oauth",
+    "contextWindow": 200000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "claude"
+  },
+  {
+    "id": "qwen3-coder-next",
+    "displayName": "Qwen3 Coder Next",
+    "provider": "claude-kiro-oauth",
+    "contextWindow": 256000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "claude"
+  },
+  {
+    "id": "gpt-5.2",
+    "displayName": "GPT-5.2",
+    "provider": "openai-codex-oauth",
+    "contextWindow": 128000,
+    "maxOutput": 32768,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "gpt-5.3-codex",
+    "displayName": "GPT-5.3 Codex",
+    "provider": "openai-codex-oauth",
+    "contextWindow": 128000,
+    "maxOutput": 32768,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "gpt-5.4",
+    "displayName": "GPT-5.4",
+    "provider": "openai-codex-oauth",
+    "contextWindow": 128000,
+    "maxOutput": 32768,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "gpt-5.4-mini",
+    "displayName": "GPT-5.4 Mini",
+    "provider": "openai-codex-oauth",
+    "contextWindow": 128000,
+    "maxOutput": 32768,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "gpt-5.5",
+    "displayName": "GPT-5.5",
+    "provider": "openai-codex-oauth",
+    "contextWindow": 128000,
+    "maxOutput": 32768,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "gpt-4o",
+    "displayName": "GPT-4o",
+    "provider": "github-models",
+    "contextWindow": 128000,
+    "maxOutput": 16384,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "gpt-4o-mini",
+    "displayName": "GPT-4o Mini",
+    "provider": "github-models",
+    "contextWindow": 128000,
+    "maxOutput": 16384,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "gpt-4.1",
+    "displayName": "GPT-4.1",
+    "provider": "github-models",
+    "contextWindow": 1000000,
+    "maxOutput": 32768,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "gpt-4.1-mini",
+    "displayName": "GPT-4.1 Mini",
+    "provider": "github-models",
+    "contextWindow": 1000000,
+    "maxOutput": 32768,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "gpt-4.1-nano",
+    "displayName": "GPT-4.1 Nano",
+    "provider": "github-models",
+    "contextWindow": 1000000,
+    "maxOutput": 32768,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "DeepSeek-R1",
+    "displayName": "DeepSeek R1",
+    "provider": "github-models",
+    "contextWindow": 128000,
+    "maxOutput": 32768,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "DeepSeek-V3-0324",
+    "displayName": "DeepSeek V3 (2024-03-24)",
+    "provider": "github-models",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "Meta-Llama-3.1-405B-Instruct",
+    "displayName": "Meta Llama 3.1 405B Instruct",
+    "provider": "github-models",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "Meta-Llama-3.1-8B-Instruct",
+    "displayName": "Meta Llama 3.1 8B Instruct",
+    "provider": "github-models",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "Phi-4",
+    "displayName": "Phi-4",
+    "provider": "github-models",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "meta/llama-3.2-3b-instruct",
+    "displayName": "Meta Llama 3.2 3B Instruct",
+    "provider": "nvidia-nim",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "meta/llama-4-maverick-17b-128e-instruct",
+    "displayName": "Meta Llama 4 Maverick 17B 128E Instruct",
+    "provider": "nvidia-nim",
+    "contextWindow": 1048576,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "nvidia/llama-3.3-nemotron-super-49b-v1",
+    "displayName": "NVIDIA Llama 3.3 Nemotron Super 49B v1",
+    "provider": "nvidia-nim",
+    "contextWindow": 131072,
+    "maxOutput": 131072,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "nvidia/llama-3.3-nemotron-super-49b-v1.5",
+    "displayName": "NVIDIA Llama 3.3 Nemotron Super 49B v1.5",
+    "provider": "nvidia-nim",
+    "contextWindow": 131072,
+    "maxOutput": 131072,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "openai/gpt-oss-20b",
+    "displayName": "OpenAI GPT OSS 20B",
+    "provider": "nvidia-nim",
+    "contextWindow": 128000,
+    "maxOutput": 16384,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "openai/gpt-oss-120b",
+    "displayName": "OpenAI GPT OSS 120B",
+    "provider": "nvidia-nim",
+    "contextWindow": 128000,
+    "maxOutput": 32768,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "mistralai/mistral-small-4-119b-2603",
+    "displayName": "Mistral Small 4 119B (2026-03)",
+    "provider": "nvidia-nim",
+    "contextWindow": 131072,
+    "maxOutput": 32768,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "mistralai/mistral-large-3-675b-instruct-2512",
+    "displayName": "Mistral Large 3 675B Instruct (2025-12)",
+    "provider": "nvidia-nim",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "grok-4.1-mini",
+    "displayName": "Grok 4.1 Mini",
+    "provider": "grok-web",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "grok-4.1-thinking",
+    "displayName": "Grok 4.1 Thinking",
+    "provider": "grok-web",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "grok-4.20",
+    "displayName": "Grok 4.20",
+    "provider": "grok-web",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "grok-4.20-auto",
+    "displayName": "Grok 4.20 Auto",
+    "provider": "grok-web",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "grok-4.20-fast",
+    "displayName": "Grok 4.20 Fast",
+    "provider": "grok-web",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "grok-4.20-expert",
+    "displayName": "Grok 4.20 Expert",
+    "provider": "grok-web",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "grok-4.20-heavy",
+    "displayName": "Grok 4.20 Heavy",
+    "provider": "grok-web",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "grok-imagine-1.0",
+    "displayName": "Grok Imagine 1.0",
+    "provider": "grok-web",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "grok-imagine-1.0-edit",
+    "displayName": "Grok Imagine 1.0 Edit",
+    "provider": "grok-web",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "grok-imagine-1.0-fast",
+    "displayName": "Grok Imagine 1.0 Fast",
+    "provider": "grok-web",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "grok-imagine-1.0-fast-edit",
+    "displayName": "Grok Imagine 1.0 Fast Edit",
+    "provider": "grok-web",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  }
+]
