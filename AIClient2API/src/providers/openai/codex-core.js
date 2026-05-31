@@ -162,7 +162,7 @@ export class CodexApiService {
     /**
      * 生成内容（非流式）
      */
-    async generateContent(model, requestBody) {
+    async generateContent(model, requestBody, _hasRetriedOn401 = false) {
         if (!this.isInitialized) {
             await this.initialize();
         }
@@ -214,6 +214,22 @@ export class CodexApiService {
             return this.parseNonStreamResponse(response.data);
         } catch (error) {
             if (error.response?.status === 401) {
+                // Attempt an inline synchronous token refresh before giving up.
+                // This self-heals single-account pools where server-side token
+                // revocation would otherwise leave the provider unavailable until
+                // the background refresh completes. _hasRetriedOn401 prevents loops.
+                if (!_hasRetriedOn401) {
+                    logger.warn('[Codex] Received 401. Attempting inline token refresh before credential switch...');
+                    try {
+                        await this.refreshAccessToken();
+                        logger.info('[Codex] Inline token refresh succeeded — retrying request.');
+                        return this.generateContent(model, requestBody, true);
+                    } catch (refreshErr) {
+                        logger.error('[Codex] Inline token refresh failed:', refreshErr.message);
+                        // Fall through to the existing credential-switch path below.
+                    }
+                }
+
                 logger.info('[Codex] Received 401. Triggering background refresh...');
 
                 // 触发后台异步刷新
@@ -235,7 +251,7 @@ export class CodexApiService {
     /**
      * 流式生成内容
      */
-    async* generateContentStream(model, requestBody) {
+    async* generateContentStream(model, requestBody, _hasRetriedOn401 = false) {
         if (!this.isInitialized) {
             await this.initialize();
         }
@@ -287,6 +303,21 @@ export class CodexApiService {
             yield* this.parseSSEStream(response.data);
         } catch (error) {
             if (error.response?.status === 401) {
+                // Attempt an inline synchronous token refresh before giving up.
+                // Mirrors the generateContent 401 path — see that method for rationale.
+                if (!_hasRetriedOn401) {
+                    logger.warn('[Codex] Received 401 during stream. Attempting inline token refresh...');
+                    try {
+                        await this.refreshAccessToken();
+                        logger.info('[Codex] Inline token refresh succeeded — retrying stream.');
+                        yield* this.generateContentStream(model, requestBody, true);
+                        return;
+                    } catch (refreshErr) {
+                        logger.error('[Codex] Inline token refresh failed during stream:', refreshErr.message);
+                        // Fall through to the existing credential-switch path below.
+                    }
+                }
+
                 logger.info('[Codex] Received 401 during stream. Triggering background refresh...');
 
                 // 触发后台异步刷新

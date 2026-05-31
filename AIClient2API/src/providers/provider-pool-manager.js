@@ -77,7 +77,7 @@ export class ProviderPoolManager {
         'gemini-cli-oauth': 'gemini-2.5-flash-lite',
         'gemini-antigravity': 'gemini-3-flash',
         'openai-custom': 'gpt-4o-mini',
-        'nvidia-nim': 'meta/llama-3.3-70b-instruct',
+        'nvidia-nim': 'meta/llama-3.2-3b-instruct',
         'github-models': 'gpt-4o-mini',
         'claude-custom': 'claude-sonnet-4-5-20250929',
         'claude-kiro-oauth': 'claude-haiku-4-5',

@@ -171,100 +171,102 @@ export class OpenAIApiService {
         }
     }
 
-    async *streamApi(endpoint, body, isRetry = false, retryCount = 0) {
+    async *streamApi(endpoint, body) {
         const maxRetries = this.config.REQUEST_MAX_RETRIES || 3;
-        const baseDelay = this.config.REQUEST_BASE_DELAY || 1000;  // 1 second base delay
+        const baseDelay = this.config.REQUEST_BASE_DELAY || 1000;
 
         // OpenAI 的流式请求需要将 stream 设置为 true
         const streamRequestBody = { ...body, stream: true };
 
-        try {
-            const axiosConfig = {
-                method: 'post',
-                url: endpoint,
-                data: streamRequestBody,
-                responseType: 'stream'
-            };
-            this._applySidecar(axiosConfig);
-            const response = await this.axiosInstance.request(axiosConfig);
+        let retryCount = 0;
+        while (true) {
+            try {
+                const axiosConfig = {
+                    method: 'post',
+                    url: endpoint,
+                    data: streamRequestBody,
+                    responseType: 'stream'
+                };
+                this._applySidecar(axiosConfig);
+                const response = await this.axiosInstance.request(axiosConfig);
 
-            const stream = response.data;
-            let buffer = '';
+                const stream = response.data;
+                let buffer = '';
 
-            for await (const chunk of stream) {
-                buffer += chunk.toString();
-                let newlineIndex;
-                while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
-                    const line = buffer.substring(0, newlineIndex).trim();
-                    buffer = buffer.substring(newlineIndex + 1);
+                for await (const chunk of stream) {
+                    buffer += chunk.toString();
+                    let newlineIndex;
+                    while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
+                        const line = buffer.substring(0, newlineIndex).trim();
+                        buffer = buffer.substring(newlineIndex + 1);
 
-                    if (line.startsWith('data: ')) {
-                        const jsonData = line.substring(6).trim();
-                        if (jsonData === '[DONE]') {
-                            return; // Stream finished
+                        if (line.startsWith('data: ')) {
+                            const jsonData = line.substring(6).trim();
+                            if (jsonData === '[DONE]') {
+                                return; // Stream finished
+                            }
+                            try {
+                                const parsedChunk = JSON.parse(jsonData);
+                                yield parsedChunk;
+                            } catch (e) {
+                                logger.warn("[OpenAIApiService] Failed to parse stream chunk JSON:", e.message, "Data:", jsonData);
+                            }
                         }
-                        try {
-                            const parsedChunk = JSON.parse(jsonData);
-                            yield parsedChunk;
-                        } catch (e) {
-                            logger.warn("[OpenAIApiService] Failed to parse stream chunk JSON:", e.message, "Data:", jsonData);
-                        }
-                    } else if (line === '') {
-                        // Empty line, end of an event
+                        // Empty lines (SSE event separators) are intentionally ignored.
                     }
                 }
-            }
-        } catch (error) {
-            const status = error.response?.status;
-            const data = error.response?.data;
-            const errorCode = error.code;
-            const errorMessage = error.message || '';
-            
-            // 检查是否为可重试的网络错误
-            const isNetworkError = isRetryableNetworkError(error);
-            
-            if (status === 401 || status === 403) {
-                logger.error(`[OpenAI API] Received ${status} during stream. API Key might be invalid or expired.`);
-                throw error;
-            }
+                return; // Stream exhausted normally — exit the retry loop.
+            } catch (error) {
+                const status = error.response?.status;
+                const errorCode = error.code;
+                const errorMessage = error.message || '';
 
-            // Handle 429 (Too Many Requests)
-            if (status === 429) {
-                const retryAfter = getRetryAfterMs(error);
-                if (retryAfter !== null) {
-                    logger.warn(`[OpenAI API] Received 429 with Retry-After: ${retryAfter}ms during stream. Throwing to upper layer.`);
+                // 检查是否为可重试的网络错误
+                const isNetworkError = isRetryableNetworkError(error);
+
+                if (status === 401 || status === 403) {
+                    logger.error(`[OpenAI API] Received ${status} during stream. API Key might be invalid or expired.`);
                     throw error;
                 }
-                if (retryCount < maxRetries) {
-                    const delay = baseDelay * Math.pow(2, retryCount);
-                    logger.info(`[OpenAI API] Received 429 (Too Many Requests) during stream. No Retry-After found. Retrying in ${delay}ms... (attempt ${retryCount + 1}/${maxRetries})`);
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    yield* this.streamApi(endpoint, body, isRetry, retryCount + 1);
-                    return;
+
+                // Handle 429 (Too Many Requests)
+                if (status === 429) {
+                    const retryAfter = getRetryAfterMs(error);
+                    if (retryAfter !== null) {
+                        logger.warn(`[OpenAI API] Received 429 with Retry-After: ${retryAfter}ms during stream. Throwing to upper layer.`);
+                        throw error;
+                    }
+                    if (retryCount < maxRetries) {
+                        const delay = baseDelay * Math.pow(2, retryCount);
+                        logger.info(`[OpenAI API] Received 429 (Too Many Requests) during stream. No Retry-After found. Retrying in ${delay}ms... (attempt ${retryCount + 1}/${maxRetries})`);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        retryCount++;
+                        continue;
+                    }
                 }
-            }
 
-            // Handle other retryable errors (5xx server errors)
-            if (status >= 500 && status < 600 && retryCount < maxRetries) {
-                const delay = baseDelay * Math.pow(2, retryCount);
-                logger.info(`[OpenAI API] Received ${status} server error during stream. Retrying in ${delay}ms... (attempt ${retryCount + 1}/${maxRetries})`);
-                await new Promise(resolve => setTimeout(resolve, delay));
-                yield* this.streamApi(endpoint, body, isRetry, retryCount + 1);
-                return;
-            }
+                // Handle other retryable errors (5xx server errors)
+                if (status >= 500 && status < 600 && retryCount < maxRetries) {
+                    const delay = baseDelay * Math.pow(2, retryCount);
+                    logger.info(`[OpenAI API] Received ${status} server error during stream. Retrying in ${delay}ms... (attempt ${retryCount + 1}/${maxRetries})`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    retryCount++;
+                    continue;
+                }
 
-            // Handle network errors (ECONNRESET, ETIMEDOUT, etc.) with exponential backoff
-            if (isNetworkError && retryCount < maxRetries) {
-                const delay = baseDelay * Math.pow(2, retryCount);
-                const errorIdentifier = errorCode || errorMessage.substring(0, 50);
-                logger.info(`[OpenAI API] Network error (${errorIdentifier}) during stream. Retrying in ${delay}ms... (attempt ${retryCount + 1}/${maxRetries})`);
-                await new Promise(resolve => setTimeout(resolve, delay));
-                yield* this.streamApi(endpoint, body, isRetry, retryCount + 1);
-                return;
-            }
+                // Handle network errors (ECONNRESET, ETIMEDOUT, etc.) with exponential backoff
+                if (isNetworkError && retryCount < maxRetries) {
+                    const delay = baseDelay * Math.pow(2, retryCount);
+                    const errorIdentifier = errorCode || errorMessage.substring(0, 50);
+                    logger.info(`[OpenAI API] Network error (${errorIdentifier}) during stream. Retrying in ${delay}ms... (attempt ${retryCount + 1}/${maxRetries})`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    retryCount++;
+                    continue;
+                }
 
-            logger.error(`[OpenAI API] Error calling streaming API (Status: ${status}, Code: ${errorCode}):`, errorMessage);
-            throw error;
+                logger.error(`[OpenAI API] Error calling streaming API (Status: ${status}, Code: ${errorCode}):`, errorMessage);
+                throw error;
+            }
         }
     }
 
@@ -295,14 +297,35 @@ export class OpenAIApiService {
     }
 
     async listModels() {
-        try {
-            const response = await this.axiosInstance.get('/models');
-            return response.data;
-        } catch (error) {
-            const status = error.response?.status;
-            const data = error.response?.data;
-            logger.error(`Error listing OpenAI models (Status: ${status}):`, data || error.message);
-            throw error;
+        const maxRetries = this.config.REQUEST_MAX_RETRIES || 3;
+        const baseDelay = this.config.REQUEST_BASE_DELAY || 1000;
+
+        let retryCount = 0;
+        while (true) {
+            try {
+                const response = await this.axiosInstance.get('/models');
+                return response.data;
+            } catch (error) {
+                const status = error.response?.status;
+                const isNetworkError = isRetryableNetworkError(error);
+
+                // Auth and client errors are not retryable — fail fast.
+                if (status === 401 || status === 403 || status === 404) {
+                    logger.error(`Error listing OpenAI models (Status: ${status}):`, error.response?.data || error.message);
+                    throw error;
+                }
+
+                if (retryCount < maxRetries && isNetworkError) {
+                    const delay = baseDelay * Math.pow(2, retryCount);
+                    logger.warn(`[OpenAI API] listModels network error (${error.code || error.message.substring(0, 40)}). Retrying in ${delay}ms... (attempt ${retryCount + 1}/${maxRetries})`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    retryCount++;
+                    continue;
+                }
+
+                logger.error(`Error listing OpenAI models (Status: ${status}):`, error.response?.data || error.message);
+                throw error;
+            }
         }
     }
 }
