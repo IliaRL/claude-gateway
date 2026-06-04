@@ -218,11 +218,24 @@ export function getClientIp(req, config = {}) {
 /**
  * Reads the entire request body from an HTTP request.
  */
-export function getRequestBody(req) {
+export function getRequestBody(req, { maxBytes } = {}) {
     return new Promise((resolve, reject) => {
         let body = '';
-        req.on('data', chunk => { body += chunk.toString(); });
+        let totalBytes = 0;
+        let rejected = false;
+        req.on('data', chunk => {
+            if (rejected) return;
+            totalBytes += Buffer.byteLength(chunk);
+            if (maxBytes !== undefined && totalBytes > maxBytes) {
+                rejected = true;
+                const err = new Error('Request body too large');
+                err.statusCode = 413;
+                return reject(err);
+            }
+            body += chunk.toString();
+        });
         req.on('end', () => {
+            if (rejected) return;
             if (!body) return resolve({});
             try { resolve(JSON.parse(body)); } catch (error) { reject(new Error("Invalid JSON in request body.")); }
         });
