@@ -73,8 +73,26 @@ function _isCrossFamilyDowngrade(fromModel, toModel) {
  * Manages a pool of API service providers, handling their health and selection.
  */
 export class ProviderPoolManager {
-    // 默认健康检查模型配置
-    // 键名必须与 MODEL_PROVIDER 常量值一致
+    /**
+     * Default health-check model per provider type.
+     * Keys MUST match MODEL_PROVIDER constant values exactly.
+     *
+     * Catalog compliance:
+     * - EXACT MATCH (model ID owned by provider in model-catalog.json):
+     *   gemini-cli-oauth, gemini-antigravity, nvidia-nim, github-models,
+     *   claude-kiro-oauth, openai-qwen-oauth, openai-iflow, openai-codex-oauth,
+     *   grok-cli-oauth, grok-web
+     * - BORROWED (managed-list providers with no static catalog entries;
+     *   model ID is borrowed from another provider for health-check purposes only):
+     *   openai-custom ('gpt-4o-mini' from github-models)
+     *   atlascloud ('gpt-4o-mini' from github-models)
+     *   claude-custom ('claude-sonnet-4-5-20250929' from claude-kiro-oauth)
+     *   openaiResponses-custom ('gpt-4o-mini' from github-models)
+     *   forward-api ('gpt-4o-mini' from github-models)
+     *
+     * Managed-list providers discover their models dynamically at runtime via live API calls.
+     * Keep in sync with configs/model-catalog.json when catalog models are added or removed.
+     */
     static DEFAULT_HEALTH_CHECK_MODELS = {
         'gemini-cli-oauth': 'gemini-2.5-flash-lite',
         'gemini-antigravity': 'gemini-3-flash',
