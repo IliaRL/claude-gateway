@@ -12,26 +12,27 @@ Any OpenAI-compatible model (OpenRouter, Ollama, Gemini, Mistral, Kiro, Codex, c
 
 ### Validated
 
-- ✓ 2-tier architecture (Claude Code → AIClient2API :3000 → providers) — Milestone 1 complete
-- ✓ LiteLLM removed (was corrupting Anthropic SSE stream) — Milestone 1
-- ✓ Tool search headers pass through correctly — Milestone 1
-- ✓ drop_params: false (preserves cache_control blocks) — Milestone 1
-- ✓ 212-test suite passing — Milestone 1
-- ✓ model-catalog.json as canonical model ID source — established
-- ✓ Provider pool manager with cooldowns + fallback chain — established
-- ✓ Module boundaries clean: core/providers/handlers/auth groups have clean one-way dependency boundaries — Phase 3
-- ✓ Provider addition requires changes in ≤2 files: forward-api activated, 2-file workflow proven — Phase 3
-- ✓ model-catalog.json → provider-models.js single source of truth: hardcoded model IDs eliminated from routing pipeline — Phase 3
-- ✓ provider_health surfaces disabled providers as `status:disabled` instead of silently dropping them — Phase 3
+- ✓ 2-tier architecture (Claude Code → AIClient2API :3000 → providers) — v1.0
+- ✓ LiteLLM removed (was corrupting Anthropic SSE stream) — v1.0
+- ✓ Tool search headers pass through correctly — v1.0
+- ✓ drop_params: false (preserves cache_control blocks) — v1.0
+- ✓ 212-test suite passing — v1.0
+- ✓ model-catalog.json as canonical model ID source — v1.0
+- ✓ Provider pool manager with cooldowns + fallback chain — v1.0
+- ✓ Antigravity SyntaxError fixed and verified (node --check exits 0) — v2.0
+- ✓ openai-custom correctly disabled at pool level (isDisabled: true) — v2.0
+- ✓ One-command connectivity validation: pnpm run smoke completes in <30s — v2.0
+- ✓ OPERATION.md operator runbook — 259-line copy-pastable guide — v2.0
+- ✓ docs/SYSTEM-OVERVIEW.md architecture reference — traffic flow, provider selection, security paths — v2.0
+- ✓ Security audit passed — no command injection, no hardcoded secrets, sync scripts reviewed — v2.0
+- ✓ Module boundaries clean: core/providers/handlers/auth groups have clean one-way dependency boundaries — v2.0
+- ✓ Provider addition requires changes in ≤2 files: forward-api activated, 2-file workflow proven — v2.0
+- ✓ model-catalog.json → provider-models.js single source of truth: hardcoded model IDs eliminated — v2.0
+- ✓ /provider_health surfaces disabled providers as `status:disabled` with disabledCount — v2.0
 
 ### Active
 
-- [ ] SyntaxError in antigravity-core.js:1830 fixed (proxy currently broken on that path)
-- [ ] Standard connectivity test suite — curl one-liners for /v1/models and /v1/messages
-- [ ] Provider-specific smoke tests covering all 7 active providers
-- [ ] OPERATION.md / RUNBOOK.md written and accurate
-- [ ] System analysis SYSTEM OVERVIEW written (traffic flow, provider selection, security paths)
-- [ ] Best-practice audit completed — ISSUES.md with impact/cause/remediation
+*(No active requirements — v3.0 not yet defined. Run `/gsd:new-milestone` to define next milestone.)*
 
 ### Out of Scope
 
@@ -70,13 +71,17 @@ Claude Code CLI
 
 ### Known Active Issues
 
-1. **SyntaxError in antigravity-core.js:1830** — proxy fails on Antigravity path (from handoff notes)
-2. **openai-custom disabled** — credential revoked, needs cleanup or re-provisioning
-3. **Test scripts not unified** — live-verify.cjs, master-smoke-test.cjs, omni-test.cjs exist but no single "does it work?" one-liner
+1. **72 circular import cycles** — all route through `src/utils/` as intermediary; no direct cross-group boundary imports. Catalogued in `AIClient2API/docs/ARCH-AUDIT.md` as C-01 through C-04. Deferred to future refactor phase.
+2. **model-catalog.test.js** — 1 pre-existing failure (unknown provider in catalog). Non-blocking.
+3. **api-integration.test.js** — 8 pre-existing failures (credential-related, upstream quota). Non-blocking.
+4. **REQUIRED_API_KEY in config.json** — low-severity placeholder value committed to git; overridden by `AICLIENT_TOKEN` env var at runtime. Recommend replacing with a comment placeholder in future cleanup.
 
-### Debug Log Analysis (2026-06-04)
+### Current State (post-v2.0)
 
-Both recent debug logs show clean startup with no proxy errors. MCP servers connect normally. The FotW campaign payload warnings are cosmetic (Claude Code internal UI feature). The ENOENT for jobs directory is cosmetic (watcher for non-existent session file). No provider authentication failures in the startup window.
+- **Proxy:** Stable. 4/5 active providers healthy (github-models, nvidia-nim, gemini-antigravity, kiro). openai-custom disabled (credential revoked).
+- **Diagnostics:** `pnpm run smoke` validates all providers in <30s. `pnpm run check:models` and `pnpm run check:chat` for quick one-liners.
+- **Documentation:** OPERATION.md + docs/SYSTEM-OVERVIEW.md written. All stale LiteLLM refs removed from active docs.
+- **Architecture:** Module boundaries clean. Provider addition is a 2-file operation. All model IDs flow from model-catalog.json.
 
 ## Constraints
 
@@ -95,7 +100,11 @@ Both recent debug logs show clean startup with no proxy errors. MCP servers conn
 | model-catalog.json as source of truth | Prevents hardcoded model IDs scattered across source | ✓ Good |
 | Provider pool manager with cooldowns | Enables multi-account quota rotation without code changes | ✓ Good |
 | ANTHROPIC_BASE_URL direct to :3000 | Clean path, no intermediate proxy serialization | ✓ Good |
-| Coarse GSD granularity (3-5 phases) | System already works; changes are surgical, not greenfield | — Pending |
+| Coarse GSD granularity (3-5 phases) | System already works; changes are surgical, not greenfield | ✓ Good |
+| Security audit before archiving docs | Catch injection/hardcoded-secret patterns while actively in the code | ✓ Good |
+| forward-api as 2-file proof (not a real provider) | Demo entry proves the workflow without adding a live external dependency | ✓ Good |
+| madge module audit before declaring ARCH-02 pass | 72 cycles looked alarming — audit revealed all are via utils/ intermediary, not real boundary violations | ✓ Good |
+| Defer 72 circular cycles to future refactor | Cycles are pre-existing and utils/-mediated; fixing them is a large refactor with no immediate user-facing benefit | — Pending |
 
 ## Evolution
 
@@ -115,4 +124,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-05 after Phase 3 (Architecture + Modularity) completion*
+*Last updated: 2026-06-05 after v2.0 milestone (Proxy Excellence) completion*

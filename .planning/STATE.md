@@ -17,10 +17,10 @@ stopped_at: Milestone complete (Phase 3 was final phase)
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-06-04)
+See: .planning/PROJECT.md (updated 2026-06-05)
 
 **Core value:** Any OpenAI-compatible model can be routed through AIClient2API with zero friction — add a provider, validate connectivity in one command, trust the fallback chain.
-**Current focus:** Milestone complete
+**Current focus:** v2.0 archived — planning next milestone (run `/gsd:new-milestone`)
 
 ## Current Position
 
