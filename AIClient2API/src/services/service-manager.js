@@ -718,6 +718,7 @@ export async function getProviderStatus(config, options = {}) {
     let unhealthyProvideIdentifyList = [];
     let count = 0;
     let unhealthyCount = 0;
+    let disabledCount = 0;
     let unhealthyRatio = 0;
     const filterProvider = options && options.provider;
     const filterCustomName = options && options.customName;
@@ -738,7 +739,6 @@ export async function getProviderStatus(config, options = {}) {
         
         const slimArr = providerPools[key]
             .filter(item => {
-                if (item.isDisabled) return false;
                 if (filterCustomName && item.customName !== filterCustomName) return false;
                 return true;
             })
@@ -760,9 +760,12 @@ export async function getProviderStatus(config, options = {}) {
                     slim.identify = null;
                 }
                 slim.provider = key;
+                slim.status = item.isDisabled ? 'disabled' : (slim.isHealthy === false ? 'unhealthy' : 'healthy');
                 // 统计
                 count++;
-                if (slim.isHealthy === false) {
+                if (item.isDisabled) {
+                    disabledCount++;
+                } else if (slim.isHealthy === false) {
                     unhealthyCount++;
                     if (slim.identify) unhealthyProvideIdentifyList.push(slim.identify);
                 }
@@ -780,6 +783,7 @@ export async function getProviderStatus(config, options = {}) {
         unhealthySummeryMessage,
         count,
         unhealthyCount,
+        disabledCount,
         unhealthyRatio
     };
 }
