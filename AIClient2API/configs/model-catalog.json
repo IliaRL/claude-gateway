@@ -961,5 +961,15 @@
     "maxOutput": 8192,
     "fallbackTarget": null,
     "converterStrategy": "openai"
+  },
+  {
+    "id": "openai:forward-demo-model",
+    "displayName": "Forward API Demo Model",
+    "provider": "forward-api",
+    "contextWindow": 128000,
+    "maxOutput": 16384,
+    "fallbackTarget": null,
+    "converterStrategy": "openai",
+    "_comment": "Example entry demonstrating 2-file forward-api provider addition — remove before production use"
   }
 ]
