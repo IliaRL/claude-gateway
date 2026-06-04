@@ -29,7 +29,7 @@ KIRO_DB       = Path.home() / "Library/Application Support/kiro-cli/data.sqlite3
 KIRO_BAK      = Path.home() / ".kiro/oauth_creds.json.bak"
 
 CREDS_DIR     = Path("/Users/ilialiston/MASTER-C/Credentials/claude-kiro-oauth")
-CONFIGS_DIR   = Path("/Users/ilialiston/MASTER-C/Tier1-AIClient2API/configs/kiro")
+CONFIGS_DIR   = Path("/Users/ilialiston/MASTER-C/AIClient2API/configs/kiro")
 
 # Registry file — maps profileArn → account number so slots stay stable
 REGISTRY_FILE = CREDS_DIR / ".account_registry.json"
