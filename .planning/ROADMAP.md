@@ -12,7 +12,7 @@
 |---|-------|------|--------------|-----------------|
 | 1 | Critical Fixes + Connectivity | Fix live bugs, establish one-command validation | BUG-01, BUG-02, DIAG-01–04, OPS-01–03 | 4 |
 | 2 | Documentation + Security | Write runbook and audit credential handling | DOC-01–03, SEC-01–03 | 3 |
-| 3 | Architecture + Modularity | Clean module boundaries, provider extensibility | ARCH-01–03 | 3 |
+| 3 | Architecture + Modularity | 2/3 | In Progress|  |
 
 ---
 
