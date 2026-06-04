@@ -59,8 +59,10 @@
       "openai-custom",
       "claude-kiro-oauth",
       "gemini-antigravity"
-    ]
+    ],
+    "forward-api": []
   },
+  "_forward_api_example_comment": "To add a new OpenAI-compatible provider: (1) add a forward-api type entry with FORWARD_BASE_URL and FORWARD_API_KEY to provider_pools.json, (2) add model entries with openai: prefix to model-catalog.json. No source file changes required.",
   "modelFallbackMapping": {
     "claude-sonnet-4-6": {
       "targetModel": "gemini-claude-sonnet-4-6",
