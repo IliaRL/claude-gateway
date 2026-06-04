@@ -43,20 +43,20 @@ export CLAUDE_CODE_SKIP_BEDROCK_AUTH=1
 
 ---
 
-## Issue 5: Tier 2 SSE Corruption (NOT Resolved — Tier 2 Bypassed)
-**Status:** OPEN — worked around by routing Claude Code directly to Tier 1 (:3000)  
-**Symptom:** Streaming responses through LiteLLM (:4000) produce corrupted SSE in Claude Code.  
-**Root Cause:** LiteLLM re-wraps the (already Anthropic-format) SSE stream, emitting a **duplicate `message_start` event** and interleaving replies.  
-**Verification (2026-05-29 live test):** Identical streaming `/v1/messages` request to both ports — `:3000` returned one clean Anthropic sequence (`message_start` → deltas → `message_stop`, all valid JSON); `:4000` returned **two `message_start` events** + interleaved text. The earlier `a093426` buffering change (`stream_timeout`, `X-Accel-Buffering: no`) did **not** resolve the re-wrap.  
-**Current routing:** `claude-proxy` sets `ANTHROPIC_BASE_URL=http://127.0.0.1:3000` (Tier 1 direct). Tier 2 runs but is **out of the Claude Code hot path**. A scoped RCA of the double-wrap is tracked for a future fix so :4000 can re-enter the path.
+## Issue 5: Tier 2 SSE Corruption (Resolved — LiteLLM Removed in v2.0)
+**Status:** RESOLVED — LiteLLM (the old Tier 2 proxy on :4000) was removed entirely in v2.0. Claude Code routes directly to AIClient2API (:3000).  
+**Historical symptom:** Streaming responses through LiteLLM (:4000) produced corrupted SSE in Claude Code.  
+**Root Cause (historical):** LiteLLM re-wrapped the (already Anthropic-format) SSE stream, emitting a **duplicate `message_start` event** and interleaving replies.  
+**Verification (2026-05-29 live test):** `:3000` returned one clean Anthropic sequence (`message_start` → deltas → `message_stop`, all valid JSON); `:4000` returned **two `message_start` events** + interleaved text.  
+**Resolution:** LiteLLM removed from the architecture in v2.0. The system is now 2-tier only: Claude Code → AIClient2API (:3000) → external providers. No :4000 port in the hot path.
 
 ---
 
-## Issue 6: Startup CPU Spike (Sequential Startup Required)
-**Status:** FIXED  
-**Symptom:** MacBook CPU pegs at 100% immediately after starting both tiers.  
-**Root Cause:** LiteLLM fires ~80 concurrent health-check requests at Tier 1 before Tier 1 has finished initializing, causing a storm of concurrent connections.  
-**Fix:** `scripts/safe-restart.sh` enforces sequential startup — Tier 1 must pass a health check before Tier 2 starts. Never start both tiers simultaneously.
+## Issue 6: Startup CPU Spike (Historical — LiteLLM Removed in v2.0)
+**Status:** RESOLVED — LiteLLM removed in v2.0; this issue is no longer applicable.  
+**Historical symptom:** MacBook CPU pegged at 100% immediately after starting both tiers.  
+**Root Cause (historical):** LiteLLM fired ~80 concurrent health-check requests at Tier 1 before Tier 1 finished initializing.  
+**Note:** `scripts/safe-restart.sh` still enforces safe sequential startup for the single-tier system. Only one process to start now — AIClient2API on :3000.
 
 ---
 
@@ -102,7 +102,7 @@ export CLAUDE_CODE_SKIP_BEDROCK_AUTH=1
 1. **`ENABLE_TOOL_SEARCH` not reliably active** — placing it in `settings.json` is documented as unreliable for this var. Must also be a global shell export in `zshrc` (alongside other `AICLIENT_*` exports), not only inline at `claude-pick` call sites. Affects subagent spawning, IDE sessions, and `--resume` paths.  
 2. **`anthropic-beta` header pass-through unaudited** — for Kiro (real Anthropic endpoint), `anthropic-beta` and `anthropic-version` headers must be forwarded verbatim; verify `src/handlers/request-handler.js` and provider adapters don't strip them. For non-Anthropic providers, headers must be stripped outbound but response translator must synthesize correct Anthropic-format capability blocks.  
 3. **Empty tool-name streaming bug** — FIXED (WR-04/05 in Phase 2, 2026-05-29): converter now buffers tool-call chunks and only emits `content_block_start` once per `index`.  
-4. **`drop_params: true` in LiteLLM** — FIXED (Issue 2): removed global `drop_params`.  
+4. **`drop_params: true` in LiteLLM** — FIXED (Issue 2): removed global `drop_params`. *(Historical — LiteLLM removed in v2.0; no longer applicable.)*  
 **Fix 1 (quick, low-risk):** Add `export ENABLE_TOOL_SEARCH=true` as a true shell export in `~/dotfiles/zsh/zshrc`, not just inline at `claude-pick`. Currently only inline injection.  
 **Fix 2 (audit needed):** Read `src/handlers/request-handler.js` to verify `anthropic-beta` is forwarded for Kiro and stripped + re-synthesized for other providers.
 

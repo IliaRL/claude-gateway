@@ -2,6 +2,8 @@
 > Fetch the complete documentation index at: https://code.claude.com/docs/llms.txt
 > Use this file to discover all available pages before exploring further.
 
+> **Note (local system):** This file is saved reference material from the official Anthropic Claude Code LLM gateway documentation. Our gateway implementation uses **AIClient2API on :3000** — not LiteLLM. The LiteLLM configuration section below documents a third-party gateway option supported by Anthropic and is retained for reference only. LiteLLM was used as an intermediate Tier 2 proxy in an earlier design but was removed in v2.0 because it corrupted the Anthropic SSE stream (see `docs/Troubleshooting-and-Fixes.md` Issue 5).
+
 # LLM gateway configuration
 
 > Learn how to configure Claude Code to work with LLM gateway solutions. Covers gateway requirements, authentication configuration, model selection, and provider-specific endpoint setup.
