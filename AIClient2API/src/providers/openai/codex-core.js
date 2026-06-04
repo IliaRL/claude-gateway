@@ -930,6 +930,9 @@ export class CodexApiService {
                 }
             }
         }, 15 * 60 * 1000);
+        // Do not keep the event loop (or Jest worker) alive solely for this
+        // cache-cleanup timer; it only needs to run while the process is active.
+        this.cleanupInterval.unref?.();
     }
 
     /**
