@@ -167,6 +167,7 @@ export class GeminiConverter extends BaseConverter {
         super('gemini');
         // Per-request stream state for stateful Claude SSE conversion (concurrent-safe).
         this.streamParams = new Map();
+        this.openAIResponsesStreamStates = new Map();
     }
 
     /**

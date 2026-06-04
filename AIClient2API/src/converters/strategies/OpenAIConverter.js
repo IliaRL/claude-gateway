@@ -54,6 +54,7 @@ export class OpenAIConverter extends BaseConverter {
         this.codexConverter = new CodexConverter();
         // Per-request stream state for stateful Claude SSE conversion (concurrent-safe).
         this.streamParams = new Map();
+        this.openAIResponsesStreamStates = new Map();
     }
 
     /**
@@ -124,6 +125,8 @@ export class OpenAIConverter extends BaseConverter {
                 return this.toGeminiStreamChunk(chunk, model, requestId);
             case MODEL_PROTOCOL_PREFIX.OPENAI_RESPONSES:
                 return this.toOpenAIResponsesStreamChunk(chunk, model, requestId);
+            case MODEL_PROTOCOL_PREFIX.CODEX:
+                return this.codexConverter.toOpenAIStreamChunk(chunk, model, requestId);
             case MODEL_PROTOCOL_PREFIX.GROK:
                 return this.toGrokStreamChunk(chunk, model);
             case MODEL_PROTOCOL_PREFIX.OPENAI:
