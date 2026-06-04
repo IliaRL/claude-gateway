@@ -621,6 +621,150 @@
     "converterStrategy": "openai"
   },
   {
+    "id": "grok-build-0.1",
+    "displayName": "Grok Build 0.1",
+    "provider": "grok-cli-oauth",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "grok-imagine-image-quality",
+    "displayName": "Grok Imagine Image Quality",
+    "provider": "grok-cli-oauth",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "grok-imagine-image",
+    "displayName": "Grok Imagine Image",
+    "provider": "grok-cli-oauth",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "grok-imagine-image-pro",
+    "displayName": "Grok Imagine Image Pro",
+    "provider": "grok-cli-oauth",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "grok-imagine-video",
+    "displayName": "Grok Imagine Video",
+    "provider": "grok-cli-oauth",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "grok-imagine-video-1.5-preview",
+    "displayName": "Grok Imagine Video 1.5 Preview",
+    "provider": "grok-cli-oauth",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "grok-imagine-video-1.5-2026-05-30",
+    "displayName": "Grok Imagine Video 1.5 (2026-05-30)",
+    "provider": "grok-cli-oauth",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "grok-4.3",
+    "displayName": "Grok 4.3",
+    "provider": "grok-cli-oauth",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "grok-4.20-0309-reasoning",
+    "displayName": "Grok 4.20 0309 Reasoning",
+    "provider": "grok-cli-oauth",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "grok-4.20-0309-non-reasoning",
+    "displayName": "Grok 4.20 0309 Non-Reasoning",
+    "provider": "grok-cli-oauth",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "grok-4.20-multi-agent-0309",
+    "displayName": "Grok 4.20 Multi-Agent 0309",
+    "provider": "grok-cli-oauth",
+    "contextWindow": 128000,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "grok-3-mini",
+    "displayName": "Grok 3 Mini",
+    "provider": "grok-cli-oauth",
+    "contextWindow": 131072,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "grok-3-mini-fast",
+    "displayName": "Grok 3 Mini Fast",
+    "provider": "grok-cli-oauth",
+    "contextWindow": 131072,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "grok-4",
+    "displayName": "Grok 4",
+    "provider": "grok-cli-oauth",
+    "contextWindow": 256000,
+    "maxOutput": 16384,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "grok-4-fast",
+    "displayName": "Grok 4 Fast",
+    "provider": "grok-cli-oauth",
+    "contextWindow": 256000,
+    "maxOutput": 16384,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
+    "id": "grok-3",
+    "displayName": "Grok 3",
+    "provider": "grok-cli-oauth",
+    "contextWindow": 131072,
+    "maxOutput": 8192,
+    "fallbackTarget": null,
+    "converterStrategy": "openai"
+  },
+  {
     "id": "coder-model",
     "displayName": "Coder Model",
     "provider": "openai-qwen-oauth",

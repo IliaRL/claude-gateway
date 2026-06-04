@@ -759,6 +759,7 @@ registerAdapter(MODEL_PROVIDER.ANTIGRAVITY, AntigravityApiServiceAdapter);
 registerAdapter(MODEL_PROVIDER.KIRO_API, KiroApiServiceAdapter);
 registerAdapter(MODEL_PROVIDER.CODEX_API, CodexApiServiceAdapter);
 registerAdapter(MODEL_PROVIDER.GROK_WEB, GrokApiServiceAdapter);
+registerAdapter(MODEL_PROVIDER.GROK_CLI, GrokCliApiServiceAdapter);
 registerAdapter(MODEL_PROVIDER.NVIDIA_NIM, OpenAIApiServiceAdapter);
 registerAdapter(MODEL_PROVIDER.GITHUB_MODELS, OpenAIApiServiceAdapter);
 // registerAdapter(MODEL_PROVIDER.FORWARD_API, ForwardApiServiceAdapter);
