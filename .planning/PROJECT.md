@@ -19,6 +19,10 @@ Any OpenAI-compatible model (OpenRouter, Ollama, Gemini, Mistral, Kiro, Codex, c
 - ✓ 212-test suite passing — Milestone 1
 - ✓ model-catalog.json as canonical model ID source — established
 - ✓ Provider pool manager with cooldowns + fallback chain — established
+- ✓ Module boundaries clean: core/providers/handlers/auth groups have clean one-way dependency boundaries — Phase 3
+- ✓ Provider addition requires changes in ≤2 files: forward-api activated, 2-file workflow proven — Phase 3
+- ✓ model-catalog.json → provider-models.js single source of truth: hardcoded model IDs eliminated from routing pipeline — Phase 3
+- ✓ provider_health surfaces disabled providers as `status:disabled` instead of silently dropping them — Phase 3
 
 ### Active
 
@@ -28,8 +32,6 @@ Any OpenAI-compatible model (OpenRouter, Ollama, Gemini, Mistral, Kiro, Codex, c
 - [ ] OPERATION.md / RUNBOOK.md written and accurate
 - [ ] System analysis SYSTEM OVERVIEW written (traffic flow, provider selection, security paths)
 - [ ] Best-practice audit completed — ISSUES.md with impact/cause/remediation
-- [ ] Module boundaries clean: config, routing, logging, security separated
-- [ ] Provider addition requires changes in ≤2 files
 
 ### Out of Scope
 
@@ -113,4 +115,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-04 after project initialization*
+*Last updated: 2026-06-05 after Phase 3 (Architecture + Modularity) completion*
