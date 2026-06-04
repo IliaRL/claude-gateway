@@ -187,6 +187,27 @@ describe('API Integration Tests with HTTP Requests', () => {
             }
         });
 
+        test('OpenAI /v1/chat/completions non-streaming with AtlasCloud provider', async () => {
+            REAL_TEST_DATA.openai.nonStreamRequest.model = "deepseek-ai/DeepSeek-V3";
+            const response = await makeRequest(
+                `${TEST_SERVER_BASE_URL}/v1/chat/completions`,
+                'POST',
+                'bearer',
+                { 'model-provider': MODEL_PROVIDER.ATLASCLOUD },
+                REAL_TEST_DATA.openai.nonStreamRequest
+            );
+
+            expect(response.status).toBe(200);
+            expect(response.headers.get('content-type')).toContain('application/json');
+            
+            const responseData = await response.json();
+            expect(responseData).toHaveProperty('choices');
+            expect(Array.isArray(responseData.choices)).toBe(true);
+            expect(responseData.choices.length).toBeGreaterThan(0);
+            expect(responseData.choices[0]).toHaveProperty('message');
+            expect(responseData.choices[0].message).toHaveProperty('content');
+        });
+
         // To run this test:
         // npx jest ./tests/api-integration.test.js -t "OpenAI /v1/chat/completions streaming with OpenAI provider"
         test('OpenAI /v1/chat/completions streaming with OpenAI provider', async () => {
@@ -515,6 +536,22 @@ describe('API Integration Tests with HTTP Requests', () => {
             expect(Array.isArray(responseData.data)).toBe(true);
             const missing = responseData.data.filter(m => !m.display_name?.startsWith('Claude '));
             expect(missing).toHaveLength(0);
+        });
+
+        test('OpenAI /v1/models AtlasCloud', async () => {
+            const response = await makeRequest(
+                `${TEST_SERVER_BASE_URL}/v1/models`,
+                'GET',
+                'bearer',
+                { 'model-provider': MODEL_PROVIDER.ATLASCLOUD }
+            );
+
+            expect(response.status).toBe(200);
+            expect(response.headers.get('content-type')).toContain('application/json');
+            
+            const responseData = await response.json();
+            expect(responseData).toHaveProperty('data');
+            expect(Array.isArray(responseData.data)).toBe(true);
         });
 
         // npx jest ./tests/api-integration.test.js -t "OpenAI /v1/models Claude"

@@ -701,6 +701,7 @@ export async function getProviderStatus(config, options = {}) {
     // identify 字段映射表
     const identifyFieldMap = {
         'openai-custom': 'OPENAI_BASE_URL',
+        'atlascloud': 'OPENAI_BASE_URL',
         'openaiResponses-custom': 'OPENAI_BASE_URL',
         'gemini-cli-oauth': 'GEMINI_OAUTH_CREDS_FILE_PATH',
         'claude-custom': 'CLAUDE_BASE_URL',
@@ -710,6 +711,7 @@ export async function getProviderStatus(config, options = {}) {
         'openai-iflow': 'IFLOW_TOKEN_FILE_PATH',
         'forward-api': 'FORWARD_BASE_URL',
         'grok-web': 'GROK_COOKIE_TOKEN',
+        'grok-cli-oauth': 'GROK_CLI_OAUTH_CREDS_FILE_PATH',
         'openai-codex-oauth': 'CODEX_OAUTH_CREDS_FILE_PATH'
     };
     let providerPoolsSlim = [];

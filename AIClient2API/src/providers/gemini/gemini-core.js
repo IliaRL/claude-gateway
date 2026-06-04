@@ -778,6 +778,8 @@ export class GeminiApiService {
         if (!GEMINI_MODELS.includes(model)) {
             logger.warn(`[Gemini] Model '${model}' not found. Using default model: '${GEMINI_MODELS[0]}'`);
             baseModel = GEMINI_MODELS[0];
+            // 同步更新请求体中的模型名称，以便调用方知晓实际使用的模型
+            requestBody.model = baseModel;
         }
 
         const processedRequestBody = normalizeGeminiThinkingRequest(
@@ -830,6 +832,8 @@ export class GeminiApiService {
         if (!GEMINI_MODELS.includes(model)) {
             logger.warn(`[Gemini] Model '${model}' not found. Using default model: '${GEMINI_MODELS[0]}'`);
             baseModel = GEMINI_MODELS[0];
+            // 同步更新请求体中的模型名称，以便调用方知晓实际使用的模型
+            requestBody.model = baseModel;
         }
 
         const processedRequestBody = normalizeGeminiThinkingRequest(

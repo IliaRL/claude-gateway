@@ -67,7 +67,8 @@ export const PROVIDER_MODELS = Object.assign(Object.create(null), _byProvider);
 export const MANAGED_MODEL_LIST_PROVIDERS = [
     'openai-custom',
     'openaiResponses-custom',
-    'claude-custom'
+    'claude-custom',
+    'atlascloud'
 ];
 
 export function getManagedModelListProviderType(providerType) {
