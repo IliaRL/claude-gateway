@@ -1,0 +1,80 @@
+{
+  "canonical_queue": [
+    {
+      "type": "readme",
+      "resolved_path": "README.md",
+      "mode": "update",
+      "preservation_mode": null,
+      "wave": 1,
+      "status": "pending"
+    },
+    {
+      "type": "architecture",
+      "resolved_path": "docs/ARCHITECTURE.md",
+      "mode": "update",
+      "preservation_mode": null,
+      "wave": 1,
+      "status": "pending"
+    },
+    {
+      "type": "getting_started",
+      "resolved_path": "docs/GETTING-STARTED.md",
+      "mode": "update",
+      "preservation_mode": null,
+      "wave": 2,
+      "status": "pending"
+    },
+    {
+      "type": "development",
+      "resolved_path": "docs/DEVELOPMENT.md",
+      "mode": "update",
+      "preservation_mode": null,
+      "wave": 2,
+      "status": "pending"
+    },
+    {
+      "type": "testing",
+      "resolved_path": "docs/TESTING.md",
+      "mode": "update",
+      "preservation_mode": null,
+      "wave": 2,
+      "status": "pending"
+    },
+    {
+      "type": "configuration",
+      "resolved_path": "docs/CONFIGURATION.md",
+      "mode": "update",
+      "preservation_mode": null,
+      "wave": 1,
+      "status": "pending"
+    }
+  ],
+  "review_queue": [
+    { "path": "CLAUDE.md", "type": "hand-written", "status": "pending_review" },
+    { "path": "docs/AIClient-BP.md", "type": "hand-written", "status": "pending_review" },
+    { "path": "docs/ANTHROPIC_GATEWAY_SPEC.md", "type": "hand-written", "status": "pending_review" },
+    { "path": "docs/archive/Architecture-and-Proxy-Integration.md", "type": "hand-written", "status": "pending_review" },
+    { "path": "docs/archive/LiteLLM-BP.md", "type": "hand-written", "status": "pending_review" },
+    { "path": "docs/Model-Guide.md", "type": "hand-written", "status": "pending_review" },
+    { "path": "docs/provider-documentation/codex.md", "type": "hand-written", "status": "pending_review" },
+    { "path": "docs/provider-documentation/gemini-cli.md", "type": "hand-written", "status": "pending_review" },
+    { "path": "docs/provider-documentation/kiro.md", "type": "hand-written", "status": "pending_review" },
+    { "path": "docs/provider-documentation/openai.md", "type": "hand-written", "status": "pending_review" },
+    { "path": "docs/superpowers/plans/2026-05-28-agent-sync.md", "type": "hand-written", "status": "pending_review" },
+    { "path": "docs/superpowers/plans/2026-05-28-mcp-sync-fix.md", "type": "hand-written", "status": "pending_review" },
+    { "path": "docs/superpowers/plans/2026-05-31-claude-syntax-interceptor.md", "type": "hand-written", "status": "pending_review" },
+    { "path": "docs/superpowers/plans/2026-05-31-plan-a-health-guard.md", "type": "hand-written", "status": "pending_review" },
+    { "path": "docs/superpowers/plans/2026-05-31-plan-b-trace-store.md", "type": "hand-written", "status": "pending_review" },
+    { "path": "docs/superpowers/plans/2026-05-31-plan-c-catalog-validator.md", "type": "hand-written", "status": "pending_review" },
+    { "path": "docs/superpowers/plans/2026-05-31-plan-d-performance-optimizations.md", "type": "hand-written", "status": "pending_review" },
+    { "path": "docs/superpowers/specs/2026-05-31-claude-syntax-interceptor-design.md", "type": "hand-written", "status": "pending_review" },
+    { "path": "docs/superpowers/specs/2026-05-31-extensibility-catalog-validator-design.md", "type": "hand-written", "status": "pending_review" },
+    { "path": "docs/superpowers/specs/2026-05-31-observability-trace-store-design.md", "type": "hand-written", "status": "pending_review" },
+    { "path": "docs/superpowers/specs/2026-05-31-reliability-health-guard-design.md", "type": "hand-written", "status": "pending_review" },
+    { "path": "docs/Troubleshooting-and-Fixes.md", "type": "hand-written", "status": "pending_review" },
+    { "path": "docs/ULTIMATE-GOAL.md", "type": "hand-written", "status": "pending_review" },
+    { "path": "INFRASTRUCTURE-MAP.md", "type": "hand-written", "status": "pending_review" }
+  ],
+  "gap_queue": [],
+  "created_at": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+}
