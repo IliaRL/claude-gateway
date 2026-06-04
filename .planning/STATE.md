@@ -1,65 +1,52 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: complete
-stopped_at: All 3 plans executed and committed. Phase 01 complete.
-last_updated: "2026-05-28T12:25:00.000Z"
+milestone: v2.0
+milestone_name: Proxy Excellence
+status: not_started
+stopped_at: Project initialized. Phase 1 not started.
+last_updated: "2026-06-04T00:00:00.000Z"
 progress:
-  total_phases: 1
-  completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
-  percent: 100
+  total_phases: 3
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # STATE.md
 
 ## Project Reference
 
-**Building:** 3-tier AI gateway tool-use reliability fixes
-**Core value:** Claude Code works reliably through proxy — tools call, context isn't exhausted, fallbacks trigger
+See: .planning/PROJECT.md (updated 2026-06-04)
+
+**Core value:** Any OpenAI-compatible model can be routed through AIClient2API with zero friction — add a provider, validate connectivity in one command, trust the fallback chain.
+**Current focus:** Phase 1 — Critical Fixes + Connectivity Tests
 
 ## Current Position
 
-Phase: 01 (fix-remaining-tool-use-failures) — COMPLETE
-Plan: 3 of 3 — all plans executed and committed
-**Phase:** 1 of 1 — Fix Remaining Tool-Use Failures
-**Plan:** All complete ✓
-**Status:** Phase 01 complete
+Phase: 01 (critical-fixes-connectivity) — NOT STARTED
+Plan: 0 of TBD
 
-Progress: ██████████ 100%
+## Open Questions
 
-## Recent Decisions
+- [ ] Is the antigravity-core.js:1830 SyntaxError the same one from the previous session or a new regression?
+- [ ] Which providers are currently healthy? (run `pnpm run verify:quick` to check)
+- [ ] Is openai-custom disabled at the pool level or at the provider config level?
 
-- Bypassed Tier 2 originally to fix SSE corruption — both tiers now running healthy
-- ENABLE_TOOL_SEARCH and drop_params fixes already applied (pre-phase)
-- Gemini context window fix committed at 756fbd3
-- SSE buffering settings committed at a093426 (stream_timeout: 600, X-Accel-Buffering: no)
-- Kiro anthropic-beta multi-beta fix committed at 0187ab7
-- OpenAIConverter parallel tool streaming fix committed at 39228e9
+## Phase History
 
-## Completed Work
+| Phase | Status | Completed |
+|-------|--------|-----------|
+| Phase 1: Critical Fixes + Connectivity | Not started | — |
+| Phase 2: Documentation + Security | Not started | — |
+| Phase 3: Architecture + Modularity | Not started | — |
 
-- Fix 1: ENABLE_TOOL_SEARCH global export (zshrc) ✓
-- Fix 4: drop_params: false (litellm_config.yaml) ✓
-- Bonus: Gemini 1M context injection (request-handlers.js, commit 756fbd3) ✓
-- Plan 01-01 Task 1: Gemini context window commit verified ✓
-- Plan 01-01 Task 2: LiteLLM SSE buffering config committed (a093426) ✓
-- Plan 01-01 Task 3: Both tiers healthy, routing verified ✓
-- Plan 01-02: Kiro anthropic-beta header fix (0187ab7) ✓
-- Plan 01-03: OpenAIConverter parallel tool streaming fix (39228e9) ✓
+## Previous Milestone
 
-## Pending
+**v1.0 Gateway Tool-Use Reliability** — COMPLETE (2026-05-28)
+- 3 plans executed, 179 tests green
+- LiteLLM removed, 2-tier architecture established
+- Tool search headers, drop_params, SSE streaming fixed
 
-None — phase complete.
-
-## Blockers / Concerns
-
-None.
-
-## Session Continuity
-
-Last session: 2026-05-28
-Stopped at: Phase 01 fully complete — all 3 plans executed, committed, summaries written
-Resume: No pending work. Consider running smoke tests to validate end-to-end.
+---
+*State initialized: 2026-06-04*
