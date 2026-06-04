@@ -10,7 +10,8 @@ const ids = catalog.map(e => e.id);
 const VALID_PROVIDERS = new Set([
   'claude-kiro-oauth', 'gemini-antigravity', 'gemini-cli-oauth',
   'openai-codex-oauth', 'openai-custom', 'nvidia-nim', 'github-models',
-  'grok-web', 'grok-cli-oauth', 'openai-qwen-oauth', 'openai-iflow'
+  'grok-web', 'grok-cli-oauth', 'openai-qwen-oauth', 'openai-iflow',
+  'forward-api'
 ]);
 const VALID_STRATEGIES = new Set(['claude', 'gemini', 'openai']);
 
