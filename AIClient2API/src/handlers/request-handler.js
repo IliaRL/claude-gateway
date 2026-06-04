@@ -201,6 +201,7 @@ export function createRequestHandler(config, providerPoolManager) {
                                 items: provideStatus.providerPoolsSlim,
                                 count: provideStatus.count,
                                 unhealthyCount: provideStatus.unhealthyCount,
+                                disabledCount: provideStatus.disabledCount,
                                 unhealthyRatio: provideStatus.unhealthyRatio,
                                 unhealthySummeryMessage: provideStatus.unhealthySummeryMessage,
                                 summaryHealth
