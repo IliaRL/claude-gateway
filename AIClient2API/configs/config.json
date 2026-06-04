@@ -3,7 +3,7 @@
   "SERVER_PORT": 3000,
   "HOST": "0.0.0.0",
   "MODEL_PROVIDER": "gemini-antigravity,gemini-cli-oauth,claude-kiro-oauth,openai-codex-oauth,openai-custom",
-  "SYSTEM_PROMPT_FILE_PATH": "/Users/ilialiston/MASTER-C/AIClient2API/configs/input_system_prompt.txt",
+  "SYSTEM_PROMPT_FILE_PATH": "",
   "SYSTEM_PROMPT_MODE": "append",
   "SYSTEM_PROMPT_REPLACEMENTS": [],
   "PROMPT_LOG_BASE_NAME": "prompt_log",

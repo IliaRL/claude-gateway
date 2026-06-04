@@ -189,6 +189,19 @@ async function restartWorker() {
  * 计划重启（用于崩溃后自动重启）
  */
 function scheduleRestart() {
+    // Reset the backoff counter if the worker had a long healthy run (>= 60s).
+    // startTime is an ISO string set on each (re)start, so it reflects how long
+    // the worker that just died was alive. Without this, a single crash after
+    // hours of uptime would inherit the accumulated exponential delay (up to 30s)
+    // — or, worse, be denied a restart by the maxRestartAttempts guard below.
+    if (workerStatus.startTime) {
+        const uptimeMs = Date.now() - new Date(workerStatus.startTime).getTime();
+        if (uptimeMs >= 60_000 && workerStatus.restartCount > 0) {
+            logger.info(`[Master] Worker ran ${Math.round(uptimeMs / 1000)}s before exit — resetting restart backoff counter`);
+            workerStatus.restartCount = 0;
+        }
+    }
+
     if (workerStatus.restartCount >= config.maxRestartAttempts) {
         logger.error('[Master] Max restart attempts reached, giving up');
         return;
@@ -261,8 +274,8 @@ function createMasterServer() {
         const path = url.pathname;
         const method = req.method;
 
-        // 设置 CORS 头
-        res.setHeader('Access-Control-Allow-Origin', '*');
+        // 设置 CORS 头 — management endpoints are local-only; restrict from wildcard
+        res.setHeader('Access-Control-Allow-Origin', 'http://127.0.0.1');
         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
         res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 

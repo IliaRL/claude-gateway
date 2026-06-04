@@ -408,24 +408,11 @@ export function createRequestHandler(config, providerPoolManager) {
                         }
                     }
 
-                    // 获取或选择 API Service 实例
-                    let apiService;
-                    // try {
-                    //     apiService = await getApiService(currentConfig);
-                    // } catch (error) {
-                    //     handleError(res, { statusCode: 500, message: `Failed to get API service: ${error.message}` }, currentConfig.MODEL_PROVIDER);
-                    //     const poolManager = getProviderPoolManager();
-                    //     if (poolManager) {
-                    //         poolManager.markProviderUnhealthy(currentConfig.MODEL_PROVIDER, {
-                    //             uuid: currentConfig.uuid
-                    //         });
-                    //     }
-                    //     return;
-                    // }
-
                     try {
                         // Handle API requests
-                        const apiHandled = await handleAPIRequests(method, path, req, res, currentConfig, apiService, providerPoolManager, PROMPT_LOG_FILENAME);
+                        // apiService is intentionally undefined here; handleAPIRequests
+                        // resolves the provider internally via the pool manager.
+                        const apiHandled = await handleAPIRequests(method, path, req, res, currentConfig, undefined, providerPoolManager, PROMPT_LOG_FILENAME);
                         if (apiHandled) return;
 
                         // Fallback for unmatched routes
